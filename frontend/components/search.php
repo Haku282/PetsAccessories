@@ -27,7 +27,7 @@ if (!($db instanceof PDO)) {
                         product_id, 
                         product_name AS name, 
                         COALESCE(NULLIF(discount_price, 0), price) AS price, 
-                        COALESCE(NULLIF(thumbnail, ""), "/PetsAccessories/public/images/default-product.png") AS image
+                        COALESCE(NULLIF(thumbnail, ""), "/PetsAccessories/frontend/public/images/default-product.png") AS image
                     FROM products 
                     WHERE status = 1 AND (
                         product_name LIKE :keyword 
@@ -48,7 +48,7 @@ if (!($db instanceof PDO)) {
                             product_id, 
                             product_name AS name, 
                             COALESCE(NULLIF(discount_price, 0), price) AS price, 
-                            COALESCE(NULLIF(thumbnail, ""), "/PetsAccessories/public/images/default-product.png") AS image
+                            COALESCE(NULLIF(thumbnail, ""), "/PetsAccessories/frontend/public/images/default-product.png") AS image
                         FROM products 
                         WHERE status = 1 AND product_name LIKE :keyword 
                         ORDER BY created_at DESC';

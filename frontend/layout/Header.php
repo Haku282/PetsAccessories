@@ -44,7 +44,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
 <header>
     <div class="header-top">
         <div class="logo">
-            <a href="/PetsAccessories/public/index.php" style="text-decoration: none; color: inherit;">
+            <a href="/PetsAccessories/frontend/public/index.php" style="text-decoration: none; color: inherit;">
                 <h1>PetsAccessories</h1>
             </a>
         </div>
@@ -115,7 +115,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                                 <div class="mega-group">
                                     <h4>Danh mục đang cập nhật</h4>
                                     <ul>
-                                        <li><a href="/PetsAccessories/public/index.php">Quay về trang chủ</a></li>
+                                        <li><a href="/PetsAccessories/frontend/public/index.php">Quay về trang chủ</a></li>
                                     </ul>
                                 </div>
                             </div>

@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pets Accessories - Trang chủ</title>
-    <link rel="stylesheet" href="../frontend/layout/style.css">
+    <link rel="stylesheet" href="../layout/style.css">
 </head>
 
 <body>
 
     <?php
     // Kết nối DB để lấy sản phẩm cho trang chủ
-    require_once __DIR__ . '/../backend/config/database.php';
+    require_once __DIR__ . '/../../backend/config/database.php';
 
     $featuredProducts = [];
     $newProducts = [];
@@ -26,7 +26,7 @@
                 p.product_id,
                 p.product_name AS name,
                 COALESCE(NULLIF(p.discount_price, 0), p.price) AS price,
-                COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/public/images/default-product.png') AS image
+                COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/frontend/public/images/default-product.png') AS image
              FROM products p
              WHERE p.status = 1
              ORDER BY (CASE WHEN p.discount_price > 0 THEN 1 ELSE 0 END) DESC, p.stock_quantity DESC, p.created_at DESC
@@ -39,7 +39,7 @@
                 p.product_id,
                 p.product_name AS name,
                 COALESCE(NULLIF(p.discount_price, 0), p.price) AS price,
-                COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/public/images/default-product.png') AS image
+                COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/frontend/public/images/default-product.png') AS image
              FROM products p
              WHERE p.status = 1
              ORDER BY p.created_at DESC
@@ -52,7 +52,7 @@
                 p.product_id,
                 p.product_name AS name,
                 p.discount_price AS price,
-                COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/public/images/default-product.png') AS image
+                COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/frontend/public/images/default-product.png') AS image
              FROM products p
              WHERE p.status = 1
                AND p.discount_price > 0
@@ -67,25 +67,25 @@
     }
 
     // Tích hợp các components
-    require_once __DIR__ . '/../frontend/layout/Header.php';
-    require_once __DIR__ . '/../frontend/components/BannerSlider.php';
-    require_once __DIR__ . '/../frontend/components/NewsSection.php';
+    require_once __DIR__ . '/../layout/Header.php';
+    require_once __DIR__ . '/../components/BannerSlider.php';
+    require_once __DIR__ . '/../components/NewsSection.php';
 
     // Các section Sản phẩm:
     $sectionTitle = "Sản phẩm Nổi Bật";
     $products = $featuredProducts;
-    require __DIR__ . '/../frontend/components/ProductGrid.php';
+    require __DIR__ . '/../components/ProductGrid.php';
 
     $sectionTitle = "Sản phẩm Mới";
     $products = $newProducts;
-    require __DIR__ . '/../frontend/components/ProductGrid.php';
+    require __DIR__ . '/../components/ProductGrid.php';
 
     $sectionTitle = "Khuyến Mãi Khủng";
     $products = $saleProducts;
-    require __DIR__ . '/../frontend/components/ProductGrid.php';
+    require __DIR__ . '/../components/ProductGrid.php';
 
     // Tin tức & Thông tin
-    require_once __DIR__ . '/../frontend/layout/Footer.php';
+    require_once __DIR__ . '/../layout/Footer.php';
     ?>
 
 </body>

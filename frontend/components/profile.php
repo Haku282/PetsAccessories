@@ -188,7 +188,7 @@ if (isset($_SESSION['user_id'])) {
 
             <button type="button" class="btn-edit-mode" onclick="toggleProfileMode('edit')">Chỉnh sửa</button>
             <p class="index-link" style="margin-top: 15px; text-align: center;">
-                <a href="/PetsAccessories/public/index.php">Quay về trang chủ</a>
+                <a href="/PetsAccessories/frontend/public/index.php">Quay về trang chủ</a>
             </p>
         </div>
 
@@ -254,3 +254,4 @@ function toggleProfileMode(mode) {
 
 </body>
 </html>
+
