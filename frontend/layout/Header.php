@@ -11,7 +11,7 @@ if (!($db instanceof PDO)) {
     $category_tree = [];
 } else {
     try {
-        $stmt = $db->query("SELECT category_id, category_name, parent_id FROM categories WHERE status = 1 ORDER BY COALESCE(parent_id, 0), sort_order, category_name");
+        $stmt = $db->query("SELECT category_id, category_name, parent_id FROM categories WHERE status = 1 ORDER BY COALESCE(parent_id, 0),  category_name");
         $all_categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $category_tree = [];
@@ -30,6 +30,8 @@ if (!($db instanceof PDO)) {
         }
     } catch (PDOException $e) {
         $category_tree = [];
+        // In lỗi ra thẳng trang web để dễ nhìn
+        echo "<div style='background: red; color: white; text-align: center; padding: 10px; z-index: 9999; position: relative;'>Lỗi Header SQL: " . $e->getMessage() . "</div>";
     }
 }
 
@@ -49,9 +51,18 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             </a>
         </div>
         <div class="search-bar">
-            <form action="/PetsAccessories/frontend/components/search.php" method="GET">
-                <input type="text" name="q" placeholder="Tìm kiếm nhanh sản phẩm...">
+            <form action="/PetsAccessories/frontend/components/search.php" method="GET" style="display: flex; align-items: center; gap: 8px;">
+
+                <input type="text" name="q" placeholder="Tìm kiếm nhanh sản phẩm..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+
                 <button type="submit">Tìm kiếm</button>
+                <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">⚙️</button>
+
+                <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo isset($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">Mặc định</option>
+                    <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
+                    <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
+                </select>
             </form>
         </div>
         <div class="auth-buttons">
@@ -91,7 +102,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         <ul class="primary-menu">
             <li class="has-mega">
                 <a href="#">Chó</a>
-                
+
                 <div class="mega-dropdown">
                     <div class="mega-inner">
                         <?php foreach ($mega_menu_columns as $column): ?>
@@ -123,15 +134,21 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                     </div>
                 </div> <!-- /mega-dropdown -->
             </li>
-            
-            <li><a href="#">Mèo</a></li>
-            <li><a href="#">Thiết bị thông minh</a></li>
-            <li><a href="#">Hàng mới về</a></li>
-            <li><a href="#">Thương hiệu</a></li>
-            <li><a href="#">Pagazine chăm Boss</a></li>
-            <li><a href="#">News</a></li>
-            <li><a href="#">Khuyến Mãi Mới Nhất</a></li>
-            <li><a href="#">VI / USD</a></li>
+
+            <li><a href="/PetsAccessories/frontend/components/category.php?id=2">Mèo</a></li>
+            <li><a href="/PetsAccessories/frontend/components/category.php?id=3">Thiết bị thông minh</a></li>
+            <li><a href="/PetsAccessories/frontend/components/category.php?id=4">Hàng mới về</a></li>
+            <li><a href="/PetsAccessories/frontend/components/category.php?id=5">Thương hiệu</a></li>
+            <li><a href="/PetsAccessories/frontend/components/category.php?id=6">Pagazine chăm Boss</a></li>
+            <li><a href="/PetsAccessories/frontend/components/NewsSection.php">News và Khuyến Mãi</a></li>
         </ul>
     </nav>
 </header>
+
+<script>
+    function toggleSortFilter() {
+        const sortSelect = document.getElementById('price-sort');
+        if (!sortSelect) return;
+        sortSelect.style.display = sortSelect.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
