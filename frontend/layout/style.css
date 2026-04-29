@@ -311,47 +311,105 @@ header {
 .news-section {
     width: 90%;
     max-width: 1200px;
-    margin: 50px auto;
+    margin: 60px auto;
 }
 
-.news-section h2 {
-    margin-bottom: 25px;
-    font-size: 26px;
-    color: #222;
-    text-align: center;
+.news-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 30px;
+}
+
+.news-header h2 {
+    font-size: 30px;
+    color: #1f2937;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.news-header p {
+    color: #6b7280;
+    font-size: 15px;
 }
 
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
 }
 
-.news-item {
+.news-card {
     background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.news-item h3 {
+.news-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+}
+
+.news-media {
+    height: 160px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+}
+
+.news-media--tips {
+    background: linear-gradient(135deg, #10b981, #14b8a6);
+}
+
+.news-media--reward {
+    background: linear-gradient(135deg, #f97316, #f43f5e);
+}
+
+.news-media--gear {
+    background: linear-gradient(135deg, #6366f1, #3b82f6);
+}
+
+.news-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.news-tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #111827;
+    background: #fef3c7;
+    padding: 4px 10px;
+    border-radius: 999px;
+    width: fit-content;
+}
+
+.news-title {
+    font-size: 18px;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.news-excerpt {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.news-cta {
+    margin-top: auto;
+    font-weight: 700;
     color: #ff6f61;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-}
-
-.news-item p {
-    color: #666;
-    margin-bottom: 15px;
-}
-
-.news-item a {
-    color: #007bff;
     text-decoration: none;
-    font-weight: bold;
 }
 
-.news-item a:hover {
+.news-cta:hover {
     text-decoration: underline;
 }
 
