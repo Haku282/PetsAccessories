@@ -17,7 +17,7 @@ if (!($db instanceof PDO)) {
             $error = "Vui lòng nhập đầy đủ thông tin.";
         } else {
             // Truy vấn user từ DB
-            $sql = "SELECT user_id, username, email, password, fullname FROM users WHERE username = ? OR email = ?";
+            $sql = "SELECT user_id, username, email, password, fullname, role FROM users WHERE username = ? OR email = ?";
             $stmt = $db->prepare($sql);
             $stmt->execute([$login_id, $login_id]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -26,9 +26,14 @@ if (!($db instanceof PDO)) {
             if ($user && password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['user_name'] = !empty($user['fullname']) ? $user['fullname'] : $user['username'];
+                $_SESSION['role'] = $user['role'];
 
-                // Đăng nhập thành công -> Về trang chủ
-                header("Location: /PetsAccessories/frontend/public/index.php");
+                // Chuyển hướng dựa trên role
+                if ($user['role'] === 'admin') {
+                    header("Location: /PetsAccessories/admin/frontend/index_admin.php");
+                } else {
+                    header("Location: /PetsAccessories/frontend/public/index.php");
+                }
                 exit;
             } else {
                 $error = "Tài khoản hoặc mật khẩu không chính xác!";
