@@ -1,0 +1,393 @@
+<!-- 
+  Test Page for Users Management API
+  File: /admin/frontend/pages/users/test.html
+  Usage: Mở trực tiếp trong browser để test các API
+-->
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Users API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4ec9b0;
+            margin-bottom: 20px;
+        }
+
+        .test-section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .test-section h2 {
+            color: #9cdcfe;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3e3e42;
+            padding-bottom: 10px;
+        }
+
+        .test-control {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #005a9e;
+        }
+
+        input, select {
+            background: #3c3c3c;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            padding: 6px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .response {
+            background: #1e1e1e;
+            border: 1px solid #007acc;
+            padding: 10px;
+            border-radius: 3px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #ce9178;
+        }
+
+        .error {
+            border-color: #f44747;
+            color: #f44747;
+        }
+
+        .success {
+            border-color: #4ec9b0;
+            color: #4ec9b0;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        .status.success {
+            background: #4ec9b0;
+            color: #1e1e1e;
+        }
+
+        .status.error {
+            background: #f44747;
+            color: white;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #9cdcfe;
+            font-size: 12px;
+        }
+
+        .param-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Users Management API</h1>
+
+        <!-- Test 1: Get List -->
+        <div class="test-section">
+            <h2>1. GET List Users</h2>
+            <div class="test-control">
+                <input type="number" id="page" placeholder="Page" value="1" min="1" />
+                <input type="number" id="limit" placeholder="Limit" value="10" min="1" />
+                <select id="roleFilter">
+                    <option value="">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="customer">Customer</option>
+                </select>
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="1">Active</option>
+                    <option value="0">Locked</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="Search..." />
+                <button onclick="testGetList()">🔍 Get List</button>
+            </div>
+            <div id="listResponse" class="response"></div>
+        </div>
+
+        <!-- Test 2: Get User -->
+        <div class="test-section">
+            <h2>2. GET User by ID</h2>
+            <div class="test-control">
+                <input type="number" id="getUserId" placeholder="User ID" value="1" min="1" />
+                <button onclick="testGetUser()">📋 Get User</button>
+            </div>
+            <div id="getUserResponse" class="response"></div>
+        </div>
+
+        <!-- Test 3: Add User -->
+        <div class="test-section">
+            <h2>3. POST Add User</h2>
+            <div class="test-control">
+                <input type="text" id="addUsername" placeholder="Username" value="testuser1" />
+                <input type="email" id="addEmail" placeholder="Email" value="testuser1@example.com" />
+                <input type="password" id="addPassword" placeholder="Password" value="123456" />
+            </div>
+            <div class="test-control">
+                <input type="text" id="addFullname" placeholder="Fullname" />
+                <input type="tel" id="addPhone" placeholder="Phone" />
+                <select id="addRole">
+                    <option value="customer">Customer</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button onclick="testAddUser()">➕ Add User</button>
+            </div>
+            <div id="addResponse" class="response"></div>
+        </div>
+
+        <!-- Test 4: Update User -->
+        <div class="test-section">
+            <h2>4. PUT Update User</h2>
+            <div class="test-control">
+                <input type="number" id="updateUserId" placeholder="User ID" value="2" min="1" />
+                <input type="email" id="updateEmail" placeholder="New Email" />
+                <input type="text" id="updateFullname" placeholder="New Fullname" />
+                <input type="tel" id="updatePhone" placeholder="New Phone" />
+                <select id="updateRole">
+                    <option value="">Don't Change</option>
+                    <option value="customer">Customer</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <button onclick="testUpdateUser()">✏️ Update User</button>
+            </div>
+            <div id="updateResponse" class="response"></div>
+        </div>
+
+        <!-- Test 5: Toggle Status -->
+        <div class="test-section">
+            <h2>5. POST Toggle Status</h2>
+            <div class="test-control">
+                <input type="number" id="toggleUserId" placeholder="User ID" value="2" min="1" />
+                <select id="toggleStatus">
+                    <option value="0">Lock (0)</option>
+                    <option value="1">Unlock (1)</option>
+                </select>
+                <button onclick="testToggleStatus()">🔐 Toggle Status</button>
+            </div>
+            <div id="toggleResponse" class="response"></div>
+        </div>
+
+        <!-- Test 6: Delete User -->
+        <div class="test-section">
+            <h2>6. DELETE User</h2>
+            <div class="test-control">
+                <input type="number" id="deleteUserId" placeholder="User ID" value="2" min="1" />
+                <button onclick="testDeleteUser()" style="background: #f44747;">🗑 Delete User</button>
+            </div>
+            <div id="deleteResponse" class="response"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="test-section" style="background: #2d2d30; border-color: #9cdcfe;">
+            <h2>ℹ️ Information</h2>
+            <p>📌 Base URL: <strong>/PetsAccessories/admin/backend/api/users/</strong></p>
+            <p>📌 Session required: Yes (admin role)</p>
+            <p>📌 Test user: admin / admin@gmail.com</p>
+            <p>📌 Open console (F12) to see detailed responses</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/PetsAccessories/admin/backend/api/users';
+
+        function setResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = 'response ' + (isError ? 'error' : 'success');
+        }
+
+        async function testGetList() {
+            try {
+                const page = document.getElementById('page').value || 1;
+                const limit = document.getElementById('limit').value || 10;
+                const role = document.getElementById('roleFilter').value || '';
+                const status = document.getElementById('statusFilter').value || '';
+                const search = document.getElementById('searchInput').value || '';
+
+                const params = new URLSearchParams({
+                    page, limit, role, status, search
+                });
+
+                const response = await fetch(`${API_BASE}/list.php?${params}`);
+                const data = await response.json();
+                setResponse('listResponse', data);
+                console.log('Get List:', data);
+            } catch (error) {
+                setResponse('listResponse', { error: error.message }, true);
+                console.error('Error:', error);
+            }
+        }
+
+        async function testGetUser() {
+            try {
+                const id = document.getElementById('getUserId').value;
+                const response = await fetch(`${API_BASE}/get.php?id=${id}`);
+                const data = await response.json();
+                setResponse('getUserResponse', data);
+                console.log('Get User:', data);
+            } catch (error) {
+                setResponse('getUserResponse', { error: error.message }, true);
+                console.error('Error:', error);
+            }
+        }
+
+        async function testAddUser() {
+            try {
+                const data = {
+                    username: document.getElementById('addUsername').value,
+                    email: document.getElementById('addEmail').value,
+                    password: document.getElementById('addPassword').value,
+                    fullname: document.getElementById('addFullname').value || '',
+                    phone: document.getElementById('addPhone').value || '',
+                    role: document.getElementById('addRole').value
+                };
+
+                const response = await fetch(`${API_BASE}/add.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                setResponse('addResponse', result);
+                console.log('Add User:', result);
+            } catch (error) {
+                setResponse('addResponse', { error: error.message }, true);
+                console.error('Error:', error);
+            }
+        }
+
+        async function testUpdateUser() {
+            try {
+                const data = {
+                    user_id: document.getElementById('updateUserId').value,
+                    email: document.getElementById('updateEmail').value || undefined,
+                    fullname: document.getElementById('updateFullname').value || undefined,
+                    phone: document.getElementById('updatePhone').value || undefined,
+                    role: document.getElementById('updateRole').value || undefined
+                };
+
+                // Remove undefined
+                Object.keys(data).forEach(k => data[k] === undefined && delete data[k]);
+
+                const response = await fetch(`${API_BASE}/update.php`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                setResponse('updateResponse', result);
+                console.log('Update User:', result);
+            } catch (error) {
+                setResponse('updateResponse', { error: error.message }, true);
+                console.error('Error:', error);
+            }
+        }
+
+        async function testToggleStatus() {
+            try {
+                const data = {
+                    user_id: parseInt(document.getElementById('toggleUserId').value),
+                    status: parseInt(document.getElementById('toggleStatus').value)
+                };
+
+                const response = await fetch(`${API_BASE}/toggle-status.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                setResponse('toggleResponse', result);
+                console.log('Toggle Status:', result);
+            } catch (error) {
+                setResponse('toggleResponse', { error: error.message }, true);
+                console.error('Error:', error);
+            }
+        }
+
+        async function testDeleteUser() {
+            try {
+                if (!confirm('Are you sure to delete this user?')) return;
+
+                const data = {
+                    user_id: parseInt(document.getElementById('deleteUserId').value)
+                };
+
+                const response = await fetch(`${API_BASE}/delete.php`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                setResponse('deleteResponse', result);
+                console.log('Delete User:', result);
+            } catch (error) {
+                setResponse('deleteResponse', { error: error.message }, true);
+                console.error('Error:', error);
+            }
+        }
+
+        // Test on load
+        console.log('%c🧪 Users API Test Loaded', 'color: #4ec9b0; font-size: 16px; font-weight: bold;');
+        console.log('API Base URL: ' + API_BASE);
+    </script>
+</body>
+</html>

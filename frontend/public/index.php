@@ -11,6 +11,13 @@
 <body>
 
     <?php
+    // Kiểm tra session - nếu admin, chuyển hướng tới admin dashboard
+    session_start();
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+        header("Location: /PetsAccessories/admin/frontend/index_admin.php");
+        exit;
+    }
+
     // Kết nối DB để lấy sản phẩm cho trang chủ
     require_once __DIR__ . '/../../backend/config/database.php';
 
