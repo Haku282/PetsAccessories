@@ -28,10 +28,14 @@ try {
 
     if (!$product) {
         $response['message'] = 'Sản phẩm không tồn tại.';
-        $db->rollBack();
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
     } elseif ($product['stock_quantity'] <= 0) {
         $response['message'] = 'Sản phẩm đã hết hàng.';
-        $db->rollBack();
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
     } else {
         // Decrease stock
         $updateStmt = $db->prepare('UPDATE products SET stock_quantity = stock_quantity - 1 WHERE product_id = ?');
@@ -46,13 +50,17 @@ try {
         }
         $_SESSION['cart'][$productId]++;
 
-        $db->commit();
+        if ($db->inTransaction()) {
+            $db->commit();
+        }
         $response['success'] = true;
         $response['message'] = 'Đã thêm vào giỏ hàng!';
         $response['cartCount'] = array_sum($_SESSION['cart']);
     }
 } catch (PDOException $e) {
-    $db->rollBack();
+    if ($db instanceof PDO && $db->inTransaction()) {
+        $db->rollBack();
+    }
     $response['message'] = 'Lỗi hệ thống: ' . $e->getMessage();
 }
 

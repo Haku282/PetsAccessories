@@ -1,3 +1,14 @@
+<?php
+require_once __DIR__ . '/../../backend/src/NewsSection.php';
+
+$scriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? '';
+$isEmbedded = false;
+if (!empty($scriptFilename)) {
+    $isEmbedded = realpath($scriptFilename) !== realpath(__FILE__);
+}
+
+if (!$isEmbedded):
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -11,6 +22,8 @@
 <body>
 
     <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+<?php endif; ?>
+
     <section class="news-section">
         <div class="news-header">
             <h2>Tin tức & Chương trình ưu đãi</h2>
@@ -53,4 +66,10 @@
             <?php endif; ?>
         </div>
     </section>
+
+<?php if (!$isEmbedded): ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 </body>
+
+</html>
+<?php endif; ?>
