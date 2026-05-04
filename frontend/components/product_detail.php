@@ -63,7 +63,7 @@ if (!empty($specifications)) {
                 <p class="product-detail__stock">
                     Tồn kho: <strong><?php echo $stockQuantity; ?></strong>
                 </p>
-                <button class="btn-add-cart" data-id="<?php echo (int) ($product['product_id'] ?? 0); ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
+                <button type="button" class="btn-add-cart" data-id="<?php echo (int) ($product['product_id'] ?? 0); ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
             </div>
         </div>
 
@@ -143,7 +143,7 @@ if (!empty($specifications)) {
                                 <h3><?php echo htmlspecialchars($relProd['product_name']); ?></h3>
                             </a>
                             <p class="price"><?php echo number_format($relFinalPrice, 0, ',', '.'); ?> đ</p>
-                            <button class="btn-add-cart" data-id="<?php echo (int) $relProd['product_id']; ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
+                            <button type="button" class="btn-add-cart" data-id="<?php echo (int) $relProd['product_id']; ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
                         </div>
                     </div>
                 <?php endforeach; ?>

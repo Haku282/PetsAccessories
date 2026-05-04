@@ -56,7 +56,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 <input type="text" name="q" placeholder="Tìm kiếm nhanh sản phẩm..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
 
                 <button type="submit">Tìm kiếm</button>
-                <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">⚙️</button>
+                <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">🔍</button>
 
                 <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo isset($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
                     <option value="">Mặc định</option>
@@ -77,7 +77,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                     <button class="btn-profile">Chào, <?php echo htmlspecialchars($_SESSION['user_name']); ?> &#9662;</button>
                     <div class="dropdown-content">
                         <a href="/PetsAccessories/frontend/components/profile.php">Hồ sơ cá nhân</a>
-                        <a href="/PetsAccessories/frontend/components/orders.php">Đơn mua hàng</a>
+                        <a href="/PetsAccessories/frontend/components/orders.php">Quản lý đơn hàng</a>
                         <a href="/PetsAccessories/frontend/components/change_password.php">Đổi mật khẩu</a>
                         <a href="/PetsAccessories/frontend/components/logout.php" class="logout-link">Đăng xuất</a>
                     </div>
