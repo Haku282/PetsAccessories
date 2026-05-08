@@ -1,10 +1,10 @@
 <?php
 /**
- * Trang Quản Lý Tài Khoản
+ * Trang Quản Lý Người Dùng
  * File: /admin/frontend/pages/users/index.php
  */
 
-require_once __DIR__ . '/../../../../backend/config/database.php';
+session_start();
 require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
 ?>
 
@@ -13,140 +13,211 @@ require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tài Khoản - Admin</title>
-    <link rel="stylesheet" href="../../assets/css/users.css">
+    <title>Quản Lý Người Dùng - Admin</title>
+    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/dashboard.css">
+    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/users.css">
 </head>
 <body>
-    <div style="padding: 20px;">
-        <!-- Alert Container -->
-        <div id="alertContainer"></div>
-
+    <div class="container">
         <!-- Header -->
-        <div class="admin-header">
+        <div class="header">
             <div>
-                <h1>👥 Quản Lý Tài Khoản</h1>
-                <p style="color: #7f8c8d; margin-top: 5px;">Quản lý tài khoản khách hàng và quản trị viên</p>
+                <h1><span>👥</span> Quản Lý Người Dùng</h1>
             </div>
-            <div class="header-actions">
-                <button class="btn btn-primary" id="addUserBtn">+ Thêm Tài Khoản</button>
-                <a href="/PetsAccessories/admin/frontend/index_admin.php" class="btn btn-secondary">← Quay Lại</a>
-            </div>
-        </div>
-
-        <!-- Filter Section -->
-        <div class="filter-section">
-            <div class="filter-grid">
-                <div class="filter-group">
-                    <label for="searchInput">🔍 Tìm Kiếm</label>
-                    <input type="text" id="searchInput" placeholder="Tìm theo username, email, tên..." />
-                </div>
-                <div class="filter-group">
-                    <label for="roleFilter">👤 Vai Trò</label>
-                    <select id="roleFilter">
-                        <option value="">Tất Cả</option>
-                        <option value="admin">Admin</option>
-                        <option value="customer">Khách Hàng</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="statusFilter">📊 Trạng Thái</label>
-                    <select id="statusFilter">
-                        <option value="">Tất Cả</option>
-                        <option value="1">Hoạt Động</option>
-                        <option value="0">Bị Khóa</option>
-                    </select>
-                </div>
-            </div>
-            <div class="filter-actions">
-                <button class="btn btn-primary" id="filterBtn">🔍 Lọc</button>
-                <button class="btn btn-secondary" id="resetBtn">↻ Làm Mới</button>
+            <div class="user-info">
+                <span>Xin chào: <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong></span>
+                <a href="/PetsAccessories/frontend/components/logout.php" class="logout-btn">🚪 Đăng Xuất</a>
             </div>
         </div>
 
-        <!-- Table -->
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tài Khoản</th>
-                        <th>Họ Tên</th>
-                        <th>Điện Thoại</th>
-                        <th>Vai Trò</th>
-                        <th>Trạng Thái</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <tr>
-                        <td colspan="7" class="loading">Đang tải...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Menu -->
+        <div class="menu">
+            <ul>
+                <li><a href="/PetsAccessories/admin/frontend/index_admin.php"><span>📊</span> Dashboard</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/products/index.php"><span>📦</span> Sản Phẩm</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/orders/index.php"><span>🛒</span> Đơn Hàng</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/categories/index.php"><span>📁</span> Danh Mục</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/brands/index.php"><span>🏷️</span> Thương Hiệu</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php" class="active"><span>👥</span> Người Dùng</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/coupons.php"><span>🎟️</span> Mã Giảm Giá</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/banners.php"><span>🖼️</span> Banner</a></li>
+            </ul>
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination-container">
-            <div id="pagination"></div>
+        <!-- Main Content -->
+        <div class="users-container">
+            <!-- Messages Container -->
+            <div id="messagesContainer"></div>
+
+            <!-- Header Section -->
+            <div class="users-header">
+                <h2>👥 Người Dùng</h2>
+                <div class="users-header-actions">
+                    <button class="btn btn-primary" id="addUserBtn">
+                        ➕ Thêm Người Dùng
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search & Filter Section -->
+            <div class="search-filter-section">
+                <div class="search-filter-grid">
+                    <div class="form-group">
+                        <label for="searchInput">🔍 Tìm kiếm</label>
+                        <input type="text" id="searchInput" placeholder="Tên, email, số điện thoại...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="roleFilter">👤 Vai trò</label>
+                        <select id="roleFilter">
+                            <option value="">-- Tất cả vai trò --</option>
+                            <option value="admin">Admin</option>
+                            <option value="customer">Khách hàng</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="statusFilter">📊 Trạng thái</label>
+                        <select id="statusFilter">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            <option value="1">Hoạt động</option>
+                            <option value="0">Bị khóa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="search-filter-actions">
+                    <button class="btn btn-secondary" id="resetBtn">↻ Làm mới</button>
+                    <button class="btn btn-primary" id="filterBtn">🔍 Tìm kiếm</button>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="users-table-wrapper">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Tài Khoản</th>
+                            <th>Email</th>
+                            <th>Họ Tên</th>
+                            <th>Điện Thoại</th>
+                            <th>Vai Trò</th>
+                            <th>Trạng Thái</th>
+                            <th>Ngày Tạo</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" style="text-align: center;">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Đang tải dữ liệu...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="paginationContainer"></div>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div id="userModal" class="modal">
+    <!-- User Modal -->
+    <div class="modal" id="userModal">
         <div class="modal-content">
-            <div class="modal-header" id="modalTitle">Thêm Tài Khoản Mới</div>
-            
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h3 id="modalTitle">Thêm Người Dùng Mới</h3>
+                <button class="modal-close" id="closeModalBtn">×</button>
+            </div>
+
+            <!-- Modal Body -->
             <div class="modal-body">
                 <form id="userForm">
-                    <input type="hidden" id="userId" value="">
-                    
-                    <div class="form-group">
-                        <label for="username">Username *</label>
-                        <input type="text" id="username" placeholder="Nhập username" required />
+                    <!-- Account Information -->
+                    <div class="form-section">
+                        <h4>📋 Thông Tin Tài Khoản</h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="usernameInput">Tên đăng nhập *</label>
+                                <input type="text" id="usernameInput" placeholder="Nhập tên đăng nhập..." required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="emailInput">Email *</label>
+                                <input type="email" id="emailInput" placeholder="Nhập email..." required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="passwordInput">Mật khẩu *</label>
+                                <input type="password" id="passwordInput" placeholder="Tối thiểu 6 ký tự..." required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="roleInput">Vai trò *</label>
+                                <select id="roleInput" required>
+                                    <option value="customer">Khách hàng</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="email">Email *</label>
-                        <input type="email" id="email" placeholder="Nhập email" required />
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h4>👤 Thông Tin Cá Nhân</h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullnameInput">Họ tên</label>
+                                <input type="text" id="fullnameInput" placeholder="Nhập họ tên...">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phoneInput">Số điện thoại</label>
+                                <input type="tel" id="phoneInput" placeholder="Nhập số điện thoại...">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="addressInput">Địa chỉ</label>
+                                <textarea id="addressInput" placeholder="Nhập địa chỉ..."></textarea>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="password">Mật Khẩu *</label>
-                        <input type="password" id="password" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="fullname">Họ Tên</label>
-                        <input type="text" id="fullname" placeholder="Nhập họ tên" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Điện Thoại</label>
-                        <input type="tel" id="phone" placeholder="Nhập số điện thoại" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address">Địa Chỉ</label>
-                        <textarea id="address" placeholder="Nhập địa chỉ" style="resize: vertical; min-height: 80px;"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="role">Vai Trò *</label>
-                        <select id="role" required>
-                            <option value="customer">Khách Hàng</option>
-                            <option value="admin">Admin</option>
-                        </select>
+                    <!-- Status Section -->
+                    <div class="form-section">
+                        <h4>📊 Trạng Thái</h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="statusInput">Trạng thái *</label>
+                                <select id="statusInput" required>
+                                    <option value="1">Hoạt động</option>
+                                    <option value="0">Bị khóa</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
 
+            <!-- Modal Footer -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-close" id="cancelModalBtn">Hủy</button>
-                <button type="button" class="btn btn-primary" id="saveUserBtn">💾 Lưu</button>
+                <button class="btn btn-secondary" id="cancelModalBtn">Hủy</button>
+                <button class="btn btn-primary" id="saveUserBtn">💾 Lưu Người Dùng</button>
             </div>
         </div>
     </div>
 
-    <script src="../../assets/js/users.js"></script>
+    <script src="/PetsAccessories/admin/frontend/assets/js/users.js"></script>
 </body>
 </html>

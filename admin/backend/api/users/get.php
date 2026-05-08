@@ -5,7 +5,11 @@
  */
 
 header('Content-Type: application/json');
-session_start();
+
+// Chỉ gọi session_start() nếu session chưa được khởi tạo
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Kiểm tra quyền admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -27,7 +31,7 @@ try {
 
     /** @var PDO $pdo */
     $db = $pdo;
-    $sql = "SELECT user_id, username, email, fullname, phone, address, avatar, role, status, created_at FROM users WHERE user_id = ?";
+    $sql = "SELECT user_id, username, email, fullname as full_name, phone, address, avatar, role, status, created_at FROM users WHERE user_id = ?";
     $stmt = $db->prepare($sql);
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);

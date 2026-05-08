@@ -5,7 +5,11 @@
  */
 
 header('Content-Type: application/json');
-session_start();
+
+// Chỉ gọi session_start() nếu session chưa được khởi tạo
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Kiểm tra quyền admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -28,22 +32,26 @@ try {
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = ($page - 1) * $limit;
 
-    // Xây dựng query
-    $sql = "SELECT user_id, username, email, fullname, phone, role, status, created_at FROM users WHERE 1=1";
+    // Validate page and limit
+    if ($page < 1) $page = 1;
+    if ($limit < 1 || $limit > 100) $limit = 10;
+
+    // Xây dựng query base
+    $whereClause = " WHERE 1=1";
     $params = [];
 
-    if (!empty($role)) {
-        $sql .= " AND role = ?";
+    if (!empty($role) && in_array($role, ['admin', 'customer'])) {
+        $whereClause .= " AND role = ?";
         $params[] = $role;
     }
 
-    if ($status !== '') {
-        $sql .= " AND status = ?";
+    if ($status !== '' && in_array((int)$status, [0, 1])) {
+        $whereClause .= " AND status = ?";
         $params[] = (int)$status;
     }
 
     if (!empty($search)) {
-        $sql .= " AND (username LIKE ? OR email LIKE ? OR fullname LIKE ?)";
+        $whereClause .= " AND (username LIKE ? OR email LIKE ? OR fullname LIKE ?)";
         $searchTerm = "%$search%";
         $params[] = $searchTerm;
         $params[] = $searchTerm;
@@ -51,22 +59,13 @@ try {
     }
 
     // Đếm tổng số record
-    $countSql = "SELECT COUNT(*) as total FROM users WHERE 1=1";
-    if (!empty($role)) {
-        $countSql .= " AND role = ?";
-    }
-    if ($status !== '') {
-        $countSql .= " AND status = ?";
-    }
-    if (!empty($search)) {
-        $countSql .= " AND (username LIKE ? OR email LIKE ? OR fullname LIKE ?)";
-    }
-
+    $countSql = "SELECT COUNT(*) as total FROM users" . $whereClause;
     $countStmt = $db->prepare($countSql);
     $countStmt->execute($params);
     $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
     // Lấy data
+    $sql = "SELECT user_id, username, email, fullname as full_name, phone, role, status, created_at FROM users" . $whereClause;
     $sql .= " ORDER BY created_at DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
@@ -76,10 +75,10 @@ try {
         'success' => true,
         'data' => $users,
         'pagination' => [
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'totalPages' => ceil($total / $limit)
+            'current_page' => $page,
+            'total_pages' => ceil($total / $limit),
+            'total_records' => $total,
+            'records_per_page' => $limit
         ]
     ]);
 
