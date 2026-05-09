@@ -1,34 +1,5 @@
 <?php
 require_once __DIR__ . '/../../backend/src/product_detail.php';
-
-$price = 0;
-$discountPrice = 0;
-$finalPrice = 0;
-
-if (!empty($product)) {
-    $price = (float) ($product['price'] ?? 0);
-    $discountPrice = (float) ($product['discount_price'] ?? 0);
-    $finalPrice = $discountPrice > 0 ? $discountPrice : $price;
-}
-
-$thumbnail = !empty($product['thumbnail'])
-    ? $product['thumbnail']
-    : '/PetsAccessories/frontend/public/images/default-product.png';
-
-$description = trim($product['description'] ?? '');
-$specifications = trim($product['specifications'] ?? '');
-$stockQuantity = (int) ($product['stock_quantity'] ?? 0);
-
-$specItems = [];
-if (!empty($specifications)) {
-    if (strpos($specifications, '\n') !== false) {
-        $specItems = array_filter(array_map('trim', explode("\n", $specifications)));
-    } elseif (strpos($specifications, ';') !== false) {
-        $specItems = array_filter(array_map('trim', explode(';', $specifications)));
-    } else {
-        $specItems = [$specifications];
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -124,25 +95,17 @@ if (!empty($specifications)) {
             <h2>Sản phẩm liên quan</h2>
             <div class="product-grid">
                 <?php foreach ($relatedProducts as $relProd): ?>
-                    <?php
-                    $relPrice = (float) ($relProd['price'] ?? 0);
-                    $relDiscount = (float) ($relProd['discount_price'] ?? 0);
-                    $relFinalPrice = $relDiscount > 0 ? $relDiscount : $relPrice;
-                    $relThumb = !empty($relProd['thumbnail']) 
-                        ? $relProd['thumbnail'] 
-                        : '/PetsAccessories/frontend/public/images/default-product.png';
-                    ?>
                     <div class="product-card">
                         <div class="product-image">
                             <a href="?id=<?php echo (int) $relProd['product_id']; ?>">
-                                <img src="<?php echo htmlspecialchars($relThumb); ?>" alt="<?php echo htmlspecialchars($relProd['product_name']); ?>">
+                                <img src="<?php echo htmlspecialchars((string) ($relProd['thumbnail_resolved'] ?? '')); ?>" alt="<?php echo htmlspecialchars($relProd['product_name']); ?>">
                             </a>
                         </div>
                         <div class="product-info">
                             <a href="?id=<?php echo (int) $relProd['product_id']; ?>">
                                 <h3><?php echo htmlspecialchars($relProd['product_name']); ?></h3>
                             </a>
-                            <p class="price"><?php echo number_format($relFinalPrice, 0, ',', '.'); ?> đ</p>
+                            <p class="price"><?php echo number_format((float) ($relProd['final_price'] ?? 0), 0, ',', '.'); ?> đ</p>
                             <button type="button" class="btn-add-cart" data-id="<?php echo (int) $relProd['product_id']; ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
                         </div>
                     </div>
