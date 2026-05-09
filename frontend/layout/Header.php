@@ -78,6 +78,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                     <div class="dropdown-content">
                         <a href="/PetsAccessories/frontend/components/profile.php">Hồ sơ cá nhân</a>
                         <a href="/PetsAccessories/frontend/components/orders.php">Quản lý đơn hàng</a>
+                        <a href="/PetsAccessories/frontend/public/index.php?page=wishlist">Danh sách yêu thích</a>
                         <a href="/PetsAccessories/frontend/components/change_password.php">Đổi mật khẩu</a>
                         <a href="/PetsAccessories/frontend/components/logout.php" class="logout-link">Đăng xuất</a>
                     </div>

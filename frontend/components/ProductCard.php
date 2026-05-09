@@ -15,6 +15,9 @@
             </a>
         </h3>
         <p class="price"><?php echo number_format($product['price'] ?? 0, 0, ',', '.'); ?> đ</p>
-        <button class="btn-add-cart" data-id="<?php echo (int)($product['product_id'] ?? 0); ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-add-cart" style="flex:1;" data-id="<?php echo (int)($product['product_id'] ?? 0); ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
+            <button class="btn-wishlist" style="background:none; border:1px solid #ccc; border-radius:4px; padding:0 10px; cursor:pointer;" onclick="toggleWishlist(<?php echo (int)($product['product_id'] ?? 0); ?>)" title="Yêu thích">❤️</button>
+        </div>
     </div>
 </div>

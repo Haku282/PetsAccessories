@@ -56,4 +56,30 @@ function addToCart(btn) {
         btn.disabled = false;
     });
 }
+
+function toggleWishlist(productId) {
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('action', 'toggle');
+
+    fetch('/PetsAccessories/backend/src/wishlist_api.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'success') {
+            alert(data.message);
+        } else {
+            alert(data.message);
+            if(data.message.includes('đăng nhập')) {
+                window.location.href = '/PetsAccessories/frontend/public/index.php?page=login';
+            }
+        }
+    })
+    .catch(err => {
+        alert('Có lỗi xảy ra.');
+        console.error(err);
+    });
+}
 </script>

@@ -75,16 +75,47 @@ if (!$productId) {
         // Fetch reviews if product exists
         try {
             $reviewStmt = $db->prepare(
-                'SELECT id, user_id, rating, comment, created_at
-                 FROM reviews
-                 WHERE product_id = ? AND status = 1
-                 ORDER BY created_at DESC
+                'SELECT r.review_id, r.user_id, r.rating, r.comment, r.created_at, u.fullname
+                 FROM reviews r
+                 LEFT JOIN users u ON r.user_id = u.user_id
+                 WHERE r.product_id = ? AND r.status = 1
+                 ORDER BY r.created_at DESC
                  LIMIT 10'
             );
             $reviewStmt->execute([$productId]);
             $reviews = $reviewStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch average rating
+            $avgStmt = $db->prepare('SELECT AVG(rating) as avg_rating, COUNT(review_id) as total_reviews FROM reviews WHERE product_id = ? AND status = 1');
+            $avgStmt->execute([$productId]);
+            $ratingStats = $avgStmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             $reviews = [];
+            $ratingStats = ['avg_rating' => 0, 'total_reviews' => 0];
+        }
+
+        // Check if user can review
+        $canReview = false;
+        if (isset($_SESSION['user_id'])) {
+            try {
+                $checkOrderIdStmt = $db->prepare("
+                    SELECT o.order_id
+                    FROM order_items oi
+                    JOIN orders o ON oi.order_id = o.order_id
+                    WHERE o.user_id = ? AND oi.product_id = ? AND o.order_status = 'completed'
+                    LIMIT 1
+                ");
+                $checkOrderIdStmt->execute([$_SESSION['user_id'], $productId]);
+                if ($checkOrderIdStmt->fetch()) {
+                    $checkRevStmt = $db->prepare("SELECT review_id FROM reviews WHERE user_id = ? AND product_id = ? LIMIT 1");
+                    $checkRevStmt->execute([$_SESSION['user_id'], $productId]);
+                    if (!$checkRevStmt->fetch()) {
+                        $canReview = true;
+                    }
+                }
+            } catch (PDOException $e) {
+                $canReview = false;
+            }
         }
 
         // Fetch related products (prefer same category; fallback to latest products)

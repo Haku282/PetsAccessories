@@ -59,12 +59,64 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
 
         <div class="product-detail__reviews">
             <h2>Đánh giá từ người mua</h2>
+            <?php if (isset($ratingStats) && $ratingStats['total_reviews'] > 0): ?>
+                <div class="average-rating">
+                    <span class="rating-point"><?php echo number_format($ratingStats['avg_rating'], 1); ?>/5</span>
+                    <span class="total-reviews">(<?php echo $ratingStats['total_reviews']; ?> đánh giá)</span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($canReview) && $canReview): ?>
+                <div class="review-form">
+                    <h3>Viết đánh giá của bạn</h3>
+                    <form id="submitReviewForm" onsubmit="submitReview(event)">
+                        <input type="hidden" name="product_id" value="<?php echo (int)$productId; ?>">
+                        <div class="form-group">
+                            <label for="rating">Đánh giá:</label>
+                            <select name="rating" id="rating" required>
+                                <option value="5">5 Sao</option>
+                                <option value="4">4 Sao</option>
+                                <option value="3">3 Sao</option>
+                                <option value="2">2 Sao</option>
+                                <option value="1">1 Sao</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Bình luận:</label>
+                            <textarea name="comment" id="comment" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Gửi đánh giá</button>
+                    </form>
+                    <script>
+                        function submitReview(e) {
+                            e.preventDefault();
+                            const formData = new FormData(e.target);
+                            fetch('/PetsAccessories/backend/src/submit_review.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                alert(data.message);
+                                if(data.status === 'success') {
+                                    location.reload();
+                                }
+                            })
+                            .catch(err => {
+                                alert('Có lỗi xảy ra.');
+                            });
+                        }
+                    </script>
+                </div>
+            <?php endif; ?>
+
             <?php if (!empty($reviews) && is_array($reviews)): ?>
                 <div class="reviews-list">
                     <?php foreach ($reviews as $review): ?>
-                        <div class="review-item">
+                        <div class="review-item" style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px;">
                             <div class="review-header">
-                                <div class="review-rating">
+                                <strong class="reviewer-name"><?php echo htmlspecialchars($review['fullname'] ?? 'Khách hàng'); ?></strong>
+                                <div class="review-rating" style="color: #ff9800; display: inline-block; margin-left: 10px;">
                                     <?php 
                                     $rating = (int) ($review['rating'] ?? 5);
                                     for ($i = 0; $i < 5; $i++) {

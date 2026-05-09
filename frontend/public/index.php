@@ -18,6 +18,16 @@
         exit;
     }
 
+    $page = $_GET['page'] ?? '';
+    if ($page === 'wishlist') {
+        require_once __DIR__ . '/../components/wishlist.php';
+        exit;
+    }
+    if ($page === 'product_detail') {
+        require_once __DIR__ . '/../components/product_detail.php';
+        exit;
+    }
+
     // Kết nối DB để lấy sản phẩm cho trang chủ
     require_once __DIR__ . '/../../backend/config/database.php';
 
