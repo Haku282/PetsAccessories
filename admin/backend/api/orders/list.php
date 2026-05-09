@@ -48,69 +48,51 @@ try {
     // Lấy các tham số filter
     $status = isset($_GET['status']) ? trim($_GET['status']) : '';
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
-    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+    $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    $limit = isset($_GET['limit']) ? max(1, (int)$_GET['limit']) : 10;
     $offset = ($page - 1) * $limit;
 
-    // Xây dựng query lấy đơn hàng
-    $sql = "
-        SELECT 
-            o.order_id, 
-            o.user_id, 
-            u.username,
-            u.email,
-            o.total_price, 
-            o.shipping_fee, 
-            o.discount_amount, 
-            o.order_status, 
-            o.payment_status,
-            o.payment_method,
-            o.shipping_method,
-            o.created_at, 
-            o.updated_at,
-            COUNT(oi.order_item_id) as item_count
-        FROM orders o
-        LEFT JOIN users u ON o.user_id = u.user_id
-        LEFT JOIN order_items oi ON o.order_id = oi.order_id
-        WHERE 1=1
-    ";
+// 1. Khởi tạo câu điều kiện WHERE và Params dùng chung
+    $whereSql = " WHERE 1=1";
     $params = [];
 
     if (!empty($status)) {
-        $sql .= " AND o.order_status = ?";
+        $whereSql .= " AND o.order_status = ?";
         $params[] = $status;
     }
 
     if (!empty($search)) {
-        $sql .= " AND (u.username LIKE ? OR u.email LIKE ? OR o.order_id = ?)";
+        $whereSql .= " AND (u.username LIKE ? OR u.email LIKE ? OR o.order_id = ?)";
         $searchTerm = "%$search%";
-        $params[] = $searchTerm;
-        $params[] = $searchTerm;
-        $params[] = (int)$search;
+        array_push($params, $searchTerm, $searchTerm, (int)$search);
     }
 
-    $sql .= " GROUP BY o.order_id";
-
-    // Đếm tổng số bản ghi
-    $countSql = "SELECT COUNT(DISTINCT o.order_id) as total FROM orders o
-                 LEFT JOIN users u ON o.user_id = u.user_id
-                 LEFT JOIN order_items oi ON o.order_id = oi.order_id
-                 WHERE 1=1";
-    $countParams = $params;
-    
-    if (!empty($status)) {
-        $countSql .= " AND o.order_status = ?";
-    }
-    if (!empty($search)) {
-        $countSql .= " AND (u.username LIKE ? OR u.email LIKE ? OR o.order_id = ?)";
-    }
+    // 2. Query Đếm tổng số bản ghi (Không cần JOIN order_items cho nhẹ)
+    $countSql = "SELECT COUNT(o.order_id) as total 
+                 FROM orders o 
+                 LEFT JOIN users u ON o.user_id = u.user_id" 
+                 . $whereSql;
     
     $countStmt = $db->prepare($countSql);
-    $countStmt->execute($countParams);
+    $countStmt->execute($params);
     $totalRecords = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-    // Lấy dữ liệu phân trang
-    $sql .= " ORDER BY o.created_at DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+    // 3. Query Lấy danh sách đơn hàng
+    $sql = "
+        SELECT 
+            o.order_id, o.user_id, u.username, u.email, o.total_price, 
+            o.shipping_fee, o.discount_amount, o.order_status, 
+            o.payment_status, o.payment_method, o.shipping_method, 
+            o.created_at, o.updated_at,
+            COUNT(oi.order_item_id) as item_count
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.user_id
+        LEFT JOIN order_items oi ON o.order_id = oi.order_id
+        " . $whereSql . "
+        GROUP BY o.order_id
+        ORDER BY o.created_at DESC 
+        LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
     $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);

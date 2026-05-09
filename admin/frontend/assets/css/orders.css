@@ -347,6 +347,12 @@
     border-color: var(--info-color);
 }
 
+.action-btn.warning:hover {
+    background: var(--warning-color);
+    color: white;
+    border-color: var(--warning-color);
+}
+
 /* Pagination */
 .pagination-container {
     display: flex;

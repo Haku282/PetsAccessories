@@ -56,7 +56,7 @@ try {
     $stmt = $db->prepare("
         SELECT 
             o.*,
-            u.user_name,
+            u.fullname,
             u.email,
             u.phone
         FROM orders o
@@ -101,7 +101,7 @@ try {
     $logsStmt = $db->prepare("
         SELECT 
             ol.*,
-            a.user_name as admin_name
+            a.fullname as admin_name
         FROM order_logs ol
         LEFT JOIN users a ON ol.admin_id = a.user_id
         WHERE ol.order_id = ?
@@ -118,7 +118,7 @@ try {
         'data' => [
             'order_id' => $order['order_id'],
             'user_id' => $order['user_id'],
-            'user_name' => $order['user_name'],
+            'fullname' => $order['fullname'],
             'email' => $order['email'],
             'phone' => $order['phone'],
             'total_price' => (float)$order['total_price'],
@@ -126,8 +126,10 @@ try {
             'discount_amount' => (float)$order['discount_amount'],
             'order_status' => $order['order_status'],
             'order_status_label' => $statusInfo['label'],
+            'order_status_color' => $statusInfo['color'], // Thêm dòng này
             'payment_status' => $order['payment_status'],
             'payment_status_label' => $paymentStatusInfo['label'],
+            'payment_status_color' => $paymentStatusInfo['color'], // Thêm dòng này
             'payment_method' => $order['payment_method'],
             'shipping_method' => $order['shipping_method'],
             'shipping_address' => $order['shipping_address'],
@@ -146,9 +148,11 @@ try {
                 ];
             }, $items),
             'status_history' => array_map(function($h) {
+                $hInfo = getOrderStatusInfo($h['status']);
                 return [
                     'status' => $h['status'],
-                    'status_label' => getOrderStatusInfo($h['status'])['label'],
+                    'status_label' => $hInfo['label'],
+                    'status_color' => $hInfo['color'], // Thêm dòng này
                     'changed_at' => $h['changed_at']
                 ];
             }, $statusHistory),

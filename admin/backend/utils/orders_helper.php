@@ -36,11 +36,11 @@ function getOrderById($db, $orderId) {
 function getOrderItems($db, $orderId) {
     try {
         $stmt = $db->prepare("
-            SELECT oi.*, p.product_name, p.price, p.image
+            SELECT oi.*, p.product_name, p.price, p.thumbnail as image
             FROM order_items oi
             LEFT JOIN products p ON oi.product_id = p.product_id
             WHERE oi.order_id = ?
-            ORDER BY oi.item_id ASC
+            ORDER BY oi.order_item_id ASC
         ");
         $stmt->execute([$orderId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -84,7 +84,7 @@ function getOrderLogs($db, $orderId) {
             FROM order_logs ol
             LEFT JOIN users a ON ol.admin_id = a.user_id
             WHERE ol.order_id = ?
-            ORDER BY ol.logged_at DESC
+            ORDER BY ol.changed_at DESC
         ");
         $stmt->execute([$orderId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -119,9 +119,8 @@ function getOrderStatusInfo($status) {
  */
 function getPaymentStatusInfo($status) {
     $statusMap = [
-        'pending' => ['label' => 'Chưa thanh toán', 'color' => '#FFC107'],
-        'completed' => ['label' => 'Đã thanh toán', 'color' => '#4CAF50'],
-        'failed' => ['label' => 'Thất bại', 'color' => '#F44336'],
+        'unpaid' => ['label' => 'Chưa thanh toán', 'color' => '#FFC107'],
+        'paid' => ['label' => 'Đã thanh toán', 'color' => '#4CAF50'],
         'refunded' => ['label' => 'Hoàn tiền', 'color' => '#9C27B0'],
     ];
     
@@ -182,13 +181,13 @@ function formatCurrency($amount) {
  * @param string $newStatus New status
  * @return bool Success
  */
-function addStatusHistory($db, $orderId, $oldStatus, $newStatus) {
+function addStatusHistory($db, $orderId, $newStatus) { // Bỏ old_status
     try {
         $stmt = $db->prepare("
-            INSERT INTO order_status_history (order_id, old_status, new_status, changed_at)
-            VALUES (?, ?, ?, NOW())
+            INSERT INTO order_status_history (order_id, status, changed_at)
+            VALUES (?, ?, NOW())
         ");
-        return $stmt->execute([$orderId, $oldStatus, $newStatus]);
+        return $stmt->execute([$orderId, $newStatus]);
     } catch (PDOException $e) {
         return false;
     }
@@ -204,13 +203,13 @@ function addStatusHistory($db, $orderId, $oldStatus, $newStatus) {
  * @param string $reason Reason for action
  * @return bool Success
  */
-function logOrderAction($db, $orderId, $adminId, $action, $reason = '') {
+function logOrderAction($db, $orderId, $adminId, $oldStatus, $newStatus, $reason = '') { // Đổi params cho đúng CSDL
     try {
         $stmt = $db->prepare("
-            INSERT INTO order_logs (order_id, admin_id, action, reason, logged_at)
-            VALUES (?, ?, ?, ?, NOW())
+            INSERT INTO order_logs (order_id, admin_id, old_status, new_status, reason, changed_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
         ");
-        return $stmt->execute([$orderId, $adminId, $action, $reason]);
+        return $stmt->execute([$orderId, $adminId, $oldStatus, $newStatus, $reason]);
     } catch (PDOException $e) {
         return false;
     }
@@ -231,8 +230,8 @@ function getAllOrders($db, $page = 1, $status = null, $search = '', $perPage = 1
         $offset = ($page - 1) * $perPage;
         $query = "
             SELECT o.*, u.username, u.email, u.phone,
-                   COUNT(oi.item_id) as item_count,
-                   SUM(oi.quantity * oi.price) as total
+                   COUNT(oi.order_item_id) as item_count,
+                   SUM(oi.quantity * oi.price_at_purchase) as total
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.user_id
             LEFT JOIN order_items oi ON o.order_id = oi.order_id
@@ -242,7 +241,7 @@ function getAllOrders($db, $page = 1, $status = null, $search = '', $perPage = 1
         $params = [];
         
         if ($status) {
-            $query .= " AND o.status = ?";
+            $query .= " AND o.order_status = ?";
             $params[] = $status;
         }
         
@@ -329,10 +328,10 @@ function getOrderStatistics($db) {
         
         // Get total revenue
         $stmt = $db->query("
-            SELECT SUM(oi.quantity * oi.price) as total
+            SELECT SUM(oi.quantity * oi.price_at_purchase) as total
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.order_id
-            WHERE o.status = 'completed'
+            WHERE o.order_status = 'completed'
         ");
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $stats['total_revenue'] = $result['total'] ?? 0;
