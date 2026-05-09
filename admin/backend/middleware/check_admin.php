@@ -4,7 +4,10 @@
  * Sử dụng ở đầu các file admin để bảo vệ trang
  */
 
-session_start();
+// Chỉ gọi session_start() nếu session chưa được khởi tạo
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Kiểm tra nếu user chưa đăng nhập
 if (!isset($_SESSION['user_id'])) {

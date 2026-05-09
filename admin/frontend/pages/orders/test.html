@@ -1,0 +1,288 @@
+<!-- 
+  Test Page for Orders Management API
+  File: /admin/frontend/pages/orders/test.html
+  Usage: Mở trực tiếp trong browser để test các API
+-->
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Orders API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4ec9b0;
+            margin-bottom: 20px;
+        }
+
+        .test-section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .test-section h2 {
+            color: #9cdcfe;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3e3e42;
+            padding-bottom: 10px;
+        }
+
+        .test-item {
+            margin-bottom: 15px;
+        }
+
+        .test-item label {
+            color: #ce9178;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .test-item input,
+        .test-item select {
+            width: 100%;
+            padding: 8px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #005a9e;
+        }
+
+        .response {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 3px;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #ce9178;
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .response.error {
+            border-color: #f48771;
+            color: #f48771;
+        }
+
+        .response.success {
+            border-color: #6a9955;
+            color: #6a9955;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛒 Test Orders Management API</h1>
+
+        <!-- List Orders -->
+        <div class="test-section">
+            <h2>📋 GET - List Orders</h2>
+            <div class="test-item">
+                <label>Page:</label>
+                <input type="number" id="listPage" value="1" min="1">
+            </div>
+            <div class="test-item">
+                <label>Status:</label>
+                <select id="listStatus">
+                    <option value="">-- All --</option>
+                    <option value="pending">pending</option>
+                    <option value="confirmed">confirmed</option>
+                    <option value="shipping">shipping</option>
+                    <option value="completed">completed</option>
+                    <option value="cancelled">cancelled</option>
+                </select>
+            </div>
+            <div class="test-item">
+                <label>Search:</label>
+                <input type="text" id="listSearch" placeholder="Username, email, order ID...">
+            </div>
+            <button onclick="testListOrders()">Test List Orders</button>
+            <div id="listResponse" class="response" style="display:none;"></div>
+        </div>
+
+        <!-- Get Order Detail -->
+        <div class="test-section">
+            <h2>📋 GET - Order Detail</h2>
+            <div class="test-item">
+                <label>Order ID:</label>
+                <input type="number" id="orderId" value="1" min="1">
+            </div>
+            <button onclick="testGetOrder()">Test Get Order</button>
+            <div id="getResponse" class="response" style="display:none;"></div>
+        </div>
+
+        <!-- Update Order Status -->
+        <div class="test-section">
+            <h2>POST - Update Order Status</h2>
+            <div class="test-item">
+                <label>Order ID:</label>
+                <input type="number" id="updateOrderId" value="1" min="1">
+            </div>
+            <div class="test-item">
+                <label>New Status:</label>
+                <select id="newStatus">
+                    <option value="">-- Select Status --</option>
+                    <option value="pending">pending</option>
+                    <option value="confirmed">confirmed</option>
+                    <option value="shipping">shipping</option>
+                    <option value="completed">completed</option>
+                    <option value="cancelled">cancelled</option>
+                </select>
+            </div>
+            <div class="test-item">
+                <label>Reason (optional):</label>
+                <input type="text" id="reason" placeholder="Update reason...">
+            </div>
+            <button onclick="testUpdateStatus()">Test Update Status</button>
+            <div id="updateResponse" class="response" style="display:none;"></div>
+        </div>
+
+        <!-- Export Order -->
+        <div class="test-section">
+            <h2>📥 GET - Export Order</h2>
+            <div class="test-item">
+                <label>Order ID:</label>
+                <input type="number" id="exportOrderId" value="1" min="1">
+            </div>
+            <div class="test-item">
+                <label>Format:</label>
+                <select id="exportFormat">
+                    <option value="pdf">PDF</option>
+                    <option value="excel">Excel</option>
+                </select>
+            </div>
+            <button onclick="testExport()">Test Export</button>
+            <p style="margin-top: 10px; color: #888; font-size: 11px;">✓ Export sẽ download file</p>
+        </div>
+    </div>
+
+    <script>
+        const apiBase = '/PetsAccessories/admin/backend/api/orders';
+
+        async function testListOrders() {
+            const page = document.getElementById('listPage').value;
+            const status = document.getElementById('listStatus').value;
+            const search = document.getElementById('listSearch').value;
+            
+            const url = new URL(`${apiBase}/list.php`, window.location.origin);
+            url.searchParams.set('page', page);
+            if (status) url.searchParams.set('status', status);
+            if (search) url.searchParams.set('search', search);
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResponse(data, 'listResponse');
+            } catch (error) {
+                displayError(error, 'listResponse');
+            }
+        }
+
+        async function testGetOrder() {
+            const id = document.getElementById('orderId').value;
+            
+            try {
+                const response = await fetch(`${apiBase}/get.php?id=${id}`);
+                const data = await response.json();
+                displayResponse(data, 'getResponse');
+            } catch (error) {
+                displayError(error, 'getResponse');
+            }
+        }
+
+        async function testUpdateStatus() {
+            const orderId = document.getElementById('updateOrderId').value;
+            const newStatus = document.getElementById('newStatus').value;
+            const reason = document.getElementById('reason').value;
+
+            if (!newStatus) {
+                alert('Vui lòng chọn trạng thái');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBase}/update-status.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        order_id: parseInt(orderId),
+                        new_status: newStatus,
+                        reason: reason
+                    })
+                });
+                const data = await response.json();
+                displayResponse(data, 'updateResponse');
+            } catch (error) {
+                displayError(error, 'updateResponse');
+            }
+        }
+
+        function testExport() {
+            const orderId = document.getElementById('exportOrderId').value;
+            const format = document.getElementById('exportFormat').value;
+            window.location.href = `${apiBase}/export.php?id=${orderId}&format=${format}`;
+        }
+
+        function displayResponse(data, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.style.display = 'block';
+            element.classList.remove('error');
+            element.classList.add(data.success ? 'success' : 'error');
+        }
+
+        function displayError(error, elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = 'Error: ' + error.message;
+            element.style.display = 'block';
+            element.classList.add('error');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!-- 
+  Test Page for Categories Management API
+  File: /admin/frontend/pages/categories/test.html
+  Usage: Mở trực tiếp trong browser để test các API
+-->
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Categories API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4ec9b0;
+            margin-bottom: 20px;
+        }
+
+        .test-section {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .test-section h2 {
+            color: #9cdcfe;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #3e3e42;
+            padding-bottom: 10px;
+        }
+
+        .test-button {
+            background: #0e639c;
+            color: white;
+            border: 1px solid #1e90ff;
+            padding: 8px 15px;
+            margin: 5px 5px 5px 0;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .test-button:hover {
+            background: #1177bb;
+        }
+
+        .test-input {
+            background: #3c3c3c;
+            color: #d4d4d4;
+            border: 1px solid #3e3e42;
+            padding: 8px;
+            margin: 5px 5px 5px 0;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        select.test-input {
+            background: #3c3c3c;
+            color: #d4d4d4;
+        }
+
+        .response {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 3px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 11px;
+        }
+
+        .success {
+            color: #4ec9b0;
+        }
+
+        .error {
+            color: #f48771;
+        }
+
+        .info {
+            color: #9cdcfe;
+        }
+
+        label {
+            display: inline-block;
+            min-width: 100px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Categories Management API</h1>
+
+        <!-- List Categories -->
+        <div class="test-section">
+            <h2>📋 GET /api/categories/list.php</h2>
+            <div>
+                <label>Page:</label>
+                <input type="number" id="listPage" value="1" class="test-input" min="1">
+                
+                <label>Parent ID:</label>
+                <input type="number" id="listParent" placeholder="(optional)" class="test-input">
+                
+                <label>Status:</label>
+                <select id="listStatus" class="test-input">
+                    <option value="">-- All --</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+                
+                <label>Search:</label>
+                <input type="text" id="listSearch" placeholder="category name" class="test-input">
+                
+                <button class="test-button" onclick="testListCategories()">Test</button>
+            </div>
+            <div id="listResponse" class="response"></div>
+        </div>
+
+        <!-- Get Category Detail -->
+        <div class="test-section">
+            <h2>📂 GET /api/categories/get.php?id=</h2>
+            <div>
+                <label>Category ID:</label>
+                <input type="number" id="getCategoryId" value="1" class="test-input">
+                <button class="test-button" onclick="testGetCategory()">Test</button>
+            </div>
+            <div id="getResponse" class="response"></div>
+        </div>
+
+        <!-- Add Category -->
+        <div class="test-section">
+            <h2>➕ POST /api/categories/add.php</h2>
+            <div>
+                <label>Category Name:</label>
+                <input type="text" id="addName" placeholder="Test Category" class="test-input" style="width: 100%; margin-bottom: 10px;">
+                
+                <label>Parent ID:</label>
+                <input type="number" id="addParent" placeholder="(optional)" class="test-input">
+                
+                <label>Pet Type:</label>
+                <select id="addPetType" class="test-input">
+                    <option value="">-- Select --</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="all">All</option>
+                </select>
+                
+                <label>Status:</label>
+                <select id="addStatus" class="test-input">
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                </select>
+                
+                <button class="test-button" onclick="testAddCategory()">Test</button>
+            </div>
+            <div id="addResponse" class="response"></div>
+        </div>
+
+        <!-- Update Category -->
+        <div class="test-section">
+            <h2>✏️ POST /api/categories/update.php</h2>
+            <div>
+                <label>Category ID:</label>
+                <input type="number" id="updateId" value="1" class="test-input">
+                
+                <label>Category Name:</label>
+                <input type="text" id="updateName" placeholder="Updated Name" class="test-input" style="width: 100%; margin-bottom: 10px;">
+                
+                <label>Pet Type:</label>
+                <select id="updatePetType" class="test-input">
+                    <option value="">-- Select --</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
+                    <option value="all">All</option>
+                </select>
+                
+                <button class="test-button" onclick="testUpdateCategory()">Test</button>
+            </div>
+            <div id="updateResponse" class="response"></div>
+        </div>
+
+        <!-- Delete Category -->
+        <div class="test-section">
+            <h2>🗑️ POST /api/categories/delete.php</h2>
+            <div>
+                <label>Category ID:</label>
+                <input type="number" id="deleteId" value="1" class="test-input">
+                <button class="test-button" onclick="testDeleteCategory()">Test</button>
+            </div>
+            <div id="deleteResponse" class="response"></div>
+        </div>
+
+        <!-- Get Options -->
+        <div class="test-section">
+            <h2>🔧 GET /api/categories/get-options.php</h2>
+            <button class="test-button" onclick="testGetOptions()">Test</button>
+            <div id="optionsResponse" class="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/PetsAccessories/admin/backend/api/categories';
+
+        function displayResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            if (typeof data === 'string') {
+                element.textContent = data;
+            } else {
+                element.textContent = JSON.stringify(data, null, 2);
+            }
+            element.className = `response ${isError ? 'error' : 'success'}`;
+        }
+
+        async function testListCategories() {
+            try {
+                const page = document.getElementById('listPage').value;
+                const parent = document.getElementById('listParent').value;
+                const status = document.getElementById('listStatus').value;
+                const search = document.getElementById('listSearch').value;
+
+                let url = `${API_BASE}/list.php?page=${page}&limit=10`;
+                if (parent) url += `&parent_id=${parent}`;
+                if (status) url += `&status=${status}`;
+                if (search) url += `&search=${search}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResponse('listResponse', data);
+            } catch (error) {
+                displayResponse('listResponse', error.message, true);
+            }
+        }
+
+        async function testGetCategory() {
+            try {
+                const id = document.getElementById('getCategoryId').value;
+                const response = await fetch(`${API_BASE}/get.php?id=${id}`);
+                const data = await response.json();
+                displayResponse('getResponse', data);
+            } catch (error) {
+                displayResponse('getResponse', error.message, true);
+            }
+        }
+
+        async function testAddCategory() {
+            try {
+                const payload = {
+                    category_name: document.getElementById('addName').value,
+                    parent_id: document.getElementById('addParent').value || null,
+                    pet_type: document.getElementById('addPetType').value,
+                    status: parseInt(document.getElementById('addStatus').value)
+                };
+
+                const response = await fetch(`${API_BASE}/add.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                displayResponse('addResponse', data);
+            } catch (error) {
+                displayResponse('addResponse', error.message, true);
+            }
+        }
+
+        async function testUpdateCategory() {
+            try {
+                const payload = {
+                    category_id: parseInt(document.getElementById('updateId').value),
+                    category_name: document.getElementById('updateName').value,
+                    pet_type: document.getElementById('updatePetType').value,
+                    status: 1
+                };
+
+                const response = await fetch(`${API_BASE}/update.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                displayResponse('updateResponse', data);
+            } catch (error) {
+                displayResponse('updateResponse', error.message, true);
+            }
+        }
+
+        async function testDeleteCategory() {
+            try {
+                const payload = {
+                    category_id: parseInt(document.getElementById('deleteId').value)
+                };
+
+                const response = await fetch(`${API_BASE}/delete.php`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                displayResponse('deleteResponse', data);
+            } catch (error) {
+                displayResponse('deleteResponse', error.message, true);
+            }
+        }
+
+        async function testGetOptions() {
+            try {
+                const response = await fetch(`${API_BASE}/get-options.php`);
+                const data = await response.json();
+                displayResponse('optionsResponse', data);
+            } catch (error) {
+                displayResponse('optionsResponse', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

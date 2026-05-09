@@ -1,6 +1,9 @@
 /**
  * Admin Users Management - JavaScript
  * File: /admin/frontend/assets/js/users.js
+ * * Đã Sửa:
+ * 1. Đổi hiển thị từ 'updated_at' sang 'created_at' (Dòng 228)
+ * 2. Sửa hàm saveUser() gửi user_id trong body JSON khi update (Dòng 140, 151)
  */
 
 class UsersManager {
@@ -8,10 +11,11 @@ class UsersManager {
         this.apiBase = '/PetsAccessories/admin/backend/api/users';
         this.currentPage = 1;
         this.currentFilters = {
+            search: '',
             role: '',
-            status: '',
-            search: ''
+            status: ''
         };
+        this.currentUser = null;
         this.init();
     }
 
@@ -21,103 +25,270 @@ class UsersManager {
     }
 
     attachEventListeners() {
-        // Filter
+        // Filter & Search
         document.getElementById('filterBtn')?.addEventListener('click', () => this.applyFilters());
         document.getElementById('resetBtn')?.addEventListener('click', () => this.resetFilters());
-        
-        // Search
         document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.applyFilters();
         });
 
         // Add User
         document.getElementById('addUserBtn')?.addEventListener('click', () => this.showAddModal());
-        
-        // Modal buttons
+
+        // Modal
         document.getElementById('closeModalBtn')?.addEventListener('click', () => this.closeModal());
         document.getElementById('cancelModalBtn')?.addEventListener('click', () => this.closeModal());
         document.getElementById('saveUserBtn')?.addEventListener('click', () => this.saveUser());
-
-        // Modal backdrop
         document.getElementById('userModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'userModal') this.closeModal();
         });
     }
 
+    applyFilters() {
+        this.currentFilters.search = document.getElementById('searchInput')?.value || '';
+        this.currentFilters.role = document.getElementById('roleFilter')?.value || '';
+        this.currentFilters.status = document.getElementById('statusFilter')?.value || '';
+        this.currentPage = 1;
+        this.loadUsers();
+    }
+
+    resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('roleFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        this.currentFilters = { search: '', role: '', status: '' };
+        this.currentPage = 1;
+        this.loadUsers();
+    }
+
     async loadUsers(page = 1) {
         try {
             this.showLoading();
-            
+            this.currentPage = page;
+
             const params = new URLSearchParams({
-                page: page,
-                role: this.currentFilters.role,
-                status: this.currentFilters.status,
+                page: this.currentPage,
+                limit: 10,
                 search: this.currentFilters.search,
-                limit: 10
+                role: this.currentFilters.role,
+                status: this.currentFilters.status
             });
 
             const response = await fetch(`${this.apiBase}/list.php?${params}`);
-            const result = await response.json();
+            
+            // Kiểm tra nếu response không ok (ví dụ lỗi 500 do SQL)
+            if (!response.ok) {
+                throw new Error(`Lỗi hệ thống backend (Status: ${response.status})`);
+            }
 
-            if (result.success) {
-                this.renderTable(result.data);
-                this.renderPagination(result.pagination);
-                this.currentPage = page;
+            const data = await response.json();
+
+            if (data.success) {
+                this.renderUsers(data.data);
+                this.renderPagination(data.pagination);
             } else {
-                this.showAlert(result.message, 'danger');
+                this.showMessage('error', data.message || 'Lỗi tải dữ liệu');
+                this.renderEmptyState(data.message);
             }
         } catch (error) {
-            console.error('Error loading users:', error);
-            this.showAlert('Lỗi khi tải danh sách tài khoản', 'danger');
+            console.error('Fetch error:', error);
+            this.showMessage('error', 'Lỗi kết nối hoặc dữ liệu không hợp lệ. Vui lòng kiểm tra Console.');
+            this.renderEmptyState('Không thể tải dữ liệu');
         }
     }
 
-    renderTable(users) {
-        const tbody = document.getElementById('usersTableBody');
-        if (!tbody) return;
+    showAddModal() {
+        this.currentUser = null;
+        document.getElementById('modalTitle').textContent = '➕ Thêm Người Dùng Mới';
+        this.resetForm();
+        document.getElementById('passwordInput').required = true;
+        document.getElementById('passwordInput').placeholder = 'Tối thiểu 6 ký tự...';
+        this.openModal(); // Đã sửa từ showModal thành openModal cho đúng tên hàm ở dưới
+    }
 
-        if (users.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="7" class="text-center empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <h3>Không có tài khoản</h3>
-                        <p>Hãy thêm tài khoản mới để bắt đầu</p>
-                    </td>
-                </tr>
-            `;
+    async editUser(userId) {
+        try {
+            const response = await fetch(`${this.apiBase}/get.php?id=${userId}`);
+            const data = await response.json();
+
+            if (data.success) {
+                this.currentUser = data.data;
+                document.getElementById('modalTitle').textContent = '✏️ Sửa Người Dùng';
+                this.populateForm(data.data);
+                document.getElementById('passwordInput').required = false;
+                document.getElementById('passwordInput').placeholder = 'Bỏ trống để giữ nguyên mật khẩu';
+                this.openModal(); // Đã sửa từ showModal thành openModal
+            } else {
+                this.showMessage('error', data.message);
+            }
+        } catch (error) {
+            this.showMessage('error', 'Lỗi: ' + error.message);
+        }
+    }
+
+    populateForm(user) {
+        document.getElementById('usernameInput').value = user.username;
+        document.getElementById('emailInput').value = user.email;
+        // Backend alias 'fullname as full_name', nên ở đây dùng full_name
+        document.getElementById('fullnameInput').value = user.full_name || ''; 
+        document.getElementById('phoneInput').value = user.phone || '';
+        document.getElementById('addressInput').value = user.address || '';
+        document.getElementById('roleInput').value = user.role;
+        document.getElementById('statusInput').value = user.status;
+    }
+
+    resetForm() {
+        document.getElementById('userForm').reset();
+    }
+
+    async saveUser() {
+        if (!this.validateForm()) return;
+
+        // FIX SỬA NGƯỜI DÙNG: Gom dữ liệu, bao gồm cả ID nếu đang sửa
+        const formData = {
+            // Nếu đang sửa (currentUser != null), đính kèm user_id vào body JSON
+            user_id: this.currentUser ? this.currentUser.user_id : null, 
+            username: document.getElementById('usernameInput').value.trim(),
+            email: document.getElementById('emailInput').value.trim(),
+            fullname: document.getElementById('fullnameInput').value.trim(),
+            phone: document.getElementById('phoneInput').value.trim(),
+            address: document.getElementById('addressInput').value.trim(),
+            role: document.getElementById('roleInput').value,
+            status: document.getElementById('statusInput').value
+        };
+
+        // Chỉ thêm password nếu có giá trị
+        const passwordInput = document.getElementById('passwordInput').value;
+        if (passwordInput) {
+            formData.password = passwordInput;
+        }
+
+        // Khi thêm mới, password bắt buộc
+        if (!this.currentUser && !passwordInput) {
+            this.showMessage('error', 'Vui lòng nhập mật khẩu khi thêm người dùng mới');
+            return;
+        }
+
+        try {
+            // FIX SỬA NGƯỜI DÙNG: Đường dẫn không cần truyền ?id= nữa vì ID đã nằm trong body
+            const endpoint = this.currentUser 
+                ? `${this.apiBase}/update.php`
+                : `${this.apiBase}/add.php`;
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showMessage('success', data.message || 'Lưu thành công!');
+                this.closeModal();
+                this.loadUsers(this.currentPage);
+            } else {
+                this.showMessage('error', data.message || 'Lỗi lưu dữ liệu');
+            }
+        } catch (error) {
+            this.showMessage('error', 'Lỗi: ' + error.message);
+        }
+    }
+
+    async deleteUser(userId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác.')) return;
+
+        try {
+            const response = await fetch(`${this.apiBase}/delete.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showMessage('success', data.message || 'Xóa thành công!');
+                this.loadUsers(this.currentPage);
+            } else {
+                this.showMessage('error', data.message);
+            }
+        } catch (error) {
+            this.showMessage('error', 'Lỗi: ' + error.message);
+        }
+    }
+
+    async toggleUserStatus(userId) {
+        try {
+            // Lấy user hiện tại để biết status
+            const currentRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+            if (!currentRow) return;
+
+            const currentStatus = parseInt(currentRow.querySelector('.status-badge').getAttribute('data-status'));
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            const action = newStatus === 1 ? 'mở khóa' : 'khóa';
+
+            if (!confirm(`Bạn có chắc chắn muốn ${action} tài khoản này?`)) return;
+
+            const response = await fetch(`${this.apiBase}/toggle-status.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    user_id: userId,
+                    status: newStatus
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showMessage('success', data.message);
+                this.loadUsers(this.currentPage);
+            } else {
+                this.showMessage('error', data.message);
+            }
+        } catch (error) {
+            this.showMessage('error', 'Lỗi: ' + error.message);
+        }
+    }
+
+    renderUsers(users) {
+        const tbody = document.querySelector('.users-table tbody');
+        
+        if (!users || users.length === 0) {
+            this.renderEmptyState('Không có người dùng nào');
             return;
         }
 
         tbody.innerHTML = users.map(user => `
-            <tr class="status-${user.status === 1 ? 'active' : 'inactive'}">
-                <td>${user.user_id}</td>
+            <tr data-user-id="${user.user_id}">
                 <td>
-                    <strong>${this.escape(user.username)}</strong><br>
-                    <small class="text-muted">${this.escape(user.email)}</small>
+                    <div class="user-username">${this.escapeHtml(user.username)}</div>
                 </td>
-                <td>${this.escape(user.fullname || '-')}</td>
-                <td>${this.escape(user.phone || '-')}</td>
+                <td>${this.escapeHtml(user.email)}</td>
+                <td>${this.escapeHtml(user.full_name || '-')}</td>
+                <td>${this.escapeHtml(user.phone || '-')}</td>
                 <td>
-                    <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-customer'}">
-                        ${user.role === 'admin' ? 'Admin' : 'Khách Hàng'}
+                    <span class="role-badge role-${user.role}">
+                        ${user.role === 'admin' ? '👤 Admin' : '👥 Khách hàng'}
                     </span>
                 </td>
                 <td>
-                    <span class="badge ${user.status === 1 ? 'badge-success' : 'badge-danger'}">
-                        ${user.status === 1 ? '✓ Hoạt Động' : '✗ Bị Khóa'}
+                    <span class="status-badge status-${user.status == 1 ? 'active' : 'inactive'}" data-status="${user.status}">
+                        ${user.status == 1 ? '✓ Hoạt động' : '✗ Bị khóa'}
                     </span>
                 </td>
+                <td>${user.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN') : '-'}</td>
                 <td>
-                    <div class="action-buttons">
-                        <button class="btn-action btn-action-edit" onclick="usersManager.showEditModal(${user.user_id})" title="Sửa">
-                            ✎ Sửa
+                    <div class="table-actions">
+                        <button class="btn btn-success btn-xs" onclick="usersManager.editUser(${user.user_id})" title="Chỉnh sửa">
+                            ✏️ Sửa
                         </button>
-                        <button class="btn-action btn-action-lock" onclick="usersManager.toggleStatus(${user.user_id}, ${user.status === 1 ? 0 : 1})" title="${user.status === 1 ? 'Khóa' : 'Mở khóa'}">
-                            ${user.status === 1 ? '🔒 Khóa' : '🔓 Mở'}
+                        <button class="btn btn-${user.status == 1 ? 'warning' : 'info'} btn-xs" onclick="usersManager.toggleUserStatus(${user.user_id})" title="${user.status == 1 ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}">
+                            ${user.status == 1 ? '🔒 Khóa' : '🔓 Mở khóa'}
                         </button>
-                        <button class="btn-action btn-action-delete" onclick="usersManager.deleteUser(${user.user_id})" title="Xóa">
-                            🗑 Xóa
+                        <button class="btn btn-danger btn-xs" onclick="usersManager.deleteUser(${user.user_id})" title="Xóa">
+                            🗑️ Xóa
                         </button>
                     </div>
                 </td>
@@ -126,280 +297,133 @@ class UsersManager {
     }
 
     renderPagination(pagination) {
-        const container = document.getElementById('pagination');
-        if (!container) return;
-
-        const { page, totalPages } = pagination;
-        let html = '<ul class="pagination">';
-
-        // Previous
-        if (page > 1) {
-            html += `<li><a href="javascript:usersManager.loadUsers(${page - 1})">← Trước</a></li>`;
-        } else {
-            html += `<li class="disabled"><span>← Trước</span></li>`;
+        const container = document.getElementById('paginationContainer');
+        if (!pagination || pagination.total_pages <= 1) {
+            container.innerHTML = '';
+            return;
         }
 
-        // Pages
-        const startPage = Math.max(1, page - 2);
-        const endPage = Math.min(totalPages, page + 2);
-
-        if (startPage > 1) {
-            html += `<li><a href="javascript:usersManager.loadUsers(1)">1</a></li>`;
-            if (startPage > 2) html += `<li class="disabled"><span>...</span></li>`;
+        let html = '';
+        
+        if (pagination.current_page > 1) {
+            html += `<button onclick="usersManager.loadUsers(1)">« Đầu tiên</button>`;
+            html += `<button onclick="usersManager.loadUsers(${pagination.current_page - 1})">‹ Trước</button>`;
         }
 
-        for (let i = startPage; i <= endPage; i++) {
-            if (i === page) {
-                html += `<li class="active"><span>${i}</span></li>`;
-            } else {
-                html += `<li><a href="javascript:usersManager.loadUsers(${i})">${i}</a></li>`;
+        for (let i = 1; i <= pagination.total_pages; i++) {
+            if (i === pagination.current_page) {
+                html += `<span class="active">${i}</span>`;
+            } else if (i <= 3 || i > pagination.total_pages - 3 || Math.abs(i - pagination.current_page) <= 1) {
+                html += `<button onclick="usersManager.loadUsers(${i})">${i}</button>`;
+            } else if (i === 4 || i === pagination.total_pages - 3) {
+                html += '<span>...</span>';
             }
         }
 
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) html += `<li class="disabled"><span>...</span></li>`;
-            html += `<li><a href="javascript:usersManager.loadUsers(${totalPages})">${totalPages}</a></li>`;
+        if (pagination.current_page < pagination.total_pages) {
+            html += `<button onclick="usersManager.loadUsers(${pagination.current_page + 1})">Tiếp ›</button>`;
+            html += `<button onclick="usersManager.loadUsers(${pagination.total_pages})">Cuối cùng »</button>`;
         }
 
-        // Next
-        if (page < totalPages) {
-            html += `<li><a href="javascript:usersManager.loadUsers(${page + 1})">Sau →</a></li>`;
-        } else {
-            html += `<li class="disabled"><span>Sau →</span></li>`;
-        }
-
-        html += '</ul>';
         container.innerHTML = html;
     }
 
-    applyFilters() {
-        this.currentFilters.role = document.getElementById('roleFilter')?.value || '';
-        this.currentFilters.status = document.getElementById('statusFilter')?.value || '';
-        this.currentFilters.search = document.getElementById('searchInput')?.value || '';
-        this.loadUsers(1);
-    }
-
-    resetFilters() {
-        this.currentFilters = { role: '', status: '', search: '' };
-        document.getElementById('roleFilter').value = '';
-        document.getElementById('statusFilter').value = '';
-        document.getElementById('searchInput').value = '';
-        this.loadUsers(1);
-    }
-
-    showAddModal() {
-        document.getElementById('modalTitle').textContent = 'Thêm Tài Khoản Mới';
-        document.getElementById('userForm').reset();
-        document.getElementById('userId').value = '';
-        document.getElementById('userModal').classList.add('show');
-    }
-
-    async showEditModal(userId) {
-        try {
-            const response = await fetch(`${this.apiBase}/get.php?id=${userId}`);
-            const result = await response.json();
-
-            if (result.success) {
-                const user = result.data;
-                document.getElementById('modalTitle').textContent = 'Sửa Tài Khoản';
-                document.getElementById('userId').value = user.user_id;
-                document.getElementById('username').value = user.username;
-                document.getElementById('username').disabled = true;
-                document.getElementById('email').value = user.email;
-                document.getElementById('fullname').value = user.fullname || '';
-                document.getElementById('phone').value = user.phone || '';
-                document.getElementById('address').value = user.address || '';
-                document.getElementById('role').value = user.role;
-                document.getElementById('password').value = '';
-                document.getElementById('password').placeholder = 'Để trống nếu không đổi';
-                document.getElementById('userModal').classList.add('show');
-            } else {
-                this.showAlert(result.message, 'danger');
-            }
-        } catch (error) {
-            console.error('Error loading user:', error);
-            this.showAlert('Lỗi khi tải thông tin tài khoản', 'danger');
-        }
-    }
-
-    async saveUser() {
-        const userId = document.getElementById('userId').value;
-        const username = document.getElementById('username').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
-        const fullname = document.getElementById('fullname').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const address = document.getElementById('address').value.trim();
-        const role = document.getElementById('role').value;
-
-        // Validation
-        if (!username || !email) {
-            this.showAlert('Vui lòng điền username và email', 'warning');
-            return;
-        }
-
-        if (!this.validateEmail(email)) {
-            this.showAlert('Email không hợp lệ', 'warning');
-            return;
-        }
-
-        const data = {
-            username,
-            email,
-            fullname,
-            phone,
-            address,
-            role
-        };
-
-        try {
-            let endpoint = `${this.apiBase}/add.php`;
-            let method = 'POST';
-
-            if (userId) {
-                endpoint = `${this.apiBase}/update.php`;
-                method = 'PUT';
-                data.user_id = userId;
-                if (password) data.password = password;
-            } else {
-                if (!password) {
-                    this.showAlert('Vui lòng nhập mật khẩu', 'warning');
-                    return;
-                }
-                if (password.length < 6) {
-                    this.showAlert('Mật khẩu phải có ít nhất 6 ký tự', 'warning');
-                    return;
-                }
-                data.password = password;
-            }
-
-            const response = await fetch(endpoint, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.showAlert(result.message, 'success');
-                this.closeModal();
-                this.loadUsers(this.currentPage);
-            } else {
-                this.showAlert(result.message, 'danger');
-            }
-        } catch (error) {
-            console.error('Error saving user:', error);
-            this.showAlert('Lỗi khi lưu tài khoản', 'danger');
-        }
-    }
-
-    async toggleStatus(userId, newStatus) {
-        if (!confirm('Bạn chắc chắn muốn thay đổi trạng thái tài khoản này?')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${this.apiBase}/toggle-status.php`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, status: newStatus })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.showAlert(result.message, 'success');
-                this.loadUsers(this.currentPage);
-            } else {
-                this.showAlert(result.message, 'danger');
-            }
-        } catch (error) {
-            console.error('Error toggling status:', error);
-            this.showAlert('Lỗi khi cập nhật trạng thái', 'danger');
-        }
-    }
-
-    async deleteUser(userId) {
-        if (!confirm('Bạn chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác!')) {
-            return;
-        }
-
-        try {
-            const response = await fetch(`${this.apiBase}/delete.php`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                this.showAlert(result.message, 'success');
-                this.loadUsers(this.currentPage);
-            } else {
-                this.showAlert(result.message, 'danger');
-            }
-        } catch (error) {
-            console.error('Error deleting user:', error);
-            this.showAlert('Lỗi khi xóa tài khoản', 'danger');
-        }
-    }
-
-    closeModal() {
-        document.getElementById('userModal').classList.remove('show');
-        document.getElementById('userForm').reset();
-        document.getElementById('username').disabled = false;
-    }
-
+    // Helper function để hiển thị loading
     showLoading() {
-        const tbody = document.getElementById('usersTableBody');
+        const tbody = document.querySelector('.users-table tbody');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px;">Đang tải dữ liệu...</td></tr>`;
+        }
+    }
+
+    // Helper function để hiển thị trạng thái trống
+    renderEmptyState(message) {
+        const tbody = document.querySelector('.users-table tbody');
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="loading">
-                        <div>Đang tải...</div>
+                    <td colspan="8" style="text-align: center; padding: 40px;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon" style="font-size: 40px; margin-bottom: 10px;">👥</div>
+                            <p>${this.escapeHtml(message)}</p>
+                        </div>
                     </td>
                 </tr>
             `;
         }
+        const pagination = document.getElementById('paginationContainer');
+        if (pagination) pagination.innerHTML = '';
     }
 
-    showAlert(message, type = 'info') {
-        const alertContainer = document.getElementById('alertContainer');
-        if (!alertContainer) return;
+    validateForm() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
 
-        const alertId = 'alert-' + Date.now();
-        const alertHtml = `
-            <div id="${alertId}" class="alert alert-${type}" role="alert">
-                <strong>${type === 'success' ? '✓' : type === 'danger' ? '✗' : type === 'warning' ? '⚠' : 'ℹ'}</strong>
-                ${this.escape(message)}
-                <button type="button" class="btn-close-alert" onclick="document.getElementById('${alertId}').remove()" style="float: right; background: none; border: none; cursor: pointer; font-size: 18px;">×</button>
-            </div>
-        `;
+        if (!username) {
+            this.showMessage('error', 'Vui lòng nhập tên đăng nhập');
+            return false;
+        }
 
-        alertContainer.innerHTML += alertHtml;
+        if (!email || !email.includes('@')) {
+            this.showMessage('error', 'Vui lòng nhập email hợp lệ');
+            return false;
+        }
 
-        setTimeout(() => {
-            const element = document.getElementById(alertId);
-            if (element) element.remove();
-        }, 5000);
+        // Chỉ bắt buộc mật khẩu khi thêm mới
+        if (!this.currentUser && !password) {
+            this.showMessage('error', 'Vui lòng nhập mật khẩu');
+            return false;
+        }
+
+        if (password && password.length < 6) {
+            this.showMessage('error', 'Mật khẩu phải tối thiểu 6 ký tự');
+            return false;
+        }
+
+        return true;
     }
 
-    validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+    showMessage(type, message) {
+        // Kiểm tra xem container có tồn tại không, nếu không thì dùng alert tạm
+        const container = document.getElementById('messagesContainer');
+        if (!container) {
+            alert(message);
+            return;
+        }
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-toast ${type}`;
+        messageDiv.style = "background: #fff; padding: 10px 20px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-left: 4px solid " + (type === 'success' ? '#2ecc71' : '#e74c3c');
+        messageDiv.textContent = message;
+        container.appendChild(messageDiv);
+
+        setTimeout(() => messageDiv.remove(), 3000);
     }
 
-    escape(str) {
-        if (!str) return '';
+    escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
-        div.textContent = str;
+        div.textContent = text;
         return div.innerHTML;
+    }
+
+    openModal() {
+        const modal = document.getElementById('userModal');
+        if (modal) modal.classList.add('show');
+    }
+
+    closeModal() {
+        const modal = document.getElementById('userModal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.getElementById('userForm').reset();
+            this.currentUser = null; // Reset user đang sửa
+        }
     }
 }
 
-// Initialize when DOM is ready
+// Initialize khi DOM đã sẵn sàng
 document.addEventListener('DOMContentLoaded', () => {
     window.usersManager = new UsersManager();
 });

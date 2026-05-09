@@ -5,7 +5,11 @@
  */
 
 header('Content-Type: application/json');
-session_start();
+
+// Chỉ gọi session_start() nếu session chưa được khởi tạo
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Kiểm tra quyền admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -15,6 +19,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
 }
 
 require_once __DIR__ . '/../../../../backend/config/database.php';
+require_once __DIR__ . '/../../utils/users_helper.php';
 
 try {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -89,12 +94,28 @@ try {
         $updateParams[] = $data['status'];
     }
 
-    if (!empty($updateFields)) {
-        $updateParams[] = $userId;
-        $sql = "UPDATE users SET " . implode(", ", $updateFields) . " WHERE user_id = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute($updateParams);
+    // Xử lý password nếu được cung cấp
+    if (!empty($data['password'])) {
+        if (strlen($data['password']) < 6) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự']);
+            exit;
+        }
+        $hashedPassword = password_hash($data['password'], PASSWORD_BCRYPT);
+        $updateFields[] = "password = ?";
+        $updateParams[] = $hashedPassword;
     }
+
+    if (empty($updateFields)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Không có trường nào để cập nhật']);
+        exit;
+    }
+
+    $updateParams[] = $userId;
+    $sql = "UPDATE users SET " . implode(", ", $updateFields) . " WHERE user_id = ?";
+    $stmt = $db->prepare($sql);
+    $stmt->execute($updateParams);
 
     echo json_encode([
         'success' => true,
