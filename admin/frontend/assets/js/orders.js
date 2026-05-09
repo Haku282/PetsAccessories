@@ -97,34 +97,32 @@ class OrdersManager {
             return;
         }
 
-        tableBody.innerHTML = orders.map(order => `
+        tableBody.innerHTML = orders.map(order => {
+            // Xử lý logic hiển thị nút bấm
+            let actionButtons = `<button class="action-btn edit" onclick="ordersManager.viewOrder(${order.order_id})">👁️ Xem</button>`;
+            
+            // Nếu chưa hoàn thành và chưa hủy -> Hiện nút Hủy đơn
+            if (order.order_status !== 'completed' && order.order_status !== 'cancelled') {
+                actionButtons += `<button class="action-btn warning" style="background-color: #ff9800; color: white;" onclick="ordersManager.cancelOrder(${order.order_id})">🚫 Hủy</button>`;
+            }
+            
+            // Nếu ĐÃ HỦY -> Hiện nút Xóa vĩnh viễn
+            if (order.order_status === 'cancelled') {
+                actionButtons += `<button class="action-btn delete" onclick="ordersManager.deleteOrder(${order.order_id})">🗑️ Xóa</button>`;
+            }
+
+            return `
             <tr>
                 <td>#${order.order_id}</td>
-                <td>
-                    <strong>${order.user_name}</strong><br/>
-                    <small>${order.email}</small>
-                </td>
-                <td>${order.item_count} sản phẩm</td>
-                <td style="text-align: right;">${this.formatCurrency(order.total_price)}</td>
-                <td>
-                    <span class="status-badge status-${this.getStatusClass(order.order_status)}">
-                        ${order.order_status_label}
-                    </span>
-                </td>
-                <td>
-                    <span class="status-badge payment-status-${this.getPaymentStatusClass(order.payment_status)}">
-                        ${order.payment_status_label}
-                    </span>
-                </td>
                 <td>${this.formatDate(order.created_at)}</td>
                 <td>
                     <div class="actions-cell">
-                        <button class="action-btn edit" onclick="ordersManager.viewOrder(${order.order_id})">👁️ Xem</button>
-                        <button class="action-btn delete" onclick="ordersManager.deleteOrder(${order.order_id})">🗑️ Xóa</button>
+                        ${actionButtons}
                     </div>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
     }
 
     renderPagination(pagination) {
@@ -236,7 +234,7 @@ class OrdersManager {
                     <div class="detail-grid">
                         <div class="detail-item">
                             <label>Tên khách hàng</label>
-                            <div class="value">${order.user_name}</div>
+                            <div class="value">${order.fullname}</div>
                         </div>
                         <div class="detail-item">
                             <label>Email</label>
@@ -384,13 +382,63 @@ class OrdersManager {
         link.click();
     }
 
+    cancelOrder(id) {
+        const reason = prompt('Vui lòng nhập lý do hủy đơn hàng:');
+        if (reason === null) return; // Người dùng bấm Cancel trên hộp thoại prompt
+
+        this.showLoading();
+        fetch(`${this.apiBase}/cancel.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                order_id: id,
+                reason: reason || 'Admin hủy đơn hàng' 
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.showMessage('Đã hủy đơn hàng và hoàn lại tồn kho', 'success');
+                this.loadOrders(this.currentPage);
+                if (this.currentOrder && this.currentOrder.order_id === id) {
+                    this.viewOrder(id); // Reload lại modal nếu đang mở
+                }
+            } else {
+                this.showMessage('Lỗi: ' + data.message, 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            this.showMessage('Lỗi kết nối khi hủy đơn', 'error');
+        })
+        .finally(() => this.hideLoading());
+    }
+
     deleteOrder(id) {
-        if (!confirm('Bạn có chắc chắn muốn xóa đơn hàng này? Hành động này không thể hoàn tác.')) {
+        if (!confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa VĨNH VIỄN đơn hàng này?\n\nHành động này sẽ xóa mọi dữ liệu liên quan và KHÔNG THỂ HOÀN TÁC!')) {
             return;
         }
 
-        // TODO: Implement delete API
-        this.showMessage('Chức năng xóa đang được phát triển', 'warning');
+        this.showLoading();
+        fetch(`${this.apiBase}/delete.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                this.showMessage('Đã xóa đơn hàng thành công', 'success');
+                this.loadOrders(this.currentPage); // Tải lại danh sách
+            } else {
+                this.showMessage('Lỗi: ' + data.message, 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            this.showMessage('Lỗi kết nối khi xóa đơn', 'error');
+        })
+        .finally(() => this.hideLoading());
     }
 
     applyFilters() {

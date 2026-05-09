@@ -34,7 +34,7 @@ try {
     $stmt = $db->prepare("
         SELECT 
             o.*,
-            u.user_name,
+            u.fullname,
             u.email,
             u.phone
         FROM orders o
@@ -110,7 +110,7 @@ function generatePDF($order, $items) {
 
         <div class="order-info">
             <h3>Thông tin khách hàng</h3>
-            <p><strong>Tên:</strong> ' . htmlspecialchars($order['user_name']) . '</p>
+            <p><strong>Tên:</strong> ' . htmlspecialchars($order['fullname']) . '</p>
             <p><strong>Email:</strong> ' . htmlspecialchars($order['email']) . '</p>
             <p><strong>Điện thoại:</strong> ' . htmlspecialchars($order['phone'] ?? 'N/A') . '</p>
             <p><strong>Địa chỉ giao hàng:</strong> ' . htmlspecialchars($order['shipping_address']) . '</p>
@@ -178,7 +178,7 @@ function generateExcel($order, $items) {
 
     $excel = "ĐƠN HÀNG #" . $order['order_id'] . "\n\n";
     $excel .= "THÔNG TIN KHÁCH HÀNG\n";
-    $excel .= "Tên:\t" . $order['user_name'] . "\n";
+    $excel .= "Tên:\t" . $order['fullname'] . "\n";
     $excel .= "Email:\t" . $order['email'] . "\n";
     $excel .= "Điện thoại:\t" . ($order['phone'] ?? 'N/A') . "\n";
     $excel .= "Địa chỉ giao:\t" . $order['shipping_address'] . "\n";

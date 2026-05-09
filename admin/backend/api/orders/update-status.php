@@ -71,6 +71,21 @@ try {
         exit;
     }
 
+    // Ràng buộc luồng trạng thái
+    $allowedTransitions = [
+        'pending'   => ['confirmed', 'cancelled'],
+        'confirmed' => ['shipping', 'cancelled'],
+        'shipping  ' => ['completed', 'cancelled'],
+        'completed' => [], // Đã xong thì không đổi được nữa
+        'cancelled' => []  // Đã hủy thì không đổi được nữa
+    ];
+
+    if (!in_array($newStatus, $allowedTransitions[$oldStatus])) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'message' => "Không thể chuyển trạng thái từ {$oldStatus} sang {$newStatus}"]);
+        exit;
+    }
+
     // Bắt đầu transaction
     $db->beginTransaction();
 
@@ -97,7 +112,21 @@ try {
         ");
         $logStmt->execute([$orderId, $_SESSION['user_id'], $oldStatus, $newStatus, $reason]);
 
-        $db->commit();
+        // Xử lý hoàn tồn kho nếu đơn bị HỦY
+        if ($newStatus === 'cancelled') {
+            // Lấy danh sách sản phẩm của đơn hàng này
+            $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+            $itemsStmt->execute([$orderId]);
+            $orderItems = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Cộng lại số lượng vào bảng products (giả sử cột tên là 'stock_quantity')
+            $restoreStockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE product_id = ?");
+            foreach ($orderItems as $item) {
+                $restoreStockStmt->execute([$item['quantity'], $item['product_id']]);
+            }
+        }
+
+        $db->commit(); // Kết thúc transaction
 
         echo json_encode([
             'success' => true,
