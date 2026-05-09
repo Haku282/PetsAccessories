@@ -126,3 +126,49 @@ if (!$productId) {
         }
     }
 }
+
+$price = 0;
+$discountPrice = 0;
+$finalPrice = 0;
+$thumbnail = '';
+$description = '';
+$specItems = [];
+$stockQuantity = 0;
+
+if (!empty($product)) {
+    $price = (float) ($product['price'] ?? 0);
+    $discountPrice = (float) ($product['discount_price'] ?? 0);
+    $finalPrice = ($discountPrice > 0 && $discountPrice < $price) ? $discountPrice : $price;
+
+    $thumbnail = !empty($product['thumbnail'])
+        ? (string) $product['thumbnail']
+        : '/PetsAccessories/frontend/public/images/default-product.png';
+
+    $description = trim((string) ($product['description'] ?? ''));
+    $specifications = trim((string) ($product['specifications'] ?? ''));
+    $stockQuantity = (int) ($product['stock_quantity'] ?? 0);
+
+    if ($specifications !== '') {
+        if (strpos($specifications, "\n") !== false) {
+            $specItems = array_filter(array_map('trim', explode("\n", $specifications)));
+        } elseif (strpos($specifications, '\\n') !== false) {
+            $specItems = array_filter(array_map('trim', explode('\\n', $specifications)));
+        } elseif (strpos($specifications, ';') !== false) {
+            $specItems = array_filter(array_map('trim', explode(';', $specifications)));
+        } else {
+            $specItems = [$specifications];
+        }
+    }
+}
+
+if (!empty($relatedProducts) && is_array($relatedProducts)) {
+    foreach ($relatedProducts as &$relProd) {
+        $relPrice = (float) ($relProd['price'] ?? 0);
+        $relDiscount = (float) ($relProd['discount_price'] ?? 0);
+        $relProd['final_price'] = ($relDiscount > 0 && $relDiscount < $relPrice) ? $relDiscount : $relPrice;
+        $relProd['thumbnail_resolved'] = !empty($relProd['thumbnail'])
+            ? (string) $relProd['thumbnail']
+            : '/PetsAccessories/frontend/public/images/default-product.png';
+    }
+    unset($relProd);
+}

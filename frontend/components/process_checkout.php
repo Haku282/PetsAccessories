@@ -1,137 +1,5 @@
 <?php
-// Xử lý đơn hàng ở đây
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require_once __DIR__ . '/../../backend/config/database.php';
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /PetsAccessories/frontend/public/index.php');
-    exit;
-}
-
-$name = trim($_POST['customer_name'] ?? '');
-$phone = trim($_POST['customer_phone'] ?? '');
-$emailInput = trim($_POST['customer_email'] ?? '');
-$address = trim($_POST['customer_address'] ?? '');
-$shippingMethod = $_POST['shipping_method'] ?? 'standard';
-$paymentMethod = $_POST['payment_method'] ?? 'cod';
-
-if (empty($name) || empty($phone) || empty($address)) {
-    header('Location: /PetsAccessories/frontend/components/checkout.php?error=' . urlencode('Vui lòng điền đầy đủ thông tin giao hàng'));
-    exit;
-}
-
-if (empty($_SESSION['cart'])) {
-    header('Location: /PetsAccessories/frontend/components/cart.php?error=' . urlencode('Giỏ hàng trống'));
-    exit;
-}
-
-// Các phương thức
-$shippingLabels = [
-    'standard' => 'Giao hàng tiêu chuẩn',
-    'express' => 'Giao hàng nhanh',
-    'pickup' => 'Lấy tại cửa hàng'
-];
-$paymentLabels = [
-    'cod' => 'Thanh toán khi nhận hàng (COD)',
-    'bank_transfer' => 'Chuyển khoản ngân hàng',
-    'ewallet' => 'Ví điện tử'
-];
-
-$shippingLabel = $shippingLabels[$shippingMethod] ?? 'Giao hàng tiêu chuẩn';
-$paymentLabel = $paymentLabels[$paymentMethod] ?? 'COD';
-
-// Lấy thông tin user từ profile
-$userEmail = $emailInput;
-$userPhone = '';
-if (isset($_SESSION['user_id']) && isset($pdo)) {
-    try {
-        $stmt = $pdo->prepare('SELECT email, phone FROM users WHERE user_id = ? LIMIT 1');
-        $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($user) {
-            // Chỉ ghi đè email nếu user không nhập email mới ở form
-            if (empty($userEmail)) {
-                $userEmail = $user['email'];
-            }
-            $userPhone = !empty($user['phone']) ? $user['phone'] : $phone;
-        }
-    } catch (PDOException $e) {}
-}
-
-if (empty($userPhone)) $userPhone = $phone;
-
-// Lấy thông tin sản phẩm để gửi email
-$orderDetails = "";
-$totalValue = 0;
-if (isset($pdo) && !empty($_SESSION['cart'])) {
-    $ids = array_keys($_SESSION['cart']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = $pdo->prepare("SELECT product_id, product_name, price FROM products WHERE product_id IN ($placeholders)");
-    $stmt->execute($ids);
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($products as $p) {
-        $qty = (int)$_SESSION['cart'][$p['product_id']];
-        $price = (float)$p['price'];
-        $subtotal = $qty * $price;
-        $totalValue += $subtotal;
-        $orderDetails .= "- " . $p['product_name'] . " x " . $qty . " = " . number_format($subtotal, 0, ',', '.') . " ₫\n";
-    }
-}
-
-// 1. Gửi Email chi tiết đơn hàng
-if (!empty($userEmail)) {
-    $to = $userEmail;
-    $subject = "Xac nhan don hang tu PetsAccessories";
-    $message = "Chào " . $name . ",\n\n";
-    $message .= "Cảm ơn bạn đã mua hàng tại PetsAccessories.\n\n";
-    $message .= "CHI TIẾT ĐƠN HÀNG:\n";
-    $message .= "----------------------------------------\n";
-    $message .= $orderDetails;
-    $message .= "----------------------------------------\n";
-    $message .= "Tổng tiền hàng (Tạm tính): " . number_format($totalValue, 0, ',', '.') . " ₫\n\n";
-    $message .= "THÔNG TIN GIAO HÀNG:\n";
-    $message .= "- Vận chuyển: $shippingLabel\n";
-    $message .= "- Thanh toán: $paymentLabel\n";
-    $message .= "- Địa chỉ: $address\n\n";
-    $message .= "Trân trọng,\nĐội ngũ PetsAccessories.";
-    
-    $headers = "From: noreply@petsaccessories.com\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    @mail($to, $subject, $message, $headers);
-}
-
-// 2. Gửi SMS xác nhận
-if (!empty($userPhone)) {
-    // Đoạn code dưới đây mô phỏng gọi API gửi SMS SMSGateway/Twilio
-    // $smsMessage = "PetsAccessories: Đon hang cua ban da duoc dat thanh cong. Tong: " . number_format($totalValue, 0, ',', '.') . " ₫";
-    // send_sms($userPhone, $smsMessage);
-}
-
-// Tạo thông báo hiển thị cho user
-$contactMethods = [];
-if (!empty($userEmail)) $contactMethods[] = "Email (<b>" . htmlspecialchars($userEmail) . "</b>)";
-if (!empty($userPhone)) $contactMethods[] = "SMS (<b>" . htmlspecialchars($userPhone) . "</b>)";
-
-if (count($contactMethods) > 0) {
-    $notificationMessage = "Một biểu mẫu chi tiết đơn hàng đã được gửi tới " . implode(" và ", $contactMethods) . ".";
-} else {
-    $notificationMessage = "Đơn hàng của bạn đã được ghi nhận trên hệ thống.";
-}
-
-// TODO: Thêm logic lưu đơn hàng vào database (bảng orders, order_details, trừ tồn kho đã làm trong cart.php nên có thể cần flow đặt biệt hơn)
-
-// Xóa giỏ hàng sau khi đặt thành công
-$_SESSION['cart'] = [];
-
-if (isset($_POST['redirect_to_index']) && $_POST['redirect_to_index'] == '1') {
-    header('Location: /PetsAccessories/frontend/public/index.php');
-    exit;
-}
-
+require_once __DIR__ . '/../../backend/src/process_checkout.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -155,6 +23,34 @@ if (isset($_POST['redirect_to_index']) && $_POST['redirect_to_index'] == '1') {
         <p style="margin-bottom: 30px; color: #155724; background: #d4edda; padding: 12px; border-radius: 8px;">
             <?php echo $notificationMessage; ?>
         </p>
+
+        <?php if (!empty($createdOrderId)): ?>
+            <p style="margin-bottom: 15px; color: #555;">
+                Mã đơn hàng của bạn: <strong>#<?php echo (int) $createdOrderId; ?></strong>
+                
+                <a href="/PetsAccessories/frontend/components/order_detail.php?id=<?php echo (int) $createdOrderId; ?>" style="margin-left: 10px; color: #007bff; text-decoration: none; font-weight: 600;">Xem chi tiết</a>
+            </p>
+        <?php endif; ?>
+
+        <?php if (!empty($lineItems)): ?>
+            <div style="margin: 0 auto 25px; max-width: 520px; text-align: left; background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 14px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Danh sách sản phẩm</h3>
+                <?php foreach ($lineItems as $it): ?>
+                    <div style="display:flex; gap:10px; align-items:center; padding: 10px 0; border-bottom: 1px dashed #eee;">
+                        <img src="<?php echo htmlspecialchars((string) $it['thumbnail']); ?>" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:8px;">
+                        <div style="flex:1;">
+                            <div style="font-weight: 700; color:#333;"><?php echo htmlspecialchars((string) $it['product_name']); ?></div>
+                            <div style="color:#666; font-size: 13px;">SL: <?php echo (int) $it['quantity']; ?> · Đơn giá: <?php echo number_format((float) $it['unit_price'], 0, ',', '.'); ?> đ</div>
+                        </div>
+                        <div style="font-weight: 800; color:#111;"><?php echo number_format((float) $it['line_total'], 0, ',', '.'); ?> đ</div>
+                    </div>
+                <?php endforeach; ?>
+                <div style="display:flex; justify-content: space-between; padding-top: 12px; font-weight: 800;">
+                    <span>Tạm tính</span>
+                    <span><?php echo number_format((float) $totalValue, 0, ',', '.'); ?> đ</span>
+                </div>
+            </div>
+        <?php endif; ?>
         
         <a href="/PetsAccessories/frontend/public/index.php" class="cart-btn" style="display: inline-block;">Tiếp tục mua sắm</a>
     </main>
