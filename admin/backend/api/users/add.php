@@ -5,7 +5,11 @@
  */
 
 header('Content-Type: application/json');
-session_start();
+
+// Chỉ gọi session_start() nếu session chưa được khởi tạo
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Kiểm tra quyền admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
@@ -46,8 +50,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 6 ký tự']);
         exit;
     }
-
-    $db = $pdo;
 
     // Kiểm tra username đã tồn tại
     $stmt = $db->prepare("SELECT user_id FROM users WHERE username = ?");
