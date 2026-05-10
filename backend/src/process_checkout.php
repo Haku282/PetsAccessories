@@ -11,17 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$name = trim($_POST['customer_name'] ?? '');
-$phone = trim($_POST['customer_phone'] ?? '');
+$inputName = trim($_POST['customer_name'] ?? '');
+$inputPhone = trim($_POST['customer_phone'] ?? '');
 $emailInput = trim($_POST['customer_email'] ?? '');
-$address = trim($_POST['customer_address'] ?? '');
+$inputAddress = trim($_POST['customer_address'] ?? '');
 $shippingMethod = $_POST['shipping_method'] ?? 'standard';
 $paymentMethod = $_POST['payment_method'] ?? 'cod';
-
-if (empty($name) || empty($phone) || empty($address)) {
-    header('Location: /PetsAccessories/frontend/components/checkout.php?error=' . urlencode('Vui lòng điền đầy đủ thông tin giao hàng'));
-    exit;
-}
 
 if (empty($_SESSION['cart'])) {
     header('Location: /PetsAccessories/frontend/components/cart.php?error=' . urlencode('Giỏ hàng trống'));
@@ -42,26 +37,53 @@ $paymentLabels = [
 $shippingLabel = $shippingLabels[$shippingMethod] ?? 'Giao hàng tiêu chuẩn';
 $paymentLabel = $paymentLabels[$paymentMethod] ?? 'COD';
 
-// Lấy thông tin user từ profile
+// Lấy thông tin user từ profile (ưu tiên dữ liệu người dùng đã đăng nhập)
 $userEmail = $emailInput;
-$userPhone = '';
+$userPhone = $inputPhone;
+$userName = $inputName;
+$userAddress = $inputAddress;
 if (isset($_SESSION['user_id']) && isset($pdo)) {
     try {
-        $stmt = $pdo->prepare('SELECT email, phone FROM users WHERE user_id = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT fullname, email, phone, address FROM users WHERE user_id = ? LIMIT 1');
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user) {
-            if (empty($userEmail)) {
+            if (empty($userName) && !empty($user['fullname'])) {
+                $userName = $user['fullname'];
+            }
+            if (empty($userEmail) && !empty($user['email'])) {
                 $userEmail = $user['email'];
             }
-            $userPhone = !empty($user['phone']) ? $user['phone'] : $phone;
+            if (empty($userPhone) && !empty($user['phone'])) {
+                $userPhone = $user['phone'];
+            }
+            if (empty($userAddress) && !empty($user['address'])) {
+                $userAddress = $user['address'];
+            }
+
+            if ($inputName !== '' || $inputPhone !== '' || $inputAddress !== '') {
+                $updateName = $inputName !== '' ? $inputName : ($user['fullname'] ?? '');
+                $updatePhone = $inputPhone !== '' ? $inputPhone : ($user['phone'] ?? '');
+                $updateAddress = $inputAddress !== '' ? $inputAddress : ($user['address'] ?? '');
+
+                $updateStmt = $pdo->prepare('UPDATE users SET fullname = ?, phone = ?, address = ? WHERE user_id = ?');
+                $updateStmt->execute([$updateName, $updatePhone, $updateAddress, $_SESSION['user_id']]);
+                if ($updateName !== '') {
+                    $_SESSION['user_name'] = $updateName;
+                }
+            }
         }
     } catch (PDOException $e) {
     }
 }
 
-if (empty($userPhone)) {
-    $userPhone = $phone;
+$name = $userName;
+$phone = $userPhone;
+$address = $userAddress;
+
+if (empty($name) || empty($phone) || empty($address)) {
+    header('Location: /PetsAccessories/frontend/components/checkout.php?error=' . urlencode('Vui lòng điền đầy đủ thông tin giao hàng'));
+    exit;
 }
 
 // Lấy thông tin sản phẩm để gửi email + để lưu order_items
@@ -97,27 +119,110 @@ if (isset($pdo) && !empty($_SESSION['cart'])) {
     }
 }
 
-// 1. Gửi Email chi tiết đơn hàng
+// ==========================================
+// 1. Gửi Email chi tiết đơn hàng (Dùng PHPMailer & HTML)
+// ==========================================
 if (!empty($userEmail)) {
-    $to = $userEmail;
-    $subject = 'Xac nhan don hang tu PetsAccessories';
-    $message = 'Chào ' . $name . ",\n\n";
-    $message .= "Cảm ơn bạn đã mua hàng tại PetsAccessories.\n\n";
-    $message .= "CHI TIẾT ĐƠN HÀNG:\n";
-    $message .= "----------------------------------------\n";
-    $message .= $orderDetails;
-    $message .= "----------------------------------------\n";
-    $message .= 'Tổng tiền hàng (Tạm tính): ' . number_format($totalValue, 0, ',', '.') . " ₫\n\n";
-    $message .= "THÔNG TIN GIAO HÀNG:\n";
-    $message .= "- Vận chuyển: $shippingLabel\n";
-    $message .= "- Thanh toán: $paymentLabel\n";
-    $message .= "- Địa chỉ: $address\n\n";
-    $message .= "Trân trọng,\nĐội ngũ PetsAccessories.";
+    // Gọi file autoload của Composer (điều chỉnh đường dẫn tới thư mục vendor cho đúng với cấu trúc của bạn)
+    require_once __DIR__ . '/../../vendor/autoload.php';
 
-    $headers = "From: noreply@petsaccessories.com\r\n";
-    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    @mail($to, $subject, $message, $headers);
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+
+    try {
+        // Cấu hình Server SMTP
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'gaming12882000@gmail.com'; // ĐIỀN EMAIL CỦA BẠN
+        $mail->Password   = 'obkz gjkr zqtt rasr'; // ĐIỀN MẬT KHẨU ỨNG DỤNG
+        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+        $mail->CharSet    = 'UTF-8';
+
+        // Người gửi và người nhận
+        $mail->setFrom('gaming12882000@gmail.com', 'Pets Accessories');
+        $mail->addAddress($userEmail, $name);
+
+        // Tạo danh sách sản phẩm dạng bảng HTML từ mảng $lineItems
+        $htmlOrderRows = '';
+        foreach ($lineItems as $item) {
+            $priceFormatted = number_format($item['unit_price'], 0, ',', '.');
+            $totalFormatted = number_format($item['line_total'], 0, ',', '.');
+            $htmlOrderRows .= "
+                <tr>
+                    <td style='padding: 10px; border-bottom: 1px solid #eeeeee;'>{$item['product_name']}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #eeeeee; text-align: center;'>{$item['quantity']}</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right;'>{$priceFormatted} ₫</td>
+                    <td style='padding: 10px; border-bottom: 1px solid #eeeeee; text-align: right; font-weight: bold;'>{$totalFormatted} ₫</td>
+                </tr>
+            ";
+        }
+
+        $totalValueFormatted = number_format($totalValue, 0, ',', '.');
+
+        // Nội dung Email HTML
+        $mail->isHTML(true);
+        $mail->Subject = 'Xác nhận đơn hàng từ PetsAccessories';
+        
+        $mail->Body = "
+        <div style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;'>
+            <div style='background-color: #4CAF50; color: white; padding: 20px; text-align: center;'>
+                <h2 style='margin: 0;'>Cảm ơn bạn đã đặt hàng!</h2>
+            </div>
+            
+            <div style='padding: 20px;'>
+                <p>Chào <b>$name</b>,</p>
+                <p>Đơn hàng của bạn đã được ghi nhận thành công tại hệ thống của <b>PetsAccessories</b>. Dưới đây là chi tiết đơn hàng của bạn:</p>
+                
+                <h3 style='border-bottom: 2px solid #4CAF50; padding-bottom: 5px; color: #4CAF50;'>Thông Tin Giao Hàng</h3>
+                <ul style='list-style: none; padding: 0;'>
+                    <li><b>Người nhận:</b> $name</li>
+                    <li><b>Số điện thoại:</b> $phone</li>
+                    <li><b>Địa chỉ:</b> $address</li>
+                    <li><b>Vận chuyển:</b> $shippingLabel</li>
+                    <li><b>Thanh toán:</b> $paymentLabel</li>
+                </ul>
+
+                <h3 style='border-bottom: 2px solid #4CAF50; padding-bottom: 5px; color: #4CAF50;'>Chi Tiết Sản Phẩm</h3>
+                <table style='width: 100%; border-collapse: collapse; margin-top: 10px;'>
+                    <thead>
+                        <tr style='background-color: #f9f9f9;'>
+                            <th style='padding: 10px; text-align: left; border-bottom: 2px solid #ddd;'>Sản phẩm</th>
+                            <th style='padding: 10px; text-align: center; border-bottom: 2px solid #ddd;'>SL</th>
+                            <th style='padding: 10px; text-align: right; border-bottom: 2px solid #ddd;'>Đơn giá</th>
+                            <th style='padding: 10px; text-align: right; border-bottom: 2px solid #ddd;'>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $htmlOrderRows
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan='3' style='padding: 15px 10px; text-align: right; font-size: 16px;'><b>Tổng cộng:</b></td>
+                            <td style='padding: 15px 10px; text-align: right; font-size: 18px; color: #E53935; font-weight: bold;'>$totalValueFormatted ₫</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                <p style='margin-top: 20px; text-align: center; font-size: 14px; color: #777;'>
+                    Nếu có bất kỳ thắc mắc nào, xin vui lòng liên hệ với chúng tôi qua email này.<br>
+                    Trân trọng,<br>
+                    <b>Đội ngũ PetsAccessories</b>
+                </p>
+            </div>
+        </div>";
+
+        // Bản text thuần cho các ứng dụng mail không hỗ trợ HTML
+        $mail->AltBody = "Chào $name,\n\nCảm ơn bạn đã mua hàng tại PetsAccessories.\n\nCHI TIẾT ĐƠN HÀNG:\n$orderDetails\nTổng tiền: $totalValueFormatted ₫\n\nTHÔNG TIN GIAO HÀNG:\n- Vận chuyển: $shippingLabel\n- Thanh toán: $paymentLabel\n- Địa chỉ: $address\n\nTrân trọng,\nĐội ngũ PetsAccessories.";
+
+        $mail->send();
+    } catch (\Exception $e) {
+        error_log("Lỗi gửi email xác nhận đơn hàng: {$mail->ErrorInfo}");
+    }
 }
+// ==========================================
+// KẾT THÚC PHẦN GỬI EMAIL
+// ==========================================
 
 // 2. Gửi SMS xác nhận (mô phỏng)
 if (!empty($userPhone)) {

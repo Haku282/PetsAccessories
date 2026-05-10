@@ -114,7 +114,23 @@ class OrdersManager {
             return `
             <tr>
                 <td>#${order.order_id}</td>
-                <td>${this.formatDate(order.created_at)}</td>
+                <td>
+                    <div style="font-weight: 500;">${order.username || order.fullname || '-'}</div>
+                    <div style="font-size: 12px; color: #666;">${order.phone || ''}</div>
+                </td>
+                <td>${order.item_count} SP</td>
+                <td style="font-weight: bold; color: #ff6b6b;">${this.formatCurrency(order.total_price)}</td>
+                <td>
+                    <span class="status-badge" style="background-color: ${order.order_status_color}20; color: ${order.order_status_color};">
+                        ${order.order_status_label}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge" style="background-color: ${order.payment_status_color}20; color: ${order.payment_status_color};">
+                        ${order.payment_status_label}
+                    </span>
+                </td>
+                <td>${this.formatDateTime(order.created_at)}</td>
                 <td>
                     <div class="actions-cell">
                         ${actionButtons}
@@ -156,23 +172,34 @@ class OrdersManager {
     }
 
     viewOrder(id) {
-        this.showLoading();
+        // Hiển thị loading trong modal thay vì phá hủy bảng
+        this.openModal();
+        const modalBody = document.querySelector('.modal-body');
+        if (modalBody) {
+            modalBody.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 15px;">Đang tải thông tin chi tiết...</p>
+                </div>
+            `;
+        }
+        
         fetch(`${this.apiBase}/get.php?id=${id}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     this.currentOrder = data.data;
                     this.renderOrderDetail(data.data);
-                    this.openModal();
                 } else {
+                    this.closeModal();
                     this.showMessage('Lỗi: ' + data.message, 'error');
                 }
             })
             .catch(err => {
                 console.error('Error:', err);
+                this.closeModal();
                 this.showMessage('Lỗi tải dữ liệu', 'error');
-            })
-            .finally(() => this.hideLoading());
+            });
     }
 
     renderOrderDetail(order) {
