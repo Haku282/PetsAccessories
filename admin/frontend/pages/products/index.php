@@ -40,9 +40,7 @@ require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
                 <li><a href="/PetsAccessories/admin/frontend/pages/categories/index.php"><span>📁</span> Danh Mục</a></li>
                 <li><a href="/PetsAccessories/admin/frontend/pages/brands/index.php"><span>🏷️</span> Thương Hiệu</a></li>
                 <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php"><span>👥</span> Người Dùng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/clients/index.php" class="active"><span>👥</span> Khách Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/coupons.php"><span>🎟️</span> Mã Giảm Giá</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/banners/index.php" class="active"><span>🖼️</span> Banner</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/coupons/index.php"><span>🎟️</span> Mã Giảm Giá</a></li>
             </ul>
         </div>
 
@@ -90,6 +88,15 @@ require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
                             <option value="active">Đang bán</option>
                             <option value="inactive">Ngừng kinh doanh</option>
                             <option value="out_of_stock">Hết hàng</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discountFilter">🏷️ Giá Khuyến Mãi</label>
+                        <select id="discountFilter">
+                            <option value="">-- Tất cả --</option>
+                            <option value="1">Có khuyến mãi</option>
+                            <option value="0">Không khuyến mãi</option>
                         </select>
                     </div>
                 </div>

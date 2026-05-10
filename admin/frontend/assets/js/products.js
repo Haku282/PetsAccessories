@@ -11,6 +11,7 @@ class ProductsManager {
             category_id: '',
             status: '',
             brand_id: '',
+            discount: '',
             search: ''
         };
         this.categories = [];
@@ -154,6 +155,7 @@ class ProductsManager {
             category_id: document.getElementById('categoryFilter')?.value || '',
             status: document.getElementById('statusFilter')?.value || '',
             brand_id: document.getElementById('brandFilter')?.value || '',
+            discount: document.getElementById('discountFilter')?.value || '',
             search: document.getElementById('searchInput')?.value || ''
         };
         this.currentPage = 1;
@@ -164,11 +166,13 @@ class ProductsManager {
         document.getElementById('categoryFilter').value = '';
         document.getElementById('statusFilter').value = '';
         document.getElementById('brandFilter').value = '';
+        document.getElementById('discountFilter').value = '';
         document.getElementById('searchInput').value = '';
         this.currentFilters = {
             category_id: '',
             status: '',
             brand_id: '',
+            discount: '',
             search: ''
         };
         this.currentPage = 1;

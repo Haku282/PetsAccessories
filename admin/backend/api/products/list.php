@@ -29,6 +29,7 @@ try {
     $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
     $status = isset($_GET['status']) ? $_GET['status'] : '';
     $brand_id = isset($_GET['brand_id']) ? $_GET['brand_id'] : '';
+    $discount = isset($_GET['discount']) ? trim((string)$_GET['discount']) : '';
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
@@ -57,6 +58,14 @@ try {
     if (!empty($brand_id)) {
         $sql .= " AND p.brand_id = ?";
         $params[] = (int)$brand_id;
+    }
+
+    if ($discount !== '') {
+        if ($discount === '1') {
+            $sql .= " AND p.discount_price > 0 AND p.discount_price < p.price";
+        } elseif ($discount === '0') {
+            $sql .= " AND (p.discount_price IS NULL OR p.discount_price = 0 OR p.discount_price >= p.price)";
+        }
     }
 
     if (!empty($search)) {

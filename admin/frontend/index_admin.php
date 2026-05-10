@@ -10,37 +10,30 @@ require_once __DIR__ . '/../../backend/config/database.php';
 
 /** @var PDO $pdo */
 $db = $pdo;
-$stats = [];
+$stats = [
+    'total_orders' => 0,
+    'total_products' => 0,
+    'total_customers' => 0,
+    'total_revenue' => 0,
+    'pending_orders' => 0,
+    'out_of_stock' => 0,
+];
 
-// Lấy thống kê cơ bản
 if ($db instanceof PDO) {
     try {
-        // Tổng số đơn hàng
-        $totalOrdersStmt = $db->query("SELECT COUNT(*) as total FROM orders");
-        $stats['total_orders'] = $totalOrdersStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-        // Tổng số sản phẩm
-        $totalProductsStmt = $db->query("SELECT COUNT(*) as total FROM products");
-        $stats['total_products'] = $totalProductsStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-        // Tổng số khách hàng
-        $totalCustomersStmt = $db->query("SELECT COUNT(*) as total FROM users WHERE role = 'customer'");
-        $stats['total_customers'] = $totalCustomersStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-        // Tổng doanh thu (từ các đơn hàng đã hoàn thành)
-        $totalRevenueStmt = $db->query("SELECT COALESCE(SUM(total_price), 0) as total FROM orders WHERE order_status = 'completed'");
-        $stats['total_revenue'] = $totalRevenueStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-        // Số đơn hàng chưa xác nhận
-        $pendingOrdersStmt = $db->query("SELECT COUNT(*) as total FROM orders WHERE order_status = 'pending'");
-        $stats['pending_orders'] = $pendingOrdersStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-        // Sản phẩm hết hàng
-        $outOfStockStmt = $db->query("SELECT COUNT(*) as total FROM products WHERE stock_quantity = 0");
-        $stats['out_of_stock'] = $outOfStockStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
+        $apiStats = $db->query("SELECT 
+            (SELECT COUNT(*) FROM orders) AS total_orders,
+            (SELECT COUNT(*) FROM products) AS total_products,
+            (SELECT COUNT(*) FROM users WHERE role = 'customer') AS total_customers,
+            (SELECT COALESCE(SUM(total_price),0) FROM orders WHERE order_status = 'completed') AS total_revenue,
+            (SELECT COUNT(*) FROM orders WHERE order_status = 'pending') AS pending_orders,
+            (SELECT COUNT(*) FROM products WHERE stock_quantity = 0) AS out_of_stock");
+        $row = $apiStats->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $stats = array_merge($stats, $row);
+        }
     } catch (Exception $e) {
-        error_log("Error fetching stats: " . $e->getMessage());
+        error_log('Error fetching stats: ' . $e->getMessage());
     }
 }
 ?>
@@ -75,10 +68,14 @@ if ($db instanceof PDO) {
                 <li><a href="/PetsAccessories/admin/frontend/pages/orders/index.php"><span>🛒</span> Đơn Hàng</a></li>
                 <li><a href="/PetsAccessories/admin/frontend/pages/categories/index.php"><span>📁</span> Danh Mục</a></li>
                 <li><a href="/PetsAccessories/admin/frontend/pages/brands/index.php"><span>🏷️</span> Thương Hiệu</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php" class="active"><span>👥</span> Người Dùng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/clients/index.php" class="active"><span>👥</span> Khách Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/coupons.php"><span>🎟️</span> Mã Giảm Giá</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/banners/index.php" class="active"><span>🖼️</span> Banner</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php"><span>👥</span> Người Dùng</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/clients/index.php"><span>👥</span> Khách Hàng</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/coupons/index.php"><span>🎟️</span> Mã Giảm Giá</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/reviews/index.php"><span>⭐</span> Đánh Giá</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/shipping/index.php"><span>🚚</span> Giao Hàng</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/cms_pages/index.php"><span>📝</span> CMS</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/cms_posts/index.php"><span>📰</span> Bài Viết</a></li>
+                <li><a href="/PetsAccessories/admin/frontend/pages/banners/index.php"><span>🖼️</span> Banner</a></li>
             </ul>
         </div>
 
