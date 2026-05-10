@@ -93,14 +93,6 @@
     $products = $featuredProducts;
     require __DIR__ . '/../components/ProductGrid.php';
 
-    $sectionTitle = "Sản phẩm Mới";
-    $products = $newProducts;
-    require __DIR__ . '/../components/ProductGrid.php';
-
-    $sectionTitle = "Khuyến Mãi Khủng";
-    $products = $saleProducts;
-    require __DIR__ . '/../components/ProductGrid.php';
-
     // Tin tức & Thông tin
     require_once __DIR__ . '/../layout/Footer.php';
     ?>

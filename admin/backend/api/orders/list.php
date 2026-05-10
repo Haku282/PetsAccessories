@@ -62,9 +62,9 @@ try {
     }
 
     if (!empty($search)) {
-        $whereSql .= " AND (u.username LIKE ? OR u.email LIKE ? OR o.order_id = ?)";
+        $whereSql .= " AND (u.username LIKE ? OR u.email LIKE ? OR u.phone LIKE ? OR o.shipping_address LIKE ? OR o.order_id = ?)";
         $searchTerm = "%$search%";
-        array_push($params, $searchTerm, $searchTerm, (int)$search);
+        array_push($params, $searchTerm, $searchTerm, $searchTerm, $searchTerm, (int)$search);
     }
 
     // 2. Query Đếm tổng số bản ghi (Không cần JOIN order_items cho nhẹ)
@@ -80,7 +80,7 @@ try {
     // 3. Query Lấy danh sách đơn hàng
     $sql = "
         SELECT 
-            o.order_id, o.user_id, u.username, u.email, o.total_price, 
+            o.order_id, o.user_id, u.username, u.email, u.phone, o.shipping_address, o.total_price, 
             o.shipping_fee, o.discount_amount, o.order_status, 
             o.payment_status, o.payment_method, o.shipping_method, 
             o.created_at, o.updated_at,
@@ -111,6 +111,8 @@ try {
             'total_price' => (float)$order['total_price'],
             'shipping_fee' => (float)$order['shipping_fee'],
             'discount_amount' => (float)$order['discount_amount'],
+            'phone' => $order['phone'],
+            'shipping_address' => $order['shipping_address'],
             'order_status' => $order['order_status'],
             'order_status_label' => $statusInfo['label'],
             'order_status_color' => $statusInfo['color'],

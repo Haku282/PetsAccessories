@@ -56,10 +56,9 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 <input type="text" name="q" placeholder="Tìm kiếm nhanh sản phẩm..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
 
                 <button type="submit">Tìm kiếm</button>
-                <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">🔍</button>
+                <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">💵</button>
 
                 <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo isset($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="">Mặc định</option>
                     <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
                     <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
                 </select>
@@ -102,7 +101,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     <nav class="primary-nav">
         <ul class="primary-menu">
             <li class="has-mega">
-                <a href="#">Chó</a>
+                <a href="#">Boss</a>
 
                 <div class="mega-dropdown">
                     <div class="mega-inner">
@@ -135,12 +134,8 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                     </div>
                 </div> <!-- /mega-dropdown -->
             </li>
-
-            <li><a href="/PetsAccessories/frontend/components/category.php?id=2">Mèo</a></li>
-            <li><a href="/PetsAccessories/frontend/components/category.php?id=3">Thiết bị thông minh</a></li>
-            <li><a href="/PetsAccessories/frontend/components/category.php?id=4">Hàng mới về</a></li>
-            <li><a href="/PetsAccessories/frontend/components/category.php?id=5">Thương hiệu</a></li>
-            <li><a href="/PetsAccessories/frontend/components/category.php?id=6">Pagazine chăm Boss</a></li>
+            <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng mới về</a></li>
+            <li><a href="/PetsAccessories/frontend/components/brands.php">Thương hiệu</a></li>
             <li><a href="/PetsAccessories/frontend/components/NewsSection.php">News và Khuyến Mãi</a></li>
         </ul>
     </nav>

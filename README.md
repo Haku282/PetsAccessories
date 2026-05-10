@@ -4,4 +4,4 @@ http://localhost/PetsAccessories/frontend/public/index.php
 
 http://localhost/phpmyadmin/
 
- Test quy trình đặt hàng tới bước hoàn tất. Lưu ý hàm mail() của PHP có thể cần cài đặt thêm như Sendmail, Postfix, SMTP nếu chạy trên Localhost.
+Install PHPMailer into your project via Composer: composer require phpmailer/phpmailer
