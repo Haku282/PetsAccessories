@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
     <?php
     // Bật session nếu bạn có xử lý giỏ hàng/yêu thích ở component này
     if (session_status() === PHP_SESSION_NONE) {
@@ -102,7 +102,7 @@
         <?php endif; ?>
     </div>
 
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
 
 </html>

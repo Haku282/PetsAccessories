@@ -14,7 +14,7 @@ require_once __DIR__ . '/../../backend/src/forgot_password.php';
 
 <body>
 
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
     <main class="auth-container">
         <div class="auth-box">
@@ -42,7 +42,7 @@ require_once __DIR__ . '/../../backend/src/forgot_password.php';
         </div>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 
 </body>
 

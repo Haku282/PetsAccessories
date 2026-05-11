@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../backend/src/NewsSection.php';
+require_once __DIR__ . '/../../backend/src/news_section.php';
 
 $scriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? '';
 $isEmbedded = false;
@@ -21,7 +21,7 @@ if (!$isEmbedded):
 
 <body>
 
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
 <?php endif; ?>
 
     <section class="news-section">
@@ -68,7 +68,7 @@ if (!$isEmbedded):
     </section>
 
 <?php if (!$isEmbedded): ?>
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
 
 </html>

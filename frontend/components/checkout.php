@@ -4,6 +4,10 @@ require_once __DIR__ . '/../../backend/src/cart.php';
 $prefillName = '';
 $prefillPhone = '';
 $prefillAddress = '';
+$prefillSpecificAddress = '';
+$prefillProv = '';
+$prefillDist = '';
+$prefillWard = '';
 $prefillEmail = '';
 
 if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
@@ -17,9 +21,35 @@ if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
             $prefillPhone = (string) ($profile['phone'] ?? '');
             $prefillAddress = (string) ($profile['address'] ?? '');
             $prefillEmail = (string) ($profile['email'] ?? '');
+            
+            if ($prefillAddress) {
+                $parts = array_map('trim', explode(',', $prefillAddress));
+                if (count($parts) >= 4) {
+                    $prefillProv = array_pop($parts);
+                    $prefillDist = array_pop($parts);
+                    $prefillWard = array_pop($parts);
+                    $prefillSpecificAddress = implode(', ', $parts);
+                } elseif (count($parts) === 3) {
+                    $prefillProv = $parts[2];
+                    $prefillDist = $parts[1];
+                    $prefillWard = $parts[0];
+                } else {
+                    $prefillSpecificAddress = $prefillAddress;
+                }
+            }
         }
     } catch (PDOException $e) {
         // Ignore profile prefill errors
+    }
+}
+
+$shippingZones = [];
+if (isset($db) && ($db instanceof PDO)) {
+    try {
+        $szStmt = $db->query("SELECT zone_name, shipping_fee, estimated_delivery FROM shipping_zones WHERE status = 1");
+        $shippingZones = $szStmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Ignore errors
     }
 }
 ?>
@@ -31,10 +61,22 @@ if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thanh toán - PetsAccessories</title>
     <link rel="stylesheet" href="../layout/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container .select2-selection--single {
+            height: 45px;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 43px;
+        }
+    </style>
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
     <main class="cart-page">
         <div class="cart-container">
@@ -114,19 +156,37 @@ if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
                                         
                                         <div class="form-group" style="margin-bottom: 18px;">
                                             <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Họ và tên <span style="color:red;">*</span></label>
-                                            <input type="text" name="customer_name" value="<?php echo htmlspecialchars($prefillName); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
+                                            <input type="text" name="fullname" value="<?php echo htmlspecialchars($prefillName); ?>" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
                                         </div>
                                         <div class="form-group" style="margin-bottom: 18px;">
                                             <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Số điện thoại <span style="color:red;">*</span></label>
-                                            <input type="tel" name="customer_phone" value="<?php echo htmlspecialchars($prefillPhone); ?>" required pattern="[0-9]{10,11}" title="Vui lòng nhập 10-11 số" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
+                                            <input type="tel" name="phone" value="<?php echo htmlspecialchars($prefillPhone); ?>" required pattern="[0-9]{10,11}" title="Vui lòng nhập 10-11 số" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
                                         </div>
                                         <div class="form-group" style="margin-bottom: 18px;">
                                             <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Email (để nhận hóa đơn)</label>
-                                            <input type="email" name="customer_email" value="<?php echo htmlspecialchars($prefillEmail); ?>" placeholder="Nhập email của bạn" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
+                                            <input type="email" name="email" value="<?php echo htmlspecialchars($prefillEmail); ?>" placeholder="Nhập email của bạn" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
                                         </div>
                                         <div class="form-group" style="margin-bottom: 18px;">
-                                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Địa chỉ giao hàng <span style="color:red;">*</span></label>
-                                            <textarea name="customer_address" required rows="3" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'"><?php echo htmlspecialchars($prefillAddress); ?></textarea>
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Tỉnh/Thành phố <span style="color:red;">*</span></label>
+                                            <select name="province" id="province" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s; background: #fff;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="">Chọn Tỉnh/Thành phố</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 18px;">
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Quận/Huyện <span style="color:red;">*</span></label>
+                                            <select name="district" id="district" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s; background: #fff;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="">Chọn Quận/Huyện</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 18px;">
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Phường/Xã <span style="color:red;">*</span></label>
+                                            <select name="ward" id="ward" required style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s; background: #fff;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'">
+                                                <option value="">Chọn Phường/Xã</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 18px;">
+                                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #334155;">Địa chỉ cụ thể (Số nhà, tên đường) <span style="color:red;">*</span></label>
+                                            <textarea name="address" required rows="2" style="width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 15px; transition: border-color 0.3s;" onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#cbd5e1'"><?php echo htmlspecialchars($prefillSpecificAddress); ?></textarea>
                                         </div>
                                     </div>
 
@@ -178,12 +238,12 @@ if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
                             <strong><?php echo number_format((float) $tax, 0, ',', '.'); ?> đ</strong>
                         </div>
                         <div class="cart-summary__row">
-                            <span>Phí vận chuyển (tạm tính)</span>
-                            <strong><?php echo number_format((float) $shipping, 0, ',', '.'); ?> đ</strong>
+                            <span>Phí vận chuyển (<span id="shipping-zone-name">tạm tính</span>)</span>
+                            <strong id="shipping-fee-display"><?php echo number_format((float) $shipping, 0, ',', '.'); ?> đ</strong>
                         </div>
                         <div class="cart-summary__row cart-summary__row--total">
                             <span>Tổng cộng</span>
-                            <strong><?php echo number_format((float) $estimatedTotal, 0, ',', '.'); ?> đ</strong>
+                            <strong id="total-price-display"><?php echo number_format((float) $estimatedTotal, 0, ',', '.'); ?> đ</strong>
                         </div>
 
                         <p class="cart-summary__hint">Các giá trị trên là tạm tính và có thể thay đổi khi thanh toán.</p>
@@ -198,7 +258,7 @@ if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
         </div>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 
     <!-- Modal QR Code -->
     <div id="qr-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">
@@ -213,8 +273,148 @@ if (isset($_SESSION['user_id']) && ($db instanceof PDO)) {
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         (function () {
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+
+            // Initialize Select2
+            $('#province').select2({ placeholder: "Chọn Tỉnh/Thành phố" });
+            $('#district').select2({ placeholder: "Chọn Quận/Huyện" });
+            $('#ward').select2({ placeholder: "Chọn Phường/Xã" });
+
+            const prefillProv = <?php echo json_encode($prefillProv ?? ''); ?>;
+            const prefillDist = <?php echo json_encode($prefillDist ?? ''); ?>;
+            const prefillWard = <?php echo json_encode($prefillWard ?? ''); ?>;
+
+            // Fetch provinces
+            const cartSubtotal = <?php echo json_encode($subtotal); ?>;
+            const cartTax = <?php echo json_encode($tax); ?>;
+            const freeShippingThreshold = <?php echo json_encode($freeShippingThreshold ?? 500000); ?>;
+            const shippingZonesData = <?php echo json_encode($shippingZones); ?>;
+
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+            }
+
+            function updateShippingFee(provinceName) {
+                let fee = 30000;
+                let zoneNameMatch = 'tạm tính';
+                if (shippingZonesData && shippingZonesData.length > 0) {
+                    let matched = shippingZonesData.find(z => provinceName.includes(z.zone_name) || z.zone_name.includes(provinceName));
+                    if (!matched) {
+                        matched = shippingZonesData.find(z => z.zone_name.toLowerCase() === 'toàn quốc');
+                    }
+                    if (matched) {
+                        fee = parseFloat(matched.shipping_fee);
+                        zoneNameMatch = matched.zone_name;
+                    }
+                }
+                
+                if (cartSubtotal >= freeShippingThreshold) {
+                    fee = 0;
+                    zoneNameMatch = 'Miễn phí vận chuyển';
+                }
+
+                document.getElementById('shipping-zone-name').textContent = zoneNameMatch;
+                document.getElementById('shipping-fee-display').textContent = formatCurrency(fee);
+                const total = cartSubtotal + cartTax + fee;
+                document.getElementById('total-price-display').textContent = formatCurrency(total);
+            }
+
+            fetch('https://provinces.open-api.vn/api/?depth=3')
+                .then(res => res.json())
+                .then(data => {
+                    let provinces = data;
+                    provinces.forEach(p => {
+                        let option = document.createElement('option');
+                        option.value = p.name;
+                        option.dataset.code = p.code;
+                        option.textContent = p.name;
+                        if (p.name === prefillProv) option.selected = true;
+                        provinceSelect.appendChild(option);
+                    });
+
+                    if (prefillProv) {
+                        const selectedProvince = provinces.find(p => p.name === prefillProv);
+                        if (selectedProvince && selectedProvince.districts) {
+                            selectedProvince.districts.forEach(d => {
+                                let option = document.createElement('option');
+                                option.value = d.name;
+                                option.dataset.code = d.code;
+                                option.textContent = d.name;
+                                if (d.name === prefillDist) option.selected = true;
+                                districtSelect.appendChild(option);
+                            });
+
+                            if (prefillDist) {
+                                const selectedDistrict = selectedProvince.districts.find(d => d.name === prefillDist);
+                                if (selectedDistrict && selectedDistrict.wards) {
+                                    selectedDistrict.wards.forEach(w => {
+                                        let option = document.createElement('option');
+                                        option.value = w.name;
+                                        option.dataset.code = w.code;
+                                        option.textContent = w.name;
+                                        if (w.name === prefillWard) option.selected = true;
+                                        wardSelect.appendChild(option);
+                                    });
+                                }
+                            }
+                        }
+                    }
+
+                    $('#province').trigger('change.select2');
+                    $('#district').trigger('change.select2');
+                    $('#ward').trigger('change.select2');
+
+                    $('#province').on('change', function() {
+                        districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        
+                        const selectedProvince = provinces.find(p => p.name === this.value);
+                        if (selectedProvince && selectedProvince.districts) {
+                            selectedProvince.districts.forEach(d => {
+                                let option = document.createElement('option');
+                                option.value = d.name;
+                                option.dataset.code = d.code;
+                                option.textContent = d.name;
+                                districtSelect.appendChild(option);
+                            });
+                        }
+                        
+                        updateShippingFee(this.value || '');
+
+                        $('#district').trigger('change.select2');
+                        $('#ward').trigger('change.select2');
+                    });
+
+                    // Trigger lần đầu tiên để cập nhật phí cho tỉnh được prefill
+                    updateShippingFee($('#province').val() || '');
+
+                    $('#district').on('change', function() {
+                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        
+                        const selectedProvince = provinces.find(p => p.name === provinceSelect.value);
+                        if (selectedProvince) {
+                            const selectedDistrict = selectedProvince.districts.find(d => d.name === this.value);
+                            if (selectedDistrict && selectedDistrict.wards) {
+                                selectedDistrict.wards.forEach(w => {
+                                    let option = document.createElement('option');
+                                    option.value = w.name;
+                                    option.dataset.code = w.code;
+                                    option.textContent = w.name;
+                                    wardSelect.appendChild(option);
+                                });
+                            }
+                        }
+                        $('#ward').trigger('change.select2');
+                    });
+                })
+                .catch(err => console.error('Error fetching provinces:', err));
+
             const placeOrderBtn = document.getElementById('place-order-btn');
             const formSection = document.getElementById('checkout-form-section');
             const form = document.getElementById('checkoutForm');

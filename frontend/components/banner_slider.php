@@ -1,5 +1,5 @@
 <?php
-// frontend/components/BannerSlider.php
+// frontend/components/banner_slider.php
 ?>
 <section class="banner-slider">
     <div class="banners">

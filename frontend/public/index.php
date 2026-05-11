@@ -84,9 +84,9 @@
     }
 
     // Tích hợp các components
-    require_once __DIR__ . '/../layout/Header.php';
-    require_once __DIR__ . '/../components/BannerSlider.php';
-    require_once __DIR__ . '/../components/NewsSection.php';
+    require_once __DIR__ . '/../layout/header.php';
+    require_once __DIR__ . '/../components/banner_slider.php';
+    require_once __DIR__ . '/../components/news_section.php';
 
     // Các section Sản phẩm:
     $sectionTitle = "Sản phẩm Nổi Bật";
@@ -94,7 +94,7 @@
     require __DIR__ . '/../components/ProductGrid.php';
 
     // Tin tức & Thông tin
-    require_once __DIR__ . '/../layout/Footer.php';
+    require_once __DIR__ . '/../layout/footer.php';
     ?>
 
 </body>

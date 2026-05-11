@@ -51,7 +51,7 @@ require_once __DIR__ . '/../../backend/src/wishlist.php';
     </style>
 </head>
 <body>
-<?php require_once __DIR__ . '/../layout/Header.php'; ?>
+<?php require_once __DIR__ . '/../layout/header.php'; ?>
 
 <main class="wishlist-container">
     <h2>Danh sách yêu thích của bạn</h2>
@@ -115,6 +115,6 @@ function toggleWishlist(productId) {
 }
 </script>
 
-<?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+<?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
 </html>

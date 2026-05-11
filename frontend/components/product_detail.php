@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
 </head>
 <body>
 
-<?php require_once __DIR__ . '/../layout/Header.php'; ?>
+<?php require_once __DIR__ . '/../layout/header.php'; ?>
 
 <main class="product-detail">
     <style>

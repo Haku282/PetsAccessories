@@ -17,14 +17,23 @@ if (!($db instanceof PDO)) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fullname = trim($_POST['fullname'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
-        $address = trim($_POST['address'] ?? '');
+        
+        $addressSpecific = trim($_POST['address'] ?? '');
+        $province = trim($_POST['province'] ?? '');
+        $district = trim($_POST['district'] ?? '');
+        $ward = trim($_POST['ward'] ?? '');
+
+        $fullAddress = $addressSpecific;
+        if ($ward) $fullAddress .= ', ' . $ward;
+        if ($district) $fullAddress .= ', ' . $district;
+        if ($province) $fullAddress .= ', ' . $province;
 
         if (empty($fullname)) {
             $error = 'Vui lòng nhập họ tên.';
         } else {
             try {
                 $stmt = $db->prepare('UPDATE users SET fullname = ?, phone = ?, address = ? WHERE user_id = ?');
-                $updated = $stmt->execute([$fullname, $phone, $address, $_SESSION['user_id']]);
+                $updated = $stmt->execute([$fullname, $phone, $fullAddress, $_SESSION['user_id']]);
 
                 if ($updated) {
                     $success = 'Cập nhật hồ sơ thành công!';
