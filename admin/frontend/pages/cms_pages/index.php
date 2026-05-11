@@ -1,32 +1,11 @@
-<?php require_once __DIR__ . '/../../../backend/middleware/check_admin.php'; ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMS Trang</title>
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/dashboard.css">
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/categories.css">
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div><h1><span>📄</span> CMS Trang</h1></div>
-            <div class="user-info">
-                <span>Xin chào: <strong><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></strong></span>
-                <a href="/PetsAccessories/frontend/components/logout.php" class="logout-btn">🚪 Đăng Xuất</a>
-            </div>
-        </div>
+<?php require_once __DIR__ . '/../../../backend/middleware/check_admin.php'; 
+$pageTitle = 'CMS Trang';
+$extraCss = '<link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/categories.css">';
+$extraJs = '<script src="/PetsAccessories/admin/frontend/assets/js/cms.js"></script>';
+require_once __DIR__ . '/../../layout/header.php';
+?>
 
-        <div class="menu">
-            <ul>
-                <li><a href="/PetsAccessories/admin/frontend/index_admin.php">Dashboard</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/cms_pages/index.php" class="active">Trang CMS</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/cms_posts/index.php">Bài Viết</a></li>
-            </ul>
-        </div>
-
-        <div class="brands-container">
+<div class="brands-container">
             <div id="messagesContainer"></div>
 
             <div class="brands-header">
@@ -93,8 +72,5 @@
                 <button type="submit" form="pageForm" class="btn btn-primary" id="savePageBtn">💾 Lưu Trang</button>
             </div>
         </div>
-    </div>
 
-    <script src="/PetsAccessories/admin/frontend/assets/js/cms.js"></script>
-</body>
-</html>
+<?php require_once __DIR__ . '/../../layout/footer.php'; ?>

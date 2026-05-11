@@ -1,62 +1,11 @@
-<?php
-/**
- * Trang quản lý mã giảm giá
- * File: /admin/frontend/pages/coupons/index.php
- */
-
-// Kiểm tra quyền admin
-require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
+<?php require_once __DIR__ . '/../../../backend/middleware/check_admin.php'; 
+$pageTitle = 'Quản Lý Mã Giảm Giá - Admin';
+$extraCss = '<link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/categories.css">';
+$extraJs = '<script src="/PetsAccessories/admin/frontend/assets/js/coupons.js"></script>';
+require_once __DIR__ . '/../../layout/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Mã Giảm Giá - Admin</title>
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/dashboard.css">
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/categories.css">
-    <style>
-        .type-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .type-fixed { background-color: #e3f2fd; color: #1565c0; }
-        .type-percentage { background-color: #f3e5f5; color: #4a148c; }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div>
-                <h1><span>🎟️</span> Quản Lý Mã Giảm Giá</h1>
-            </div>
-            <div class="user-info">
-                <span>Xin chào: <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong></span>
-                <a href="/PetsAccessories/frontend/components/logout.php" class="logout-btn">🚪 Đăng Xuất</a>
-            </div>
-        </div>
-
-        <!-- Menu -->
-        <div class="menu">
-            <ul>
-                <li><a href="/PetsAccessories/admin/frontend/index_admin.php"><span>📊</span> Dashboard</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/products/index.php"><span>📦</span> Sản Phẩm</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/orders/index.php"><span>🛒</span> Đơn Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/categories/index.php"><span>📁</span> Danh Mục</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/brands/index.php"><span>🏷️</span> Thương Hiệu</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php"><span>👥</span> Người Dùng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/clients/index.php"><span>👥</span> Khách Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/coupons/index.php" class="active"><span>🎟️</span> Mã Giảm Giá</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/banners/index.php"><span>🖼️</span> Banner</a></li>
-            </ul>
-        </div>
-
-        <!-- Main Content -->
+<!-- Main Content -->
         <div class="brands-container">
             <!-- Messages Container -->
             <div id="messagesContainer"></div>
@@ -189,9 +138,5 @@ require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="/PetsAccessories/admin/frontend/assets/js/coupons.js"></script>
-</body>
-
-</html>
+<?php require_once __DIR__ . '/../../layout/footer.php'; ?>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Trang dashboard chính của admin
  * Kiểm tra quyền admin trước khi cho phép truy cập
@@ -36,48 +36,10 @@ if ($db instanceof PDO) {
         error_log('Error fetching stats: ' . $e->getMessage());
     }
 }
+
+$pageTitle = 'Dashboard';
+require_once __DIR__ . '/layout/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Quản Trị Viên</title>
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/dashboard.css">
-</head>
-
-<body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div>
-                <h1><span>📊</span> Dashboard Quản Trị</h1>
-            </div>
-            <div class="user-info">
-                <span>Xin chào: <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong></span>
-                <a href="/PetsAccessories/frontend/components/logout.php" class="logout-btn">🚪 Đăng Xuất</a>
-            </div>
-        </div>
-
-        <!-- Menu -->
-        <div class="menu">
-            <ul>
-                <li><a href="/PetsAccessories/admin/frontend/index_admin.php"><span>📊</span> Dashboard</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/products/index.php"><span>📦</span> Sản Phẩm</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/orders/index.php"><span>🛒</span> Đơn Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/categories/index.php"><span>📁</span> Danh Mục</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/brands/index.php"><span>🏷️</span> Thương Hiệu</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php"><span>👥</span> Người Dùng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/clients/index.php"><span>👥</span> Khách Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/coupons/index.php"><span>🎟️</span> Mã Giảm Giá</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/reviews/index.php"><span>⭐</span> Đánh Giá</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/shipping/index.php"><span>🚚</span> Giao Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/cms_pages/index.php"><span>📝</span> CMS</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/cms_posts/index.php"><span>📰</span> Bài Viết</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/banners/index.php"><span>🖼️</span> Banner</a></li>
-            </ul>
-        </div>
 
         <!-- Statistics -->
         <div class="stats-grid">
@@ -96,22 +58,22 @@ if ($db instanceof PDO) {
             <div class="stat-card customers">
                 <h3><span class="icon">👥</span> Khách Hàng</h3>
                 <div class="number"><?php echo $stats['total_customers'] ?? 0; ?></div>
-                <div class="label">Người dùng đã đăng ký</div>
+                <div class="label">Người dùng đăng ký</div>
             </div>
 
             <div class="stat-card revenue">
                 <h3><span class="icon">💰</span> Doanh Thu</h3>
-                <div class="number"><?php echo number_format($stats['total_revenue'] ?? 0, 0, ',', '.'); ?> ₫</div>
-                <div class="label">Từ các đơn hàng hoàn thành</div>
+                <div class="number"><?php echo number_format($stats['total_revenue'] ?? 0, 0, ',', '.'); ?> đ</div>
+                <div class="label">Từ đơn hàng hoàn thành</div>
             </div>
 
             <div class="stat-card pending">
-                <h3><span class="icon">⏳</span> Đơn Chờ Xác Nhận</h3>
+                <h3><span class="icon">⏳</span> Đơn Chờ Xử Lý</h3>
                 <div class="number"><?php echo $stats['pending_orders'] ?? 0; ?></div>
-                <div class="label">Cần xử lý ngay</div>
+                <div class="label">Cần xác nhận</div>
             </div>
 
-            <div class="stat-card stock">
+            <div class="stat-card out-of-stock">
                 <h3><span class="icon">⚠️</span> Hết Hàng</h3>
                 <div class="number"><?php echo $stats['out_of_stock'] ?? 0; ?></div>
                 <div class="label">Sản phẩm cần nhập hàng</div>
@@ -120,14 +82,14 @@ if ($db instanceof PDO) {
 
         <!-- Recent Activity -->
         <div class="recent-section">
-            <h2><span>ℹ️</span> Thông Tin Hệ Thống</h2>
-            <p>Chào mừng <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong> quay lại!</p>
+            <h2><span class="icon">ℹ️</span> Thông Tin Hệ Thống</h2>
+            <p>Chào mừng <strong><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></strong> quay lại!</p>
             <div class="system-info">
                 <p>📅 Ngày hôm nay: <strong><?php echo date('d/m/Y H:i:s'); ?></strong></p>
-                <p>🔧 Sử dụng menu trên để quản lý các chức năng khác nhau của hệ thống.</p>
+                <p>🔧 Sử dụng menu bên trái để quản lý các chức năng khác nhau của hệ thống.</p>
             </div>
         </div>
-    </div>
-</body>
 
-</html>
+<?php 
+require_once __DIR__ . '/layout/footer.php'; 
+?>

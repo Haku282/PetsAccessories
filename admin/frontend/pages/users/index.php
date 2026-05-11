@@ -1,49 +1,11 @@
-<?php
-/**
- * Trang Quản Lý Người Dùng
- * File: /admin/frontend/pages/users/index.php
- */
-
-session_start();
-require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
+<?php require_once __DIR__ . '/../../../backend/middleware/check_admin.php'; 
+$pageTitle = 'Quản Lý Người Dùng - Admin';
+$extraCss = '<link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/users.css">';
+$extraJs = '<script src="/PetsAccessories/admin/frontend/assets/js/users.js"></script>';
+require_once __DIR__ . '/../../layout/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Người Dùng - Admin</title>
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/dashboard.css">
-    <link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/users.css">
-</head>
-<body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div>
-                <h1><span>👥</span> Quản Lý Người Dùng</h1>
-            </div>
-            <div class="user-info">
-                <span>Xin chào: <strong><?php echo htmlspecialchars($_SESSION['user_name']); ?></strong></span>
-                <a href="/PetsAccessories/frontend/components/logout.php" class="logout-btn">🚪 Đăng Xuất</a>
-            </div>
-        </div>
-
-        <!-- Menu -->
-        <div class="menu">
-            <ul>
-                <li><a href="/PetsAccessories/admin/frontend/index_admin.php"><span>📊</span> Dashboard</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/products/index.php"><span>📦</span> Sản Phẩm</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/orders/index.php"><span>🛒</span> Đơn Hàng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/categories/index.php"><span>📁</span> Danh Mục</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/brands/index.php"><span>🏷️</span> Thương Hiệu</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php" class="active"><span>👥</span> Người Dùng</a></li>
-                <li><a href="/PetsAccessories/admin/frontend/pages/coupons/index.php"><span>🎟️</span> Mã Giảm Giá</a></li>
-            </ul>
-        </div>
-
-        <!-- Main Content -->
+<!-- Main Content -->
         <div class="users-container">
             <!-- Messages Container -->
             <div id="messagesContainer"></div>
@@ -215,8 +177,5 @@ require_once __DIR__ . '/../../../backend/middleware/check_admin.php';
                 <button class="btn btn-primary" id="saveUserBtn">💾 Lưu Người Dùng</button>
             </div>
         </div>
-    </div>
 
-    <script src="/PetsAccessories/admin/frontend/assets/js/users.js"></script>
-</body>
-</html>
+<?php require_once __DIR__ . '/../../layout/footer.php'; ?>
