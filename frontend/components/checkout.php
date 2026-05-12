@@ -241,9 +241,45 @@ if (isset($db) && ($db instanceof PDO)) {
                             <span>Phí vận chuyển (<span id="shipping-zone-name">tạm tính</span>)</span>
                             <strong id="shipping-fee-display"><?php echo number_format((float) $shipping, 0, ',', '.'); ?> đ</strong>
                         </div>
+                        <div class="cart-summary__row" id="discount-row" style="display: none;">
+                            <span>Giảm giá (<span id="coupon-code-display"></span>)</span>
+                            <strong id="discount-display" style="color: #e74c3c;">-0 đ</strong>
+                        </div>
                         <div class="cart-summary__row cart-summary__row--total">
                             <span>Tổng cộng</span>
                             <strong id="total-price-display"><?php echo number_format((float) $estimatedTotal, 0, ',', '.'); ?> đ</strong>
+                        </div>
+
+                        <div class="coupon-section" style="margin: 15px 0; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label for="coupon_select" style="font-size: 14px; font-weight: 500;">Mã giảm giá:</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <?php
+                                    $availableCoupons = [];
+                                    if (isset($db) && $db instanceof PDO) {
+                                        try {
+                                            $stmt = $db->query("SELECT code, discount_type, discount_value, min_order_value FROM coupons WHERE status = 1 AND (expiry_date IS NULL OR expiry_date >= NOW()) AND (usage_limit IS NULL OR used_count < usage_limit)");
+                                            $availableCoupons = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                        } catch (PDOException $e) { }
+                                    }
+                                    ?>
+                                    <select id="coupon_select" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                                        <option value="">-- Chọn mã --</option>
+                                        <?php foreach ($availableCoupons as $c): ?>
+                                            <?php 
+                                            // Check min order right here for better UX if needed, or let apply_coupon handle it. Server handled it.
+                                            $valText = $c['discount_type'] === 'percentage' ? $c['discount_value'] . '%' : number_format($c['discount_value'], 0, ',', '.') . 'đ';
+                                            $minText = $c['min_order_value'] > 0 ? " (Đơn tối thiểu " . number_format($c['min_order_value'], 0, ',', '.') . "đ)" : "";
+                                            ?>
+                                            <option value="<?php echo htmlspecialchars($c['code']); ?>">
+                                                <?php echo htmlspecialchars($c['code']); ?> - Giảm <?php echo $valText; ?><?php echo $minText; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button type="button" id="btn-apply-coupon" style="padding: 10px 15px; background: #0f172a; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">Áp dụng</button>
+                                </div>
+                            </div>
+                            <div id="coupon-message" style="margin-top: 8px; font-size: 13px;"></div>
                         </div>
 
                         <p class="cart-summary__hint">Các giá trị trên là tạm tính và có thể thay đổi khi thanh toán.</p>
@@ -296,34 +332,109 @@ if (isset($db) && ($db instanceof PDO)) {
             const freeShippingThreshold = <?php echo json_encode($freeShippingThreshold ?? 500000); ?>;
             const shippingZonesData = <?php echo json_encode($shippingZones); ?>;
 
+            let currentShippingFee = 30000;
+            let currentDiscount = 0;
+
             function formatCurrency(amount) {
                 return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
             }
 
+            function updateTotal() {
+                const total = cartSubtotal + cartTax + currentShippingFee - currentDiscount;
+                document.getElementById('total-price-display').textContent = formatCurrency(Math.max(0, total));
+            }
+
             function updateShippingFee(provinceName) {
-                let fee = 30000;
-                let zoneNameMatch = 'tạm tính';
+                currentShippingFee = 30000; // Default fee if no zone matches
+                let zoneNameMatch = 'Nội thành'; // Default zone name
+
                 if (shippingZonesData && shippingZonesData.length > 0) {
-                    let matched = shippingZonesData.find(z => provinceName.includes(z.zone_name) || z.zone_name.includes(provinceName));
-                    if (!matched) {
-                        matched = shippingZonesData.find(z => z.zone_name.toLowerCase() === 'toàn quốc');
-                    }
-                    if (matched) {
-                        fee = parseFloat(matched.shipping_fee);
-                        zoneNameMatch = matched.zone_name;
+                    const matchedZone = shippingZonesData.find(zone => provinceName.includes(zone.zone_name));
+
+                    if (matchedZone) {
+                        currentShippingFee = parseFloat(matchedZone.shipping_fee);
+                        zoneNameMatch = matchedZone.zone_name;
                     }
                 }
                 
                 if (cartSubtotal >= freeShippingThreshold) {
-                    fee = 0;
+                    currentShippingFee = 0;
                     zoneNameMatch = 'Miễn phí vận chuyển';
                 }
 
                 document.getElementById('shipping-zone-name').textContent = zoneNameMatch;
-                document.getElementById('shipping-fee-display').textContent = formatCurrency(fee);
-                const total = cartSubtotal + cartTax + fee;
-                document.getElementById('total-price-display').textContent = formatCurrency(total);
+                document.getElementById('shipping-fee-display').textContent = formatCurrency(currentShippingFee);
+                updateTotal();
             }
+
+            // Xử lý áp dụng mã coupon
+            const btnApplyCoupon = document.getElementById('btn-apply-coupon');
+            const couponSelect = document.getElementById('coupon_select');
+            const couponMessage = document.getElementById('coupon-message');
+            const discountRow = document.getElementById('discount-row');
+            const discountDisplay = document.getElementById('discount-display');
+            const couponCodeDisplay = document.getElementById('coupon-code-display');
+
+            btnApplyCoupon.addEventListener('click', function() {
+                const code = couponSelect.value;
+                if (!code) {
+                    couponMessage.textContent = 'Vui lòng chọn một mã giảm giá.';
+                    couponMessage.style.color = 'red';
+                    return;
+                }
+
+                btnApplyCoupon.disabled = true;
+                btnApplyCoupon.textContent = 'Đang xử lý...';
+
+                fetch('/PetsAccessories/backend/src/apply_coupon.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'code=' + encodeURIComponent(code) + '&subtotal=' + encodeURIComponent(cartSubtotal)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnApplyCoupon.disabled = false;
+                    btnApplyCoupon.textContent = 'Áp dụng';
+
+                    if (data.status === 'success') {
+                        currentDiscount = parseFloat(data.discount);
+                        couponMessage.textContent = data.message;
+                        couponMessage.style.color = 'green';
+                        
+                        discountRow.style.display = 'flex';
+                        couponCodeDisplay.textContent = data.code;
+                        discountDisplay.textContent = '-' + formatCurrency(currentDiscount);
+                        
+                        let hiddenInput = document.getElementById('applied_coupon_code');
+                        if (!hiddenInput) {
+                            hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'coupon_code';
+                            hiddenInput.id = 'applied_coupon_code';
+                            document.getElementById('checkoutForm').appendChild(hiddenInput);
+                        }
+                        hiddenInput.value = data.code;
+                        
+                        updateTotal();
+                    } else {
+                        couponMessage.textContent = data.message;
+                        couponMessage.style.color = 'red';
+                        currentDiscount = 0;
+                        discountRow.style.display = 'none';
+                        let hiddenInput = document.getElementById('applied_coupon_code');
+                        if (hiddenInput) {
+                            hiddenInput.value = '';
+                        }
+                        updateTotal();
+                    }
+                })
+                .catch(err => {
+                    btnApplyCoupon.disabled = false;
+                    btnApplyCoupon.textContent = 'Áp dụng';
+                    couponMessage.textContent = 'Đã xảy ra lỗi. Vui lòng thử lại sau.';
+                    couponMessage.style.color = 'red';
+                });
+            });
 
             fetch('https://provinces.open-api.vn/api/?depth=3')
                 .then(res => res.json())

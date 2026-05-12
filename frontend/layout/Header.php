@@ -39,7 +39,7 @@ $mega_menu_columns = array_chunk(array_values($category_tree), 3);
 
 $cartCount = 0;
 if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
-    $cartCount = array_sum($_SESSION['cart']);
+    $cartCount = count($_SESSION['cart']);
 }
 ?>
 

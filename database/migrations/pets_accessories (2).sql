@@ -134,6 +134,12 @@ CREATE TABLE `coupons` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+// Đang đổ dữ liệu cho bảng `coupons`
+INSERT INTO `coupons` (`code`, `discount_type`, `discount_value`, `min_order_value`, `max_discount`, `usage_limit`, `used_count`, `expiry_date`, `status`, `created_at`) VALUES
+('CHAOHE20', 'percentage', 20, 300000, 50000, 100, 0, '2026-08-31 23:59:59', 1, NOW()),
+('GIAM50K', 'fixed', 50000, 400000, NULL, 50, 0, '2026-06-30 23:59:59', 1, NOW()),
+('FREESHIP', 'fixed', 30000, 200000, NULL, 500, 0, '2026-12-31 23:59:59', 1, NOW()),
+('BOSVIP', 'percentage', 10, 0, 30000, 200, 15, '2026-12-31 23:59:59', 1, NOW());
 -- --------------------------------------------------------
 
 --

@@ -46,7 +46,7 @@ require_once __DIR__ . '/../../backend/src/search.php';
             <br>
             <div class="product-grid">
                 <?php foreach ($products as $product): ?>
-                    <?php include __DIR__ . '/ProductCard.php'; ?>
+                    <?php include __DIR__ . '/product_card.php'; ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

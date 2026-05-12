@@ -23,7 +23,7 @@ function cart_recalculate_count(): int
     if (empty($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
         return 0;
     }
-    return array_sum($_SESSION['cart']);
+    return count($_SESSION['cart']);
 }
 
 function cart_normalize_quantity(mixed $value): int

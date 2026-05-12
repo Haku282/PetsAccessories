@@ -29,7 +29,7 @@ if (!$isEmbedded):
             <h2>Tin tức & Chương trình ưu đãi</h2>
             <p>Các bài viết nổi bật, mẹo chăm sóc và ưu đãi mới nhất cho boss.</p>
         </div>
-        <div class="news-grid">
+        <div class="news-grid <?php echo !$isEmbedded ? 'news-grid--standalone' : ''; ?>">
             <?php if (empty($newsItems)): ?>
                 <article class="news-card">
                     <div class="news-media news-media--tips"></div>

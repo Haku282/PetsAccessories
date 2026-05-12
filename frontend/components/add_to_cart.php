@@ -49,7 +49,7 @@ try {
         $db->commit();
         $response['success'] = true;
         $response['message'] = 'Đã thêm vào giỏ hàng!';
-        $response['cartCount'] = array_sum($_SESSION['cart']);
+        $response['cartCount'] = count($_SESSION['cart']);
     }
 } catch (PDOException $e) {
     $db->rollBack();
