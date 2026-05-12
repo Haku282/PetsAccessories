@@ -252,31 +252,11 @@ if (isset($db) && ($db instanceof PDO)) {
 
                         <div class="coupon-section" style="margin: 15px 0; padding-top: 15px; border-top: 1px dashed #cbd5e1;">
                             <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label for="coupon_select" style="font-size: 14px; font-weight: 500;">Mã giảm giá:</label>
+                                <label for="coupon_input" style="font-size: 14px; font-weight: 500;">Mã giảm giá:</label>
                                 <div style="display: flex; gap: 8px;">
-                                    <?php
-                                    $availableCoupons = [];
-                                    if (isset($db) && $db instanceof PDO) {
-                                        try {
-                                            $stmt = $db->query("SELECT code, discount_type, discount_value, min_order_value FROM coupons WHERE status = 1 AND (expiry_date IS NULL OR expiry_date >= NOW()) AND (usage_limit IS NULL OR used_count < usage_limit)");
-                                            $availableCoupons = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                                        } catch (PDOException $e) { }
-                                    }
-                                    ?>
-                                    <select id="coupon_select" style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
-                                        <option value="">-- Chọn mã --</option>
-                                        <?php foreach ($availableCoupons as $c): ?>
-                                            <?php 
-                                            // Check min order right here for better UX if needed, or let apply_coupon handle it. Server handled it.
-                                            $valText = $c['discount_type'] === 'percentage' ? $c['discount_value'] . '%' : number_format($c['discount_value'], 0, ',', '.') . 'đ';
-                                            $minText = $c['min_order_value'] > 0 ? " (Đơn tối thiểu " . number_format($c['min_order_value'], 0, ',', '.') . "đ)" : "";
-                                            ?>
-                                            <option value="<?php echo htmlspecialchars($c['code']); ?>">
-                                                <?php echo htmlspecialchars($c['code']); ?> - Giảm <?php echo $valText; ?><?php echo $minText; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                    <input type="text" id="coupon_input" name="coupon_code" form="checkoutForm" placeholder="Nhập mã giảm giá..." style="flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px;">
                                     <button type="button" id="btn-apply-coupon" style="padding: 10px 15px; background: #0f172a; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">Áp dụng</button>
+                                    <button type="button" id="btn-cancel-coupon" style="display: none; padding: 10px 15px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; white-space: nowrap;">Hủy áp dụng</button>
                                 </div>
                             </div>
                             <div id="coupon-message" style="margin-top: 8px; font-size: 13px;"></div>
@@ -369,16 +349,17 @@ if (isset($db) && ($db instanceof PDO)) {
 
             // Xử lý áp dụng mã coupon
             const btnApplyCoupon = document.getElementById('btn-apply-coupon');
-            const couponSelect = document.getElementById('coupon_select');
+            const btnCancelCoupon = document.getElementById('btn-cancel-coupon');
+            const couponInput = document.getElementById('coupon_input');
             const couponMessage = document.getElementById('coupon-message');
             const discountRow = document.getElementById('discount-row');
             const discountDisplay = document.getElementById('discount-display');
             const couponCodeDisplay = document.getElementById('coupon-code-display');
 
             btnApplyCoupon.addEventListener('click', function() {
-                const code = couponSelect.value;
+                const code = couponInput.value.trim();
                 if (!code) {
-                    couponMessage.textContent = 'Vui lòng chọn một mã giảm giá.';
+                    couponMessage.textContent = 'Vui lòng nhập một mã giảm giá.';
                     couponMessage.style.color = 'red';
                     return;
                 }
@@ -402,7 +383,7 @@ if (isset($db) && ($db instanceof PDO)) {
                         couponMessage.style.color = 'green';
                         
                         discountRow.style.display = 'flex';
-                        couponCodeDisplay.textContent = data.code;
+                        couponCodeDisplay.textContent = data.code + ' (-' + (data.discountText || '') + ')';
                         discountDisplay.textContent = '-' + formatCurrency(currentDiscount);
                         
                         let hiddenInput = document.getElementById('applied_coupon_code');
@@ -414,6 +395,9 @@ if (isset($db) && ($db instanceof PDO)) {
                             document.getElementById('checkoutForm').appendChild(hiddenInput);
                         }
                         hiddenInput.value = data.code;
+                        couponInput.disabled = true;
+                        btnApplyCoupon.style.display = 'none';
+                        btnCancelCoupon.style.display = 'block';
                         
                         updateTotal();
                     } else {
@@ -434,6 +418,33 @@ if (isset($db) && ($db instanceof PDO)) {
                     couponMessage.textContent = 'Đã xảy ra lỗi. Vui lòng thử lại sau.';
                     couponMessage.style.color = 'red';
                 });
+            });
+
+            btnCancelCoupon.addEventListener('click', function() {
+                // Clear coupon logic
+                currentDiscount = 0;
+                discountRow.style.display = 'none';
+                couponMessage.textContent = 'Đã hủy mã giảm giá.';
+                couponMessage.style.color = '#64748b';
+                
+                let hiddenInput = document.getElementById('applied_coupon_code');
+                if (hiddenInput) {
+                    hiddenInput.value = '';
+                }
+                
+                couponInput.value = '';
+                couponInput.disabled = false;
+                btnApplyCoupon.style.display = 'block';
+                btnCancelCoupon.style.display = 'none';
+                
+                // Cũng cần xóa session ở backend để process_checkout không lấy coupon ảo
+                fetch('/PetsAccessories/backend/src/apply_coupon.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'cancel=1'
+                });
+                
+                updateTotal();
             });
 
             fetch('https://provinces.open-api.vn/api/?depth=3')
@@ -567,12 +578,18 @@ if (isset($db) && ($db instanceof PDO)) {
 
             btnCancelQr.addEventListener('click', function() {
                 qrModal.style.display = 'none';
+                if (typeof showToast === 'function') {
+                    showToast('Đã hủy thanh toán', true);
+                }
             });
 
             btnPaidQr.addEventListener('click', function() {
-                alert('Chuyển tiền thành công');
                 qrModal.style.display = 'none';
                 form.dataset.qrConfirmed = '1';
+                
+                if (typeof showToast === 'function') {
+                    showToast('Đã thanh toán thành công');
+                }
                 
                 // Cập nhật form action để chuyển về trang chủ nhanh (nếu cần qua process để lưu DB, thì process_checkout phải redirect về index)
                 // Nhưng vì process_checkout hiện tại đang hiển thị giao diện "Đặt hàng thành công", 
@@ -584,7 +601,10 @@ if (isset($db) && ($db instanceof PDO)) {
                 redirectInput.value = '1';
                 form.appendChild(redirectInput);
                 
-                form.submit();
+                // Chờ hiển thị lỗi 1.5s trước khi chuyển trang
+                setTimeout(() => {
+                    form.submit();
+                }, 1500);
             });
         })();
     </script>

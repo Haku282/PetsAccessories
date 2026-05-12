@@ -376,18 +376,30 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Đã thêm ' + qty + ' sản phẩm vào giỏ hàng!');
+                if (typeof showToast === 'function') {
+                    showToast('Đã thêm sản phẩm vào giỏ hàng!');
+                } else {
+                    alert('Đã thêm sản phẩm vào giỏ hàng!');
+                }
                 // Update header cart count
                 const countBadge = document.querySelector('.header-cart .cart-count');
-                if (countBadge) countBadge.textContent = data.cart_count || (parseInt(countBadge.textContent||0) + parseInt(qty));
+                if (countBadge) countBadge.textContent = data.cartCount || (parseInt(countBadge.textContent||0) + parseInt(qty));
             } else {
-                alert('Có lỗi xảy ra: ' + data.message);
+                if (typeof showToast === 'function') {
+                    showToast('Có lỗi xảy ra: ' + data.message, true);
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
             }
         })
         .catch(err => {
             console.error(err);
-            alert('Đã thêm sản phẩm vào giỏ hàng.');
-            location.reload();
+            if (typeof showToast === 'function') {
+                showToast('Có lỗi xảy ra kết nối Server.', true);
+            } else {
+                alert('Đã thêm sản phẩm vào giỏ hàng.');
+            }
+            // location.reload();
         });
     }
 

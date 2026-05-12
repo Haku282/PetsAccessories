@@ -25,7 +25,30 @@ require_once __DIR__ . '/../../backend/src/category.php';
         <?php else: ?>
             <div class="product-grid">
                 <?php foreach ($products as $product): ?>
-                    <?php include __DIR__ . '/product_card.php'; ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int)($product['product_id'] ?? 0); ?>">
+                                <?php 
+                                $image = !empty($product['thumbnail']) ? '/PetsAccessories/upload/imgProduct/' . $product['thumbnail'] : (!empty($product['image']) ? $product['image'] : '/PetsAccessories/frontend/public/images/default.jpg'); 
+                                ?>
+                                <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? $product['name'] ?? 'Tên sản phẩm'); ?>">
+                            </a>
+                        </div>
+                        <div class="product-info">
+                            <h3>
+                                <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int)($product['product_id'] ?? 0); ?>" style="text-decoration: none; color: inherit;">
+                                    <?php echo htmlspecialchars($product['product_name'] ?? $product['name'] ?? 'Product Name'); ?>
+                                </a>
+                            </h3>
+                            <p class="price">
+                                <?php echo number_format($product['price'] ?? 0, 0, ',', '.'); ?> đ
+                            </p>
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-add-cart" style="flex:1;" data-id="<?php echo (int)($product['product_id'] ?? 0); ?>" onclick="addToCart(this)">Thêm vào giỏ</button>
+                                <button class="btn-wishlist" style="background:none; border:1px solid #ccc; border-radius:4px; padding:0 10px; cursor:pointer;" onclick="toggleWishlist(<?php echo (int)($product['product_id'] ?? 0); ?>)" title="Yêu thích">❤️</button>
+                            </div>
+                        </div>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

@@ -49,7 +49,7 @@
                 COALESCE(NULLIF(p.discount_price, 0), p.price) AS price,
                 COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/frontend/public/images/default-product.png') AS image
              FROM products p
-             WHERE p.status = 1
+             WHERE p.status = 'active'
              ORDER BY (CASE WHEN p.discount_price > 0 THEN 1 ELSE 0 END) DESC, p.stock_quantity DESC, p.created_at DESC
              LIMIT 8"
             );
@@ -62,7 +62,8 @@
                 COALESCE(NULLIF(p.discount_price, 0), p.price) AS price,
                 COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/frontend/public/images/default-product.png') AS image
              FROM products p
-             WHERE p.status = 1
+             WHERE p.status = 'active'
+               AND p.created_at >= NOW() - INTERVAL 7 DAY
              ORDER BY p.created_at DESC
              LIMIT 8"
             );
@@ -75,7 +76,7 @@
                 p.discount_price AS price,
                 COALESCE(NULLIF(p.thumbnail, ''), '/PetsAccessories/frontend/public/images/default-product.png') AS image
              FROM products p
-             WHERE p.status = 1
+             WHERE p.status = 'active'
                AND p.discount_price > 0
                AND p.discount_price < p.price
              ORDER BY (p.price - p.discount_price) DESC, p.created_at DESC
@@ -92,9 +93,19 @@
     require_once __DIR__ . '/../components/banner_slider.php';
     require_once __DIR__ . '/../components/news_section.php';
 
+    $isEmbedded = true;
+
     // Các section Sản phẩm:
     $sectionTitle = "Sản phẩm Nổi Bật";
     $products = $featuredProducts;
+    require __DIR__ . '/../components/products.php';
+
+    $sectionTitle = "Sản phẩm Mới";
+    $products = $newProducts;
+    require __DIR__ . '/../components/products.php';
+
+    $sectionTitle = "Sản phẩm Khuyến Mãi";
+    $products = $saleProducts;
     require __DIR__ . '/../components/products.php';
 
     // Tin tức & Thông tin

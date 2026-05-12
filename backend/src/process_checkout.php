@@ -310,12 +310,56 @@ if (isset($pdo) && !empty($_SESSION['cart'])) {
         }
 
         $discountAmount = 0;
+        $couponIdInsert = null;
+        $appliedCouponCode = trim($_POST['coupon_code'] ?? '');
+        if ($appliedCouponCode !== '') {
+            $stmtCoupon = $pdo->prepare("SELECT coupon_id, discount_type, discount_value, min_order_value, max_discount, usage_limit, used_count FROM coupons WHERE code = ? AND status = 1 AND (expiry_date IS NULL OR expiry_date >= NOW())");
+            $stmtCoupon->execute([$appliedCouponCode]);
+            $coupon = $stmtCoupon->fetch(PDO::FETCH_ASSOC);
+
+            if ($coupon) {
+                $canUse = true;
+                if ($coupon['usage_limit'] !== null && $coupon['used_count'] >= $coupon['usage_limit']) {
+                    $canUse = false;
+                }
+                if ($coupon['min_order_value'] > 0 && $totalValue < $coupon['min_order_value']) {
+                    $canUse = false;
+                }
+
+                if ($canUse) {
+                    $couponIdInsert = $coupon['coupon_id'];
+                    if ($coupon['discount_type'] === 'percentage') {
+                        $calcDiscount = ($totalValue * $coupon['discount_value']) / 100;
+                        if ($coupon['max_discount'] > 0 && $calcDiscount > $coupon['max_discount']) {
+                            $calcDiscount = $coupon['max_discount'];
+                        }
+                        $discountAmount = $calcDiscount;
+                    } else {
+                        $discountAmount = $coupon['discount_value'];
+                    }
+
+                    if ($discountAmount > $totalValue) {
+                        $discountAmount = $totalValue;
+                    }
+                    
+                    // Cập nhật số lần sử dụng coupon
+                    $stmtUpdateCoupon = $pdo->prepare("UPDATE coupons SET used_count = used_count + 1 WHERE coupon_id = ?");
+                    $stmtUpdateCoupon->execute([$couponIdInsert]);
+                }
+            }
+        }
+
+        $stmtOrder = $pdo->prepare("
+            INSERT INTO orders (user_id, total_price, shipping_fee, discount_amount, coupon_id, order_status, payment_method, payment_status, shipping_method, shipping_address)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
 
         $stmtOrder->execute([
             $userIdInsert,
             $totalValue + $shippingFee - $discountAmount,
             $shippingFee,
             $discountAmount,
+            $couponIdInsert,
             'pending',
             $paymentMethod,
             'unpaid',
