@@ -27,6 +27,10 @@
         require_once __DIR__ . '/../components/product_detail.php';
         exit;
     }
+    if ($page === 'products') {
+        require_once __DIR__ . '/../components/products.php';
+        exit;
+    }
 
     // Kết nối DB để lấy sản phẩm cho trang chủ
     require_once __DIR__ . '/../../backend/config/database.php';
@@ -79,22 +83,22 @@
             );
             $saleProducts = $saleStmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            // Giữ mảng rỗng để ProductGrid hiển thị thông báo fallback.
+            // Giữ mảng rỗng để product_grid hiển thị thông báo fallback.
         }
     }
 
     // Tích hợp các components
-    require_once __DIR__ . '/../layout/Header.php';
-    require_once __DIR__ . '/../components/BannerSlider.php';
-    require_once __DIR__ . '/../components/NewsSection.php';
+    require_once __DIR__ . '/../layout/header.php';
+    require_once __DIR__ . '/../components/banner_slider.php';
+    require_once __DIR__ . '/../components/news_section.php';
 
     // Các section Sản phẩm:
     $sectionTitle = "Sản phẩm Nổi Bật";
     $products = $featuredProducts;
-    require __DIR__ . '/../components/ProductGrid.php';
+    require __DIR__ . '/../components/products.php';
 
     // Tin tức & Thông tin
-    require_once __DIR__ . '/../layout/Footer.php';
+    require_once __DIR__ . '/../layout/footer.php';
     ?>
 
 </body>

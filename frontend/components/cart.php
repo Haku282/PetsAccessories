@@ -12,7 +12,7 @@ require_once __DIR__ . '/../../backend/src/cart.php';
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
     <main class="cart-page">
         <div class="cart-container">
@@ -99,7 +99,7 @@ require_once __DIR__ . '/../../backend/src/cart.php';
         </div>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
 
 </html>

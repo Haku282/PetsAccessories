@@ -55,7 +55,7 @@ try {
         }
         $response['success'] = true;
         $response['message'] = 'Đã thêm vào giỏ hàng!';
-        $response['cartCount'] = array_sum($_SESSION['cart']);
+        $response['cartCount'] = count($_SESSION['cart']);
     }
 } catch (PDOException $e) {
     if ($db instanceof PDO && $db->inTransaction()) {

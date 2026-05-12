@@ -11,10 +11,20 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$inputName = trim($_POST['customer_name'] ?? '');
-$inputPhone = trim($_POST['customer_phone'] ?? '');
-$emailInput = trim($_POST['customer_email'] ?? '');
-$inputAddress = trim($_POST['customer_address'] ?? '');
+$inputName = trim($_POST['fullname'] ?? '');
+$inputPhone = trim($_POST['phone'] ?? '');
+$emailInput = trim($_POST['email'] ?? '');
+
+$province = trim($_POST['province'] ?? '');
+$district = trim($_POST['district'] ?? '');
+$ward = trim($_POST['ward'] ?? '');
+$addressSpecific = trim($_POST['address'] ?? '');
+
+$inputAddress = $addressSpecific;
+if ($ward) $inputAddress .= ', ' . $ward;
+if ($district) $inputAddress .= ', ' . $district;
+if ($province) $inputAddress .= ', ' . $province;
+
 $shippingMethod = $_POST['shipping_method'] ?? 'standard';
 $paymentMethod = $_POST['payment_method'] ?? 'cod';
 
@@ -61,7 +71,7 @@ if (isset($_SESSION['user_id']) && isset($pdo)) {
                 $userAddress = $user['address'];
             }
 
-            if ($inputName !== '' || $inputPhone !== '' || $inputAddress !== '') {
+            if ($inputName !== '' || $inputPhone !== '' || $addressSpecific !== '' || $province !== '' || $district !== '' || $ward !== '') {
                 $updateName = $inputName !== '' ? $inputName : ($user['fullname'] ?? '');
                 $updatePhone = $inputPhone !== '' ? $inputPhone : ($user['phone'] ?? '');
                 $updateAddress = $inputAddress !== '' ? $inputAddress : ($user['address'] ?? '');
@@ -266,7 +276,39 @@ if (isset($pdo) && !empty($_SESSION['cart'])) {
         ");
 
         $userIdInsert = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-        $shippingFee = 0;
+        // Calculate shipping fee from shipping_zones based on province
+        $shippingFee = 30000;
+        $freeShippingThreshold = 500000;
+        $matchedZone = 'tạm tính';
+        
+        $stmtSz = $pdo->query("SELECT zone_name, shipping_fee FROM shipping_zones WHERE status = 1");
+        $allZones = $stmtSz->fetchAll(PDO::FETCH_ASSOC);
+        
+        $found = false;
+        foreach ($allZones as $z) {
+            if (stripos($province, $z['zone_name']) !== false || stripos($z['zone_name'], $province) !== false) {
+                $shippingFee = (float)$z['shipping_fee'];
+                $matchedZone = $z['zone_name'];
+                $found = true;
+                break;
+            }
+        }
+        
+        if (!$found) {
+            foreach ($allZones as $z) {
+                if (mb_strtolower($z['zone_name']) === 'toàn quốc') {
+                    $shippingFee = (float)$z['shipping_fee'];
+                    $matchedZone = $z['zone_name'];
+                    break;
+                }
+            }
+        }
+
+        if ($totalValue >= $freeShippingThreshold) {
+            $shippingFee = 0;
+            $matchedZone = 'Miễn phí';
+        }
+
         $discountAmount = 0;
 
         $stmtOrder->execute([

@@ -144,7 +144,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
     </style>
 </head>
 <body>
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
     <main class="order-detail-page">
         <div class="order-detail-header">
@@ -281,6 +281,6 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
         <?php endif; ?>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
 </html>

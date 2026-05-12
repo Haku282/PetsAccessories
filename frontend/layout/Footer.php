@@ -1,5 +1,5 @@
 <?php
-// frontend/components/Footer.php
+// frontend/components/footer.php
 ?>
 <footer>
     <div class="footer-content">

@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../backend/src/category.php';
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
     <main class="product-section">
         <h2><?php echo htmlspecialchars($categoryName); ?></h2>
@@ -25,13 +25,13 @@ require_once __DIR__ . '/../../backend/src/category.php';
         <?php else: ?>
             <div class="product-grid">
                 <?php foreach ($products as $product): ?>
-                    <?php include __DIR__ . '/ProductCard.php'; ?>
+                    <?php include __DIR__ . '/product_card.php'; ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
 
 </html>

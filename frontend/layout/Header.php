@@ -1,5 +1,5 @@
 <?php
-// frontend/layout/Header.php
+// frontend/layout/header.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -39,7 +39,7 @@ $mega_menu_columns = array_chunk(array_values($category_tree), 3);
 
 $cartCount = 0;
 if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
-    $cartCount = array_sum($_SESSION['cart']);
+    $cartCount = count($_SESSION['cart']);
 }
 ?>
 
@@ -136,7 +136,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             </li>
             <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng mới về</a></li>
             <li><a href="/PetsAccessories/frontend/components/brands.php">Thương hiệu</a></li>
-            <li><a href="/PetsAccessories/frontend/components/NewsSection.php">News và Khuyến Mãi</a></li>
+            <li><a href="/PetsAccessories/frontend/components/news_section.php">News và Khuyến Mãi</a></li>
         </ul>
     </nav>
 </header>
