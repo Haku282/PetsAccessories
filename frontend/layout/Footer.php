@@ -19,16 +19,52 @@
 </footer>
 
 <script>
+function showToast(message, isError = false) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    Object.assign(toast.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        backgroundColor: isError ? '#e74c3c' : '#2ecc71',
+        color: '#fff',
+        padding: '12px 20px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: '9999',
+        fontSize: '15px',
+        fontWeight: 'bold',
+        opacity: '0',
+        transition: 'opacity 0.3s, transform 0.3s',
+        transform: 'translateY(-20px)'
+    });
+    
+    document.body.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Animate out and remove after 3s
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 function addToCart(btn) {
     const productId = btn.getAttribute('data-id');
-    if (!productId) return alert('Lỗi: Không tìm thấy ID sản phẩm.');
+    if (!productId) return showToast('Lỗi: Không tìm thấy ID sản phẩm.', true);
 
     // Vô hiệu hóa nút trong khi chờ
     const originalText = btn.innerText;
     btn.innerText = 'Đang thêm...';
     btn.disabled = true;
 
-    fetch('/PetsAccessories/frontend/components/add_to_cart.php', {
+    fetch('/PetsAccessories/backend/src/add_to_cart.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'product_id=' + productId
@@ -41,14 +77,14 @@ function addToCart(btn) {
             if (badge) {
                 badge.innerText = data.cartCount;
             }
-            alert(data.message);
+            showToast(data.message);
         } else {
-            alert('Lỗi: ' + data.message);
+            showToast('Lỗi: ' + data.message, true);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Có lỗi xảy ra kết nối Server.');
+        showToast('Có lỗi xảy ra kết nối Server.', true);
     })
     .finally(() => {
         // Phục hồi nút
@@ -69,16 +105,18 @@ function toggleWishlist(productId) {
     .then(res => res.json())
     .then(data => {
         if(data.status === 'success') {
-            alert(data.message);
+            showToast(data.message);
         } else {
-            alert(data.message);
+            showToast(data.message, true);
             if(data.message.includes('đăng nhập')) {
-                window.location.href = '/PetsAccessories/frontend/public/index.php?page=login';
+                setTimeout(() => {
+                    window.location.href = '/PetsAccessories/frontend/public/index.php?page=login';
+                }, 1500);
             }
         }
     })
     .catch(err => {
-        alert('Có lỗi xảy ra.');
+        showToast('Có lỗi xảy ra.', true);
         console.error(err);
     });
 }

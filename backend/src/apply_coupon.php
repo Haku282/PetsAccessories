@@ -6,6 +6,15 @@ require_once __DIR__ . '/../../backend/config/database.php';
 
 header('Content-Type: application/json');
 
+if (isset($_POST['cancel']) && $_POST['cancel'] == '1') {
+    if (isset($_SESSION['applied_coupon'])) {
+        unset($_SESSION['applied_coupon']);
+    }
+    echo json_encode(['status' => 'success', 'message' => 'Hủy áp dụng thành công.']);
+    exit;
+}
+
+
 // Xóa khoảng trắng thừa ở mã code
 $code = trim($_POST['code'] ?? '');
 $subtotal = floatval($_POST['subtotal'] ?? 0);
@@ -64,11 +73,16 @@ if (isset($pdo)) {
             'discount_amount' => $discount
         ];
 
+        $discountText = $coupon['discount_type'] === 'percentage' 
+            ? floatval($coupon['discount_value']) . '%' . (floatval($coupon['max_discount']) > 0 ? ' (Tối đa ' . number_format($coupon['max_discount'], 0, ',', '.') . 'đ)' : '')
+            : number_format($coupon['discount_value'], 0, ',', '.') . 'đ';
+
         echo json_encode([
             'status' => 'success',
             'message' => 'Áp dụng mã giảm giá thành công!',
             'discount' => $discount,
-            'code' => $code
+            'code' => $code,
+            'discountText' => $discountText
         ]);
         
     } catch (PDOException $e) {

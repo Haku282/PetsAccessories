@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../backend/config/database.php';
 
+$isEmbedded = $isEmbedded ?? false;
+
 // Pagination and filtering could go here
 if (!isset($products)) {
     try {
@@ -16,32 +18,35 @@ if (!isset($products)) {
 }
 $sectionTitle = $sectionTitle ?? 'Danh sách sản phẩm';
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($sectionTitle); ?> - PetsAccessories</title>
-    <link rel="stylesheet" href="../layout/style.css">
-</head>
-<body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+<?php if (!$isEmbedded): ?>
+    <!DOCTYPE html>
+    <html lang="vi">
 
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title><?php echo htmlspecialchars($sectionTitle); ?> - PetsAccessories</title>
+        <link rel="stylesheet" href="../layout/style.css">
+    </head>
+
+    <body>
+        <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php endif; ?>
     <main class="products-page" style="padding: 40px 0;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
             <section class="product-section">
                 <h2>
                     <?php echo htmlspecialchars($sectionTitle); ?>
                 </h2>
-                
+
                 <div class="product-grid">
                     <?php if (!empty($products) && is_array($products)): ?>
                         <?php foreach ($products as $product): ?>
                             <div class="product-card">
                                 <div class="product-image">
                                     <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int)($product['product_id'] ?? 0); ?>">
-                                        <?php 
-                                        $image = !empty($product['thumbnail']) ? '/PetsAccessories/upload/imgProduct/' . $product['thumbnail'] : (!empty($product['image']) ? $product['image'] : '/PetsAccessories/frontend/public/images/default.jpg'); 
+                                        <?php
+                                        $image = !empty($product['thumbnail']) ? '/PetsAccessories/upload/imgProduct/' . $product['thumbnail'] : (!empty($product['image']) ? $product['image'] : '/PetsAccessories/frontend/public/images/default.jpg');
                                         ?>
                                         <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? $product['name'] ?? 'Tên sản phẩm'); ?>">
                                     </a>
@@ -69,39 +74,10 @@ $sectionTitle = $sectionTitle ?? 'Danh sách sản phẩm';
             </section>
         </div>
     </main>
+    <?php if (!$isEmbedded): ?>
+        <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+        
+    </body>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
-    
-    <script>
-    function addToCart(btn) {
-        const id = btn.getAttribute('data-id');
-        // Logic thêm vào giỏ hàng
-        fetch('/PetsAccessories/backend/src/add_to_cart.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'product_id=' + id + '&quantity=1'
-        }).then(res => res.json()).then(data => {
-            alert('Đã thêm sản phẩm vào giỏ hàng!');
-            if (data.cart_count) {
-                // Update cart count UI if exists
-                let countElem = document.querySelector('.cart-count');
-                if (countElem) countElem.innerText = data.cart_count;
-            }
-        }).catch(err => console.error(err));
-    }
-    
-    function toggleWishlist(id) {
-        // Logic yêu thích
-        fetch('/PetsAccessories/backend/src/wishlist_api.php', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'action=toggle&product_id=' + id
-        }).then(res => res.json()).then(data => {
-            if (data.status === 'success') {
-                alert(data.message);
-            }
-        }).catch(err => console.error(err));
-    }
-    </script>
-</body>
-</html>
+    </html>
+<?php endif; ?>

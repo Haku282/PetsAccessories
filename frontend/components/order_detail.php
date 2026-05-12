@@ -218,7 +218,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                 <div class="meta-box">
                     <h3>Tổng kết</h3>
                     <div class="meta-row"><span>Phí ship</span><strong><?php echo number_format((float) ($order['shipping_fee'] ?? 0), 0, ',', '.'); ?> đ</strong></div>
-                    <div class="meta-row"><span>Giảm giá</span><strong><?php echo number_format((float) ($order['discount_amount'] ?? 0), 0, ',', '.'); ?> đ</strong></div>
+                    <div class="meta-row"><span>Giảm giá</span><strong style="<?php echo ($order['discount_amount'] ?? 0) > 0 ? 'color: #e74c3c;' : ''; ?>"><?php echo ($order['discount_amount'] ?? 0) > 0 ? '-' : ''; ?><?php echo number_format((float) ($order['discount_amount'] ?? 0), 0, ',', '.'); ?> đ</strong></div>
                     <div class="meta-row"><span>Tổng thanh toán</span><strong><?php echo number_format((float) ($order['total_price'] ?? 0), 0, ',', '.'); ?> đ</strong></div>
                 </div>
                 <div class="meta-box">

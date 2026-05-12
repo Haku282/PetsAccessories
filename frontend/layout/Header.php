@@ -58,7 +58,8 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 <button type="submit">Tìm kiếm</button>
                 <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">💵</button>
 
-                <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo isset($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo !empty($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">-- Mặc định --</option>
                     <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
                     <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
                 </select>
@@ -95,10 +96,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 </div>
             <?php endif; ?>
         </div>
-    </div> <!-- /header-top -->
-
-    <!-- MEGA MENU BAR - DYNAMIC FROM DATABASE -->
-    <nav class="primary-nav">
+    </div> <nav class="primary-nav">
         <ul class="primary-menu">
             <li class="has-mega">
                 <a href="#">Boss</a>
@@ -132,8 +130,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                             </div>
                         <?php endif; ?>
                     </div>
-                </div> <!-- /mega-dropdown -->
-            </li>
+                </div> </li>
             <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng mới về</a></li>
             <li><a href="/PetsAccessories/frontend/components/brands.php">Thương hiệu</a></li>
             <li><a href="/PetsAccessories/frontend/components/news_section.php">News và Khuyến Mãi</a></li>
