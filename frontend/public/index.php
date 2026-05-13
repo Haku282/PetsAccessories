@@ -31,6 +31,14 @@
         require_once __DIR__ . '/../components/products.php';
         exit;
     }
+    if ($page === 'news_detail') {
+        require_once __DIR__ . '/../components/news_detail.php';
+        exit;
+    }
+    if ($page === 'page_detail') {
+        require_once __DIR__ . '/../components/page_detail.php';
+        exit;
+    }
 
     // Kết nối DB để lấy sản phẩm cho trang chủ
     require_once __DIR__ . '/../../backend/config/database.php';
