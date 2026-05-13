@@ -118,12 +118,13 @@
 
                 <?php foreach ($brands as $brand): ?>
                     <?php
-                    $imageFolder = '../../backend/uploads/imgBrand';
-                    $logoPath = !empty($brand['brand_logo']) ? $imageFolder . htmlspecialchars($brand['brand_logo']) : $imageFolder . 'default-brand.png';
+                    $logoPath = !empty($brand['brand_logo']) 
+                        ? '/PetsAccessories/admin/backend/uploads/brands/' . htmlspecialchars($brand['brand_logo']) 
+                        : '/PetsAccessories/frontend/public/images/default-brand.png';
                     ?>
 
                     <a href="/PetsAccessories/frontend/public/index.php?page=products&brand_id=<?php echo $brand['brand_id']; ?>" class="brand-card">
-                        <img src="<?php echo $logoPath; ?>" alt="Logo <?php echo htmlspecialchars($brand['brand_name']); ?>" onerror="this.src='<?php echo $imageFolder; ?>default-brand.png'">
+                        <img src="<?php echo $logoPath; ?>" alt="Logo <?php echo htmlspecialchars($brand['brand_name']); ?>" loading="lazy" onerror="this.src='/PetsAccessories/frontend/public/images/default-brand.png'">
                         <h4><?php echo htmlspecialchars($brand['brand_name']); ?></h4>
                     </a>
 

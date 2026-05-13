@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit(json_encode(['success' => false, 'message' => 'Không có quyền truy cập']));
 }
 
-require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../../backend/config/database.php';
 
 try {
     /** @var PDO $pdo */

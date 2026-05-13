@@ -44,6 +44,21 @@ class ProductsManager {
         document.getElementById('cancelModalBtn')?.addEventListener('click', () => this.closeModal());
         document.getElementById('saveProductBtn')?.addEventListener('click', () => this.saveProduct());
 
+        // Preview image when file selected
+        document.getElementById('productImageInput')?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const preview = document.getElementById('currentImageContainer');
+                    const img = preview.querySelector('img');
+                    img.src = event.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         // Modal backdrop
         document.getElementById('productModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'productModal') this.closeModal();
@@ -211,7 +226,7 @@ class ProductsManager {
         if (products.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="10" style="text-align: center; padding: 40px;">
+                    <td colspan="11" style="text-align: center; padding: 40px;">
                         <div class="empty-state">
                             <div class="empty-state-icon">📦</div>
                             <p>Không có sản phẩm nào</p>
@@ -224,6 +239,13 @@ class ProductsManager {
 
         tbody.innerHTML = products.map(product => `
             <tr>
+                <td>
+                    <div class="product-thumbnail">
+                        <img src="${product.thumbnail ? '/PetsAccessories/admin/backend/uploads/products/' + product.thumbnail : '/PetsAccessories/frontend/public/images/default.jpg'}" 
+                             alt="${this.escapeHtml(product.product_name)}"
+                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+                    </div>
+                </td>
                 <td>
                     <div class="product-name">${this.escapeHtml(product.product_name)}</div>
                     <div class="product-sku">SKU: ${product.sku || '-'}</div>
@@ -322,12 +344,27 @@ class ProductsManager {
         document.getElementById('stockInput').value = product.stock_quantity;
         document.getElementById('statusInput').value = product.status;
         document.getElementById('descriptionInput').value = product.description || '';
+        
+        // Show current thumbnail preview
+        if (product.thumbnail) {
+            const currentImageContainer = document.getElementById('currentImageContainer');
+            const currentImage = document.getElementById('currentImage');
+            currentImage.src = `/PetsAccessories/admin/backend/uploads/products/${product.thumbnail}`;
+            currentImageContainer.style.display = 'block';
+        }
     }
 
     resetForm() {
         document.getElementById('productForm').reset();
         document.getElementById('imageGallery').innerHTML = '';
         document.getElementById('imageUploadInput').value = '';
+        document.getElementById('productImageInput').value = '';
+        
+        // Hide preview
+        const currentImageContainer = document.getElementById('currentImageContainer');
+        if (currentImageContainer) {
+            currentImageContainer.style.display = 'none';
+        }
     }
 
     renderProductImages(images) {
@@ -451,31 +488,63 @@ class ProductsManager {
         const stock = document.getElementById('stockInput').value;
         const status = document.getElementById('statusInput').value;
         const description = document.getElementById('descriptionInput').value;
+        const thumbnailInput = document.getElementById('productImageInput');
 
         if (!this.validateForm(productName, category, price, stock)) {
             return;
         }
 
-        const endpoint = this.currentProduct ? `${this.apiBase}/update.php` : `${this.apiBase}/add.php`;
-        const method = 'POST';
-
-        const payload = {
-            product_name: productName,
-            category_id: category,
-            brand_id: brand || null,
-            sku: sku || null,
-            price: parseFloat(price),
-            discount_price: parseFloat(discountPrice) || 0,
-            stock_quantity: parseInt(stock),
-            status: status,
-            description: description
-        };
-
-        if (this.currentProduct) {
-            payload.product_id = this.currentProduct.product_id;
+        // Check thumbnail requirement
+        const isUpdate = !!this.currentProduct;
+        if (!isUpdate && !thumbnailInput.files.length) {
+            this.showMessage('error', 'Vui lòng chọn hình ảnh sản phẩm');
+            return;
         }
 
         try {
+            let thumbnailFilename = '';
+
+            // Upload thumbnail if file selected
+            if (thumbnailInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('image', thumbnailInput.files[0]);
+
+                const uploadRes = await fetch(`${this.apiBase}/upload-image.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadRes.json();
+
+                if (!uploadData.success) {
+                    throw new Error(uploadData.message);
+                }
+
+                thumbnailFilename = uploadData.filename;
+            } else {
+                // For update without new image, keep old filename
+                thumbnailFilename = this.currentProduct.thumbnail;
+            }
+
+            const endpoint = isUpdate ? `${this.apiBase}/update.php` : `${this.apiBase}/add.php`;
+            const method = 'POST';
+
+            const payload = {
+                product_name: productName,
+                category_id: category,
+                brand_id: brand || null,
+                sku: sku || null,
+                price: parseFloat(price),
+                discount_price: parseFloat(discountPrice) || 0,
+                stock_quantity: parseInt(stock),
+                status: status,
+                description: description,
+                thumbnail: thumbnailFilename
+            };
+
+            if (isUpdate) {
+                payload.product_id = this.currentProduct.product_id;
+            }
+
             const response = await fetch(endpoint, {
                 method: method,
                 headers: {

@@ -44,7 +44,7 @@ if (!$isEmbedded):
                 <?php foreach ($newsItems as $index => $item): ?>
                     <?php
                     $thumbnail = !empty($item['thumbnail'])
-                        ? $item['thumbnail']
+                        ? '/PetsAccessories/admin/backend/uploads/posts/' . htmlspecialchars($item['thumbnail'])
                         : '/PetsAccessories/frontend/public/images/default-news.png';
                     $excerpt = trim(strip_tags($item['content'] ?? ''));
                     if (strlen($excerpt) > 120) {
@@ -54,7 +54,7 @@ if (!$isEmbedded):
                     $link = '/PetsAccessories/frontend/components/news_detail.php?slug=' . urlencode($item['slug']);
                     ?>
                     <article class="news-card">
-                        <div class="news-media <?php echo $mediaClass; ?>" style="background-image: url('<?php echo htmlspecialchars($thumbnail); ?>'); background-size: cover; background-position: center;"></div>
+                        <div class="news-media <?php echo $mediaClass; ?>" style="background-image: url('<?php echo $thumbnail; ?>'); background-size: cover; background-position: center;"></div>
                         <div class="news-body">
                             <span class="news-tag"><?php echo htmlspecialchars($item['category']); ?></span>
                             <h3 class="news-title"><?php echo htmlspecialchars($item['title']); ?></h3>

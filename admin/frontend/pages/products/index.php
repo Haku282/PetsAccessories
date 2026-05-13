@@ -73,6 +73,7 @@ require_once __DIR__ . '/../../layout/header.php';
                 <table class="products-table">
                     <thead>
                         <tr>
+                            <th>Ảnh</th>
                             <th>Tên Sản Phẩm</th>
                             <th>Danh Mục</th>
                             <th>Thương Hiệu</th>
@@ -193,8 +194,28 @@ require_once __DIR__ . '/../../layout/header.php';
                     </div>
 
                     <!-- Images Section -->
+                    <div class="form-section">
+                        <h4>🖼️ Ảnh Sản Phẩm (Thumbnail)</h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productImageInput">Chọn Ảnh Sản Phẩm *</label>
+                                <input type="file" id="productImageInput" class="form-control" accept="image/*">
+                                <small>JPG, PNG, GIF, WebP | Max 5MB</small>
+                            </div>
+
+                            <div class="form-group">
+                                <div id="currentImageContainer" style="display: none;">
+                                    <label>Xem Trước</label>
+                                    <img id="currentImage" src="" alt="preview" style="max-width: 120px; max-height: 120px; object-fit: cover; border-radius: 4px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Images Gallery Section -->
                     <div class="form-section" id="imagesSection" style="display: none;">
-                        <h4>🖼️ Ảnh Sản Phẩm</h4>
+                        <h4>🖼️ Ảnh Bổ Sung (Thêm vào gallery)</h4>
                         
                         <div class="image-upload-section" id="dropZone">
                             <p>📤 Kéo thả ảnh vào đây hoặc</p>

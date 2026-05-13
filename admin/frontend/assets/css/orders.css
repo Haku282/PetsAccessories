@@ -676,3 +676,96 @@
         min-width: 30px;
     }
 }
+
+/* Export Buttons Styling */
+#exportPdfBtn,
+#exportExcelBtn {
+    background: linear-gradient(135deg, var(--info-color) 0%, #00897b 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0, 150, 136, 0.2);
+}
+
+#exportPdfBtn:hover,
+#exportExcelBtn:hover {
+    background: linear-gradient(135deg, #00897b 0%, #006064 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 150, 136, 0.3);
+}
+
+#exportPdfBtn:active,
+#exportExcelBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 150, 136, 0.2);
+}
+
+/* Modal footer buttons spacing */
+.modal-footer {
+    gap: 12px;
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-footer .btn {
+    flex: 0 1 auto;
+    min-width: 100px;
+    justify-content: center;
+}
+
+/* Responsive adjustments for export buttons */
+@media (max-width: 768px) {
+    #exportPdfBtn,
+    #exportExcelBtn {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+    
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+    
+    .modal-footer .btn {
+        flex: 1 1 48%;
+        min-width: auto;
+    }
+}
+
+/* Banner Image Preview Styling */
+.banner-img-preview {
+    max-width: 100%;
+    height: auto;
+    max-height: 300px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: block;
+}
+
+#currentImageContainer {
+    padding: 10px;
+    background: var(--light-gray);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+#currentImageContainer p {
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+
+#currentImage {
+    max-width: 100%;
+    height: auto;
+    max-height: 250px;
+    border-radius: 4px;
+}
+

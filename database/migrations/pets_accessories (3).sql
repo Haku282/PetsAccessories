@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 05, 2026 lúc 01:15 PM
+-- Thời gian đã tạo: Th5 13, 2026 lúc 11:28 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -37,6 +37,13 @@ CREATE TABLE `banners` (
   `status` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `banners`
+--
+
+INSERT INTO `banners` (`banner_id`, `title`, `image_url`, `link_url`, `position`, `order_priority`, `status`) VALUES
+(1, '123', 'banner_1778663018_68269.png', '', 'slider', 0, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -57,7 +64,7 @@ CREATE TABLE `brands` (
 INSERT INTO `brands` (`brand_id`, `brand_name`, `brand_logo`, `description`) VALUES
 (1, 'Royal Canin', 'royal_canin.png', NULL),
 (2, 'Pedigree', 'pedigree.png', NULL),
-(3, 'Natural Core', 'natural_core.png', NULL),
+(3, 'Natural Core', 'brand_1778647652_7413.webp', ''),
 (4, 'Taste of the Wild', 'taste_of_the_wild.png', NULL);
 
 -- --------------------------------------------------------
@@ -134,12 +141,6 @@ CREATE TABLE `coupons` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-// Đang đổ dữ liệu cho bảng `coupons`
-INSERT INTO `coupons` (`code`, `discount_type`, `discount_value`, `min_order_value`, `max_discount`, `usage_limit`, `used_count`, `expiry_date`, `status`, `created_at`) VALUES
-('CHAOHE20', 'percentage', 20, 300000, 50000, 100, 0, '2026-08-31 23:59:59', 1, NOW()),
-('GIAM50K', 'fixed', 50000, 400000, NULL, 50, 0, '2026-06-30 23:59:59', 1, NOW()),
-('FREESHIP', 'fixed', 30000, 200000, NULL, 500, 0, '2026-12-31 23:59:59', 1, NOW()),
-('BOSVIP', 'percentage', 10, 0, 30000, 200, 15, '2026-12-31 23:59:59', 1, NOW());
 -- --------------------------------------------------------
 
 --
@@ -163,6 +164,13 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `user_id`, `coupon_id`, `total_price`, `shipping_fee`, `discount_amount`, `order_status`, `payment_method`, `payment_status`, `shipping_method`, `shipping_address`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 2, NULL, 465000.00, 30000.00, 0.00, 'pending', 'cod', 'unpaid', 'standard', 'Lý Tự Trọng\r\nNinh Kiều, Phường An Khánh, Quận Ninh Kiều, Thành phố Cần Thơ', NULL, '2026-05-13 03:26:31', '2026-05-13 03:26:31');
+
 -- --------------------------------------------------------
 
 --
@@ -176,6 +184,14 @@ CREATE TABLE `order_items` (
   `quantity` int(11) NOT NULL,
   `price_at_purchase` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `order_items`
+--
+
+INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `quantity`, `price_at_purchase`) VALUES
+(1, 1, 1, 1, 135000.00),
+(2, 1, 3, 1, 300000.00);
 
 -- --------------------------------------------------------
 
@@ -220,6 +236,13 @@ CREATE TABLE `pages` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `pages`
+--
+
+INSERT INTO `pages` (`page_id`, `page_title`, `page_slug`, `page_content`, `updated_at`) VALUES
+(1, '123', '123', '123', '2026-05-13 09:19:23');
+
 -- --------------------------------------------------------
 
 --
@@ -237,6 +260,13 @@ CREATE TABLE `posts` (
   `status` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `posts`
+--
+
+INSERT INTO `posts` (`post_id`, `title`, `slug`, `content`, `thumbnail`, `category`, `author_id`, `status`, `created_at`) VALUES
+(1, '1234', '1234', '1234', 'post_1778663933_6722.jpg', 'blog', 1, 1, '2026-05-13 09:18:53');
 
 -- --------------------------------------------------------
 
@@ -266,11 +296,11 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`product_id`, `category_id`, `brand_id`, `promotion_id`, `product_name`, `sku`, `price`, `discount_price`, `thumbnail`, `description`, `stock_quantity`, `status`, `created_at`, `updated_at`) VALUES
-(1, 8, 2, NULL, 'Thức ăn hạt Pedigree vị bò', 'DOG-FOOD-001', 150000.00, 135000.00, NULL, 'Thức ăn hạt giàu dinh dưỡng cho chó trưởng thành.', 49, 'active', '2026-04-27 06:35:34', '2026-04-28 08:16:17'),
+(1, 8, 2, NULL, 'Thức ăn hạt Pedigree vị bò', 'DOG-FOOD-001', 150000.00, 135000.00, 'product_1778647264_80451.jpg', 'Thức ăn hạt giàu dinh dưỡng cho chó trưởng thành.', 44, 'active', '2026-04-27 06:35:34', '2026-05-13 04:57:10'),
 (2, 9, 1, NULL, 'Pate lon Royal Canin Puppy', 'DOG-FOOD-002', 45000.00, 0.00, NULL, 'Pate thơm ngon giúp kích thích vị giác cho cún con.', 100, 'active', '2026-04-27 06:35:34', '2026-04-28 08:16:17'),
-(3, 10, NULL, NULL, 'Hạt hỗ trợ tiêu hóa cho chó nhạy cảm', 'DOG-FOOD-003', 320000.00, 300000.00, NULL, 'Công thức đặc biệt dành cho chó có hệ tiêu hóa yếu.', 19, 'active', '2026-04-27 06:35:34', '2026-04-27 11:47:08'),
+(3, 10, NULL, NULL, 'Hạt hỗ trợ tiêu hóa cho chó nhạy cảm', 'DOG-FOOD-003', 320000.00, 300000.00, 'product_1778647490_76895.webp', 'Công thức đặc biệt dành cho chó có hệ tiêu hóa yếu.', 18, 'active', '2026-04-27 06:35:34', '2026-05-13 04:44:50'),
 (4, 11, NULL, NULL, 'Thức ăn hữu cơ Natural Core', 'DOG-FOOD-004', 450000.00, 0.00, NULL, 'Thành phần 100% tự nhiên, không chất bảo quản.', 15, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
-(5, 12, NULL, NULL, 'Hạt không ngũ cốc Taste of the Wild', 'DOG-FOOD-005', 550000.00, 520000.00, NULL, 'Phù hợp cho chó dị ứng với các loại ngũ cốc.', 9, 'active', '2026-04-27 06:35:34', '2026-04-27 11:47:10'),
+(5, 12, NULL, NULL, 'Hạt không ngũ cốc Taste of the Wild', 'DOG-FOOD-005', 550000.00, 520000.00, NULL, 'Phù hợp cho chó dị ứng với các loại ngũ cốc.', 9, 'active', '2026-04-27 06:35:34', '2026-05-06 02:18:54'),
 (6, 13, NULL, NULL, 'Bánh thưởng mềm vị gà Bowwow', 'TREAT-001', 35000.00, 0.00, NULL, 'Bánh thưởng mềm, thơm mùi gà, thích hợp để huấn luyện.', 200, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
 (7, 14, NULL, NULL, 'Xương gặm sạch răng Pedigree Dentastix', 'TREAT-002', 25000.00, 0.00, NULL, 'Giúp giảm mảng bám và vôi răng cho cún.', 150, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
 (8, 15, NULL, NULL, 'Súp thưởng Wanpy cho chó', 'TREAT-003', 12000.00, 0.00, NULL, 'Súp dạng lỏng, bổ sung nước và dưỡng chất.', 300, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
@@ -384,12 +414,10 @@ CREATE TABLE `users` (
   `fullname` varchar(100) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `province` varchar(100) DEFAULT NULL,
-  `district` varchar(100) DEFAULT NULL,
-  `ward` varchar(100) DEFAULT NULL,
   `avatar` varchar(255) DEFAULT 'default-avatar.png',
   `role` enum('admin','customer') DEFAULT 'customer',
   `status` tinyint(1) DEFAULT 1,
+  `lock_reason` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -397,9 +425,9 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `fullname`, `phone`, `address`, `avatar`, `role`, `status`, `created_at`) VALUES
-(1, 'admin', 'admin@gmail.com', '$2y$10$LRGZ2PKkqCbkUcXDnKcL9OmVpHBfUEsHewzzNhT4yefC8QOnHwAB.', 'admin', '0987123456', 'Cái Răng, Cần Thơ', 'default-avatar.png', 'admin', 1, '2026-04-28 08:28:45'),
-(2, 'user', 'user@gmail.com', '$2y$10$OAC9HIDv0rz6xUlDFEcCruJsSPD.qyLAOxbrNQV6NZGmNEaJqG/Wm', 'Trần User', '0987654731', 'Lý Tự Trọng\nNinh Kiều', 'default-avatar.png', 'customer', 1, '2026-04-30 13:24:17');
+INSERT INTO `users` (`user_id`, `username`, `email`, `password`, `fullname`, `phone`, `address`, `avatar`, `role`, `status`, `lock_reason`, `created_at`) VALUES
+(1, 'admin', 'admin@gmail.com', '$2y$10$LRGZ2PKkqCbkUcXDnKcL9OmVpHBfUEsHewzzNhT4yefC8QOnHwAB.', 'admin', '0987123456', 'Cái Răng, Cần Thơ', 'default-avatar.png', 'admin', 1, NULL, '2026-04-28 08:28:45'),
+(2, 'user', 'user@gmail.com', '$2y$10$wI8Zjf14MZi/J2oPumHit.0j2w67xHK4cBC.t3BzKGrcd9ohdrfdK', 'Trần User', '0987654731', 'Lý Tự Trọng\r\nNinh Kiều, Phường An Khánh, Quận Ninh Kiều, Thành phố Cần Thơ', 'default-avatar.png', 'customer', 1, NULL, '2026-04-30 13:24:17');
 
 -- --------------------------------------------------------
 
@@ -428,6 +456,13 @@ CREATE TABLE `wishlists` (
   `product_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `wishlists`
+--
+
+INSERT INTO `wishlists` (`wishlist_id`, `user_id`, `product_id`, `created_at`) VALUES
+(2, 2, 1, '2026-05-12 09:43:09');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -589,13 +624,13 @@ ALTER TABLE `wishlists`
 -- AUTO_INCREMENT cho bảng `banners`
 --
 ALTER TABLE `banners`
-  MODIFY `banner_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `banner_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `brand_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `brand_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -613,13 +648,13 @@ ALTER TABLE `coupons`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `order_logs`
@@ -637,19 +672,19 @@ ALTER TABLE `order_status_history`
 -- AUTO_INCREMENT cho bảng `pages`
 --
 ALTER TABLE `pages`
-  MODIFY `page_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `page_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `posts`
 --
 ALTER TABLE `posts`
-  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `products`
 --
 ALTER TABLE `products`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `product_images`
@@ -703,7 +738,7 @@ ALTER TABLE `user_addresses`
 -- AUTO_INCREMENT cho bảng `wishlists`
 --
 ALTER TABLE `wishlists`
-  MODIFY `wishlist_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `wishlist_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

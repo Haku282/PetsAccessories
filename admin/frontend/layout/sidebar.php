@@ -21,8 +21,8 @@
         <li><a href="/PetsAccessories/admin/frontend/pages/shipping/index.php"><i class="icon">🚚</i> Giao Hàng</a></li>
 
         <li class="menu-header">NỘI DUNG</li>
-        <li><a href="/PetsAccessories/admin/frontend/pages/cms_pages/index.php"><i class="icon">📝</i> CMS Pages</a></li>
-        <li><a href="/PetsAccessories/admin/frontend/pages/cms_posts/index.php"><i class="icon">📰</i> Bài Viết</a></li>
+        <li><a href="/PetsAccessories/admin/frontend/pages/cms_pages/index.php"><i class="icon">📰</i> Tin Tức</a></li>
+        <li><a href="/PetsAccessories/admin/frontend/pages/cms_posts/index.php"><i class="icon">🎉</i> Chương Trình Khuyến Mãi</a></li>
         <li><a href="/PetsAccessories/admin/frontend/pages/banners/index.php"><i class="icon">🖼️</i> Banners</a></li>
     </ul>
 </aside>

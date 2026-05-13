@@ -42,6 +42,14 @@ class UsersManager {
         document.getElementById('userModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'userModal') this.closeModal();
         });
+
+        // Lock Reason Modal
+        document.getElementById('closeLockReasonModalBtn')?.addEventListener('click', () => this.closeLockReasonModal());
+        document.getElementById('cancelLockBtn')?.addEventListener('click', () => this.closeLockReasonModal());
+        document.getElementById('confirmLockBtn')?.addEventListener('click', () => this.confirmLockUser());
+        document.getElementById('lockReasonModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'lockReasonModal') this.closeLockReasonModal();
+        });
     }
 
     applyFilters() {
@@ -228,6 +236,13 @@ class UsersManager {
             const newStatus = currentStatus === 1 ? 0 : 1;
             const action = newStatus === 1 ? 'mở khóa' : 'khóa';
 
+            // Nếu muốn khóa (status = 0), hiển thị modal nhập lý do
+            if (newStatus === 0) {
+                this.showLockReasonModal(userId);
+                return;
+            }
+
+            // Nếu muốn mở khóa, confirm trực tiếp
             if (!confirm(`Bạn có chắc chắn muốn ${action} tài khoản này?`)) return;
 
             const response = await fetch(`${this.apiBase}/toggle-status.php`, {
@@ -243,6 +258,52 @@ class UsersManager {
 
             if (data.success) {
                 this.showMessage('success', data.message);
+                this.loadUsers(this.currentPage);
+            } else {
+                this.showMessage('error', data.message);
+            }
+        } catch (error) {
+            this.showMessage('error', 'Lỗi: ' + error.message);
+        }
+    }
+
+    showLockReasonModal(userId) {
+        document.getElementById('lockUserId').value = userId;
+        document.getElementById('lockReasonInput').value = '';
+        document.getElementById('lockReasonModal').style.display = 'block';
+    }
+
+    closeLockReasonModal() {
+        document.getElementById('lockReasonModal').style.display = 'none';
+        document.getElementById('lockUserId').value = '';
+        document.getElementById('lockReasonInput').value = '';
+    }
+
+    async confirmLockUser() {
+        const userId = parseInt(document.getElementById('lockUserId').value);
+        const lockReason = document.getElementById('lockReasonInput').value.trim();
+
+        if (!lockReason) {
+            this.showMessage('error', 'Vui lòng nhập lý do khóa tài khoản');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiBase}/toggle-status.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    user_id: userId,
+                    status: 0,
+                    lock_reason: lockReason
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.showMessage('success', data.message);
+                this.closeLockReasonModal();
                 this.loadUsers(this.currentPage);
             } else {
                 this.showMessage('error', data.message);

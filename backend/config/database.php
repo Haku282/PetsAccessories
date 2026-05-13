@@ -1,6 +1,8 @@
 <?php
 // backend/config/database.php
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 $host = 'localhost';
 $candidateDbNames = ['petsaccessories', 'pets_accessories'];
 $username = 'root';
@@ -13,6 +15,7 @@ foreach ($candidateDbNames as $dbname) {
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec("SET time_zone = '+07:00';");
         break;
     } catch (PDOException $e) {
         $lastError = $e;

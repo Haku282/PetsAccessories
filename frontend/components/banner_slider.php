@@ -24,7 +24,7 @@ if (isset($pdo)) {
                         <a href="<?php echo htmlspecialchars($banner['link']); ?>">
                         <?php endif; ?>
 
-                        <img src="/PetsAccessories/upload/<?php echo htmlspecialchars($banner['image_url']); ?>" alt="<?php echo htmlspecialchars($banner['title'] ?? ''); ?>">
+                        <img src="/PetsAccessories/admin/backend/uploads/banners/<?php echo htmlspecialchars($banner['image_url']); ?>" alt="<?php echo htmlspecialchars($banner['title'] ?? ''); ?>" loading="lazy">
 
                         <?php if (!empty($banner['title'])): ?>
                             <div class="banner-text"><?php echo htmlspecialchars($banner['title']); ?></div>

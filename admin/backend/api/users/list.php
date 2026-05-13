@@ -65,7 +65,7 @@ try {
     $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
     // Lấy data
-    $sql = "SELECT user_id, username, email, fullname as full_name, phone, role, status, created_at FROM users" . $whereClause;
+    $sql = "SELECT user_id, username, email, fullname as full_name, phone, role, status, lock_reason, created_at FROM users" . $whereClause;
     $sql .= " ORDER BY created_at DESC LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
     $stmt = $db->prepare($sql);
     $stmt->execute($params);

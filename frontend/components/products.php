@@ -46,9 +46,15 @@ $sectionTitle = $sectionTitle ?? 'Danh sách sản phẩm';
                                 <div class="product-image">
                                     <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int)($product['product_id'] ?? 0); ?>">
                                         <?php
-                                        $image = !empty($product['thumbnail']) ? '/PetsAccessories/upload/imgProduct/' . $product['thumbnail'] : (!empty($product['image']) ? $product['image'] : '/PetsAccessories/frontend/public/images/default.jpg');
+                                        // Build image path - support multiple thumbnail columns
+                                        $thumbnail = $product['thumbnail'] ?? $product['image'] ?? '';
+                                        if (!empty($thumbnail)) {
+                                            $image = '/PetsAccessories/admin/backend/uploads/products/' . htmlspecialchars($thumbnail);
+                                        } else {
+                                            $image = '/PetsAccessories/frontend/public/images/default.jpg';
+                                        }
                                         ?>
-                                        <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? $product['name'] ?? 'Tên sản phẩm'); ?>">
+                                        <img src="<?php echo $image; ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? $product['name'] ?? 'Tên sản phẩm'); ?>" loading="lazy">
                                     </a>
                                 </div>
                                 <div class="product-info">

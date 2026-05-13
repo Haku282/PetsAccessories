@@ -1,5 +1,5 @@
 <?php require_once __DIR__ . '/../../../backend/middleware/check_admin.php'; 
-$pageTitle = 'CMS Trang';
+$pageTitle = 'Tin Tức';
 $extraCss = '<link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/categories.css">';
 $extraJs = '<script src="/PetsAccessories/admin/frontend/assets/js/cms.js"></script>';
 require_once __DIR__ . '/../../layout/header.php';
@@ -9,9 +9,9 @@ require_once __DIR__ . '/../../layout/header.php';
             <div id="messagesContainer"></div>
 
             <div class="brands-header">
-                <h2>📄 Danh Sách Trang CMS</h2>
+                <h2>📰 Danh Sách Tin Tức</h2>
                 <div class="brands-header-actions">
-                    <button class="btn btn-primary" id="addPageBtn">➕ Thêm Trang</button>
+                    <button class="btn btn-primary" id="addPageBtn">➕ Thêm Tin Tức</button>
                 </div>
             </div>
 

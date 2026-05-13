@@ -65,11 +65,12 @@ try {
     $stock_quantity = (int)$data['stock_quantity'];
     $status = $data['status'];
     $description = !empty($data['description']) ? $data['description'] : null;
+    $thumbnail = !empty($data['thumbnail']) ? $data['thumbnail'] : null;
 
     // Thêm sản phẩm vào database
     $stmt = $db->prepare("
-        INSERT INTO products (category_id, brand_id, product_name, sku, price, discount_price, stock_quantity, status, description, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        INSERT INTO products (category_id, brand_id, product_name, sku, price, discount_price, stock_quantity, status, description, thumbnail, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     ");
 
     $success = $stmt->execute([
@@ -81,7 +82,8 @@ try {
         $discount_price,
         $stock_quantity,
         $status,
-        $description
+        $description,
+        $thumbnail
     ]);
 
     if (!$success) {

@@ -17,24 +17,32 @@ if (!($db instanceof PDO)) {
             $error = "Vui lòng nhập đầy đủ thông tin.";
         } else {
             // Truy vấn user từ DB
-            $sql = "SELECT user_id, username, email, password, fullname, role FROM users WHERE username = ? OR email = ?";
+            $sql = "SELECT user_id, username, email, password, fullname, role, status, lock_reason FROM users WHERE username = ? OR email = ?";
             $stmt = $db->prepare($sql);
             $stmt->execute([$login_id, $login_id]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             // Kiểm tra mật khẩu
             if ($user && password_verify($password, $user['password'])) {
-                $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['user_name'] = !empty($user['fullname']) ? $user['fullname'] : $user['username'];
-                $_SESSION['role'] = $user['role'];
-
-                // Chuyển hướng dựa trên role
-                if ($user['role'] === 'admin') {
-                    header("Location: /PetsAccessories/admin/frontend/index_admin.php");
+                // Kiểm tra trạng thái tài khoản
+                if ($user['status'] === 0 || $user['status'] === '0') {
+                    // Tài khoản bị khóa
+                    $reason = $user['lock_reason'] ?? 'Không có lý do';
+                    $error = "Tài khoản của bạn đã bị khóa. Lý do: " . htmlspecialchars($reason);
                 } else {
-                    header("Location: /PetsAccessories/frontend/public/index.php");
+                    // Tài khoản hoạt động - đăng nhập thành công
+                    $_SESSION['user_id'] = $user['user_id'];
+                    $_SESSION['user_name'] = !empty($user['fullname']) ? $user['fullname'] : $user['username'];
+                    $_SESSION['role'] = $user['role'];
+
+                    // Chuyển hướng dựa trên role
+                    if ($user['role'] === 'admin') {
+                        header("Location: /PetsAccessories/admin/frontend/index_admin.php");
+                    } else {
+                        header("Location: /PetsAccessories/frontend/public/index.php");
+                    }
+                    exit;
                 }
-                exit;
             } else {
                 $error = "Tài khoản hoặc mật khẩu không chính xác!";
             }
