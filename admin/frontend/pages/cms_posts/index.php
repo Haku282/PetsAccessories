@@ -1,5 +1,5 @@
 <?php require_once __DIR__ . '/../../../backend/middleware/check_admin.php'; 
-$pageTitle = 'CMS Bài Viết';
+$pageTitle = 'Chương Trình Khuyến Mãi';
 $extraCss = '<link rel="stylesheet" href="/PetsAccessories/admin/frontend/assets/css/categories.css">';
 $extraJs = '<script src="/PetsAccessories/admin/frontend/assets/js/cms.js"></script>';
 require_once __DIR__ . '/../../layout/header.php';
@@ -9,16 +9,16 @@ require_once __DIR__ . '/../../layout/header.php';
             <div id="messagesContainer"></div>
 
             <div class="brands-header">
-                <h2>📰 Danh Sách Bài Viết</h2>
+                <h2>🎉 Danh Sách Chương Trình Khuyến Mãi</h2>
                 <div class="brands-header-actions">
-                    <button class="btn btn-primary" id="addPostBtn">➕ Thêm Bài Viết</button>
+                    <button class="btn btn-primary" id="addPostBtn">➕ Thêm Chương Trình</button>
                 </div>
             </div>
 
             <div class="search-filter-section">
                 <div class="search-filter-grid">
                     <div class="form-group">
-                        <label>Tìm kiếm bài viết</label>
+                        <label>Tìm kiếm chương trình</label>
                         <input id="postSearch" placeholder="Tiêu đề, nội dung...">
                     </div>
                 </div>
@@ -33,6 +33,7 @@ require_once __DIR__ . '/../../layout/header.php';
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th style="width: 120px;">Hình Ảnh</th>
                             <th>Tiêu đề</th>
                             <th>Loại</th>
                             <th>Trạng thái</th>
@@ -77,8 +78,13 @@ require_once __DIR__ . '/../../layout/header.php';
                         </select>
                     </div>
                     <div class="form-group-vertical">
-                        <label>Ảnh đại diện (URL)</label>
-                        <input type="text" id="postThumbnail" placeholder="/uploads/... hoặc URL ảnh">
+                        <label>Ảnh Bài Viết (Thumbnail) <span id="postThumbnailRequired" style="color:red;">*</span></label>
+                        <input type="file" id="postThumbnailFile" accept="image/*">
+                        <div class="image-preview-container" style="margin-top: 10px;">
+                            <img id="postThumbnailPreview" style="max-width: 200px; display: none;">
+                            <span id="postThumbnailName" style="display: none; color: #666;"></span>
+                        </div>
+                        <input type="hidden" id="postThumbnail">
                     </div>
                     <div class="form-group-vertical">
                         <label>Nội dung *</label>

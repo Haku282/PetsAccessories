@@ -1,7 +1,7 @@
 <?php
 /**
- * API: Upload ảnh sản phẩm (thumbnail)
- * POST /admin/backend/api/products/upload-image.php
+ * API: Upload banner image
+ * POST /admin/backend/api/banners/upload-image.php
  */
 
 header('Content-Type: application/json');
@@ -51,7 +51,7 @@ try {
     }
 
     // Create upload directory if not exists
-    $uploadDir = __DIR__ . '/../../uploads/products/';
+    $uploadDir = __DIR__ . '/../../uploads/banners/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
@@ -78,14 +78,14 @@ try {
         echo json_encode([
             'success' => true,
             'filename' => $existingFile,
-            'image_url' => '/PetsAccessories/admin/backend/uploads/products/' . $existingFile,
+            'image_url' => '/PetsAccessories/admin/backend/uploads/banners/' . $existingFile,
             'message' => 'File này đã tồn tại, sử dụng lại'
         ]);
         exit;
     }
 
     // Generate unique filename and upload
-    $fileName = 'product_' . time() . '_' . rand(10000, 99999) . '.' . $fileExtension;
+    $fileName = 'banner_' . time() . '_' . rand(10000, 99999) . '.' . $fileExtension;
     $targetPath = $uploadDir . $fileName;
 
     // Move file
@@ -98,7 +98,7 @@ try {
     echo json_encode([
         'success' => true,
         'filename' => $fileName,
-        'image_url' => '/PetsAccessories/admin/backend/uploads/products/' . $fileName
+        'image_url' => '/PetsAccessories/admin/backend/uploads/banners/' . $fileName
     ]);
 
 } catch (Exception $e) {

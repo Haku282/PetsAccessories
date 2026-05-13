@@ -16,9 +16,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Chỉ chấp nhận PUT request']);
+    echo json_encode(['success' => false, 'message' => 'Chỉ chấp nhận POST request']);
     exit;
 }
 
@@ -62,6 +62,11 @@ try {
         exit;
     }
 
+    // Get old post data to check thumbnail change
+    $oldPostStmt = $db->prepare("SELECT thumbnail FROM posts WHERE post_id = ?");
+    $oldPostStmt->execute([$postId]);
+    $oldPost = $oldPostStmt->fetch(PDO::FETCH_ASSOC);
+
     $updateFields = [];
     $params = [];
 
@@ -70,6 +75,15 @@ try {
         if (isset($data[$field])) {
             $updateFields[] = "$field = ?";
             $params[] = $data[$field];
+            
+            // Delete old thumbnail if changed
+            if ($field === 'thumbnail' && !empty($oldPost['thumbnail']) && $data[$field] !== $oldPost['thumbnail']) {
+                $uploadDir = __DIR__ . '/../../uploads/posts/';
+                $oldImagePath = $uploadDir . $oldPost['thumbnail'];
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
         }
     }
 

@@ -31,7 +31,7 @@ try {
 
     /** @var PDO $pdo */
     $db = $pdo;
-    $sql = "SELECT user_id, username, email, fullname as full_name, phone, address, avatar, role, status, created_at FROM users WHERE user_id = ?";
+    $sql = "SELECT user_id, username, email, fullname as full_name, phone, address, avatar, role, status, lock_reason, created_at FROM users WHERE user_id = ?";
     $stmt = $db->prepare($sql);
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);

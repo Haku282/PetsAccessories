@@ -64,6 +64,20 @@ try {
         throw new Exception(implode(', ', $errors));
     }
 
+    // Get old brand data to check logo change
+    $oldBrandStmt = $db->prepare("SELECT brand_logo FROM brands WHERE brand_id = ?");
+    $oldBrandStmt->execute([$brandId]);
+    $oldBrand = $oldBrandStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Delete old logo if changed
+    if (!empty($data['brand_logo']) && !empty($oldBrand['brand_logo']) && $data['brand_logo'] !== $oldBrand['brand_logo']) {
+        $uploadDir = __DIR__ . '/../../uploads/brands/';
+        $oldLogoPath = $uploadDir . $oldBrand['brand_logo'];
+        if (file_exists($oldLogoPath)) {
+            unlink($oldLogoPath);
+        }
+    }
+
     // Cập nhật thương hiệu
     $stmt = $db->prepare("
         UPDATE brands 
@@ -75,7 +89,7 @@ try {
     
     $stmt->execute([
         $data['brand_name'],
-        isset($data['brand_logo']) ? $data['brand_logo'] : null,
+        isset($data['brand_logo']) ? $data['brand_logo'] : $oldBrand['brand_logo'],
         isset($data['description']) ? $data['description'] : null,
         $brandId
     ]);

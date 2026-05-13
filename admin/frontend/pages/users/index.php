@@ -86,6 +86,29 @@ require_once __DIR__ . '/../../layout/header.php';
         </div>
     </div>
 
+    <!-- Lock Reason Modal -->
+    <div class="modal" id="lockReasonModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="lockReasonModalTitle">🔒 Khóa Tài Khoản</h3>
+                <button class="modal-close" id="closeLockReasonModalBtn">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="lockReasonForm">
+                    <input type="hidden" id="lockUserId">
+                    <div class="form-group">
+                        <label for="lockReasonInput">Lý do khóa tài khoản *</label>
+                        <textarea id="lockReasonInput" rows="4" placeholder="Nhập lý do khóa..." required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelLockBtn">Hủy</button>
+                <button type="submit" form="lockReasonForm" class="btn btn-danger" id="confirmLockBtn">🔒 Khóa Tài Khoản</button>
+            </div>
+        </div>
+    </div>
+
     <!-- User Modal -->
     <div class="modal" id="userModal">
         <div class="modal-content">

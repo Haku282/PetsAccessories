@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const postCategory = document.getElementById('postCategory');
   const postStatus = document.getElementById('postStatus');
   const postThumbnail = document.getElementById('postThumbnail');
+  const postThumbnailFile = document.getElementById('postThumbnailFile');
+  const postThumbnailPreview = document.getElementById('postThumbnailPreview');
+  const postThumbnailName = document.getElementById('postThumbnailName');
   const postContent = document.getElementById('postContent');
   const postModalTitle = document.getElementById('postModalTitle');
   let pages = [];
@@ -54,6 +57,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modal) modal.style.display = 'none';
   };
 
+  // Preview thumbnail when file selected
+  postThumbnailFile?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        postThumbnailPreview.src = event.target.result;
+        postThumbnailPreview.style.display = 'block';
+        postThumbnailName.textContent = file.name;
+        postThumbnailName.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
   async function loadPages() {
     if (!pageBody) return;
     const params = new URLSearchParams({ search: pageSearch?.value.trim() || '', page: 1, limit: 100 });
@@ -71,8 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${escapeHtml(p.page_title)}</td>
         <td>${escapeHtml(p.page_slug)}</td>
         <td>
-          <button onclick="window.__editPage(${p.page_id})">Sửa</button>
-          <button onclick="window.__deletePage(${p.page_id}, ${jsString(p.page_title)})">Xóa</button>
+          <div class="actions-cell">
+            <button class="action-btn edit" onclick="window.__editPage(${p.page_id})">✏️ Sửa</button>
+            <button class="action-btn delete" onclick="window.__deletePage(${p.page_id}, ${jsString(p.page_title)})">🗑️ Xóa</button>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -86,18 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!data.success) return msg(data.message || 'Không tải được bài viết', 'error');
     posts = data.data || [];
     if (!posts.length) {
-      postBody.innerHTML = '<tr><td colspan="5" style="text-align:center">Không có dữ liệu</td></tr>';
+      postBody.innerHTML = '<tr><td colspan="6" style="text-align:center">Không có dữ liệu</td></tr>';
       return;
     }
     postBody.innerHTML = posts.map(p => `
       <tr>
         <td>${p.post_id}</td>
+        <td>
+          <img src="/PetsAccessories/admin/backend/uploads/posts/${escapeHtml(p.thumbnail || 'default.jpg')}" alt="${escapeHtml(p.title)}" style="max-width: 100px; max-height: 80px; border-radius: 4px; object-fit: cover;">
+        </td>
         <td>${escapeHtml(p.title)}</td>
         <td>${escapeHtml(p.category)}</td>
         <td>${p.status == 1 ? 'Hiện' : 'Ẩn'}</td>
         <td>
-          <button onclick="window.__editPost(${p.post_id})">Sửa</button>
-          <button onclick="window.__deletePost(${p.post_id}, ${jsString(p.title)})">Xóa</button>
+          <div class="actions-cell">
+            <button class="action-btn edit" onclick="window.__editPost(${p.post_id})">✏️ Sửa</button>
+            <button class="action-btn delete" onclick="window.__deletePost(${p.post_id}, ${jsString(p.title)})">🗑️ Xóa</button>
+          </div>
         </td>
       </tr>
     `).join('');
@@ -126,6 +151,18 @@ document.addEventListener('DOMContentLoaded', () => {
     postStatus.value = String(post.status ?? 1);
     postThumbnail.value = post.thumbnail || '';
     postContent.value = post.content || '';
+    
+    // Show old thumbnail preview when editing
+    if (post.thumbnail) {
+      postThumbnailPreview.src = `/PetsAccessories/admin/backend/uploads/posts/${post.thumbnail}`;
+      postThumbnailPreview.style.display = 'block';
+      postThumbnailName.textContent = post.thumbnail;
+      postThumbnailName.style.display = 'block';
+    } else {
+      postThumbnailPreview.style.display = 'none';
+      postThumbnailName.style.display = 'none';
+    }
+    
     postModalTitle.textContent = '✏️ Sửa Bài Viết';
     openModal(postModal);
   };
@@ -177,6 +214,29 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const savePost = async () => {
+    // Validate title, slug, content
+    if (!postTitle.value.trim()) {
+      msg('Vui lòng nhập tiêu đề', 'error');
+      return;
+    }
+    if (!postSlug.value.trim()) {
+      msg('Vui lòng nhập slug', 'error');
+      return;
+    }
+    if (!postContent.value.trim()) {
+      msg('Vui lòng nhập nội dung', 'error');
+      return;
+    }
+    
+    // Validate thumbnail: required for new post, optional for edit
+    const file = postThumbnailFile?.files?.[0];
+    const hasExistingThumbnail = postThumbnail.value.trim();
+    
+    if (!editingPostId && !file && !hasExistingThumbnail) {
+      msg('Vui lòng chọn ảnh bài viết', 'error');
+      return;
+    }
+    
     const payload = {
       title: postTitle.value.trim(),
       slug: postSlug.value.trim(),
@@ -184,11 +244,31 @@ document.addEventListener('DOMContentLoaded', () => {
       category: postCategory.value,
       status: parseInt(postStatus.value || '1', 10)
     };
-    const thumbnail = postThumbnail.value.trim();
-    if (thumbnail) payload.thumbnail = thumbnail;
+    
+    // Handle thumbnail upload
+    let thumbnailFilename = postThumbnail.value.trim();
+    
+    if (file) {
+      // Upload thumbnail file
+      const formData = new FormData();
+      formData.append('image', file);
+      const uploadRes = await fetch(`${apiBase}/posts/upload-image.php`, {
+        method: 'POST',
+        body: formData
+      });
+      const uploadData = await uploadRes.json();
+      if (!uploadData.success) {
+        msg('Lỗi upload ảnh: ' + (uploadData.message || 'Không xác định'), 'error');
+        return;
+      }
+      thumbnailFilename = uploadData.filename;
+    }
+    
+    if (thumbnailFilename) payload.thumbnail = thumbnailFilename;
     if (editingPostId) payload.post_id = editingPostId;
+    
     const res = await fetch(`${apiBase}/posts/${editingPostId ? 'update.php' : 'create.php'}`, {
-      method: editingPostId ? 'PUT' : 'POST',
+      method: editingPostId ? 'POST' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
@@ -198,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closeModal(postModal);
       editingPostId = null;
       if (postId) postId.value = '';
+      if (postThumbnailFile) postThumbnailFile.value = '';
       loadPosts();
     }
   };
@@ -220,6 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (postCategory) postCategory.value = 'blog';
     if (postStatus) postStatus.value = '1';
     if (postThumbnail) postThumbnail.value = '';
+    if (postThumbnailFile) postThumbnailFile.value = '';
+    postThumbnailPreview.style.display = 'none';
+    postThumbnailName.style.display = 'none';
     if (postContent) postContent.value = '';
     postModalTitle.textContent = '➕ Thêm Bài Viết';
     openModal(postModal);

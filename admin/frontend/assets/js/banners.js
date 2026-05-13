@@ -40,6 +40,19 @@ const bannerManager = {
         this.cancelBtn.addEventListener('click', () => this.closeModal());
         this.saveBtn.addEventListener('click', () => this.saveBanner());
         
+        // Preview image when file selected
+        this.imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    this.currentImage.src = event.target.result;
+                    this.currentImageContainer.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
         // Đóng modal khi click ra ngoài
         window.addEventListener('click', (e) => {
             if (e.target === this.modal) this.closeModal();
@@ -75,7 +88,7 @@ const bannerManager = {
             <tr>
                 <td>#${banner.id}</td>
                 <td>
-                    <img src="/PetsAccessories/uploads/banners/${banner.image}" alt="${banner.title}" class="banner-img-preview">
+                    <img src="/PetsAccessories/admin/backend/uploads/banners/${banner.image}" alt="${banner.title}" class="banner-img-preview">
                 </td>
                 <td><strong>${banner.title}</strong></td>
                 <td>${banner.link ? `<a href="${banner.link}" target="_blank">Xem Link</a>` : 'Không có'}</td>
@@ -108,7 +121,7 @@ const bannerManager = {
             this.imageInput.required = false; 
             
             // Hiện ảnh cũ
-            this.currentImage.src = `/PetsAccessories/uploads/banners/${banner.image}`;
+            this.currentImage.src = `/PetsAccessories/admin/backend/uploads/banners/${banner.image}`;
             this.currentImageContainer.style.display = 'block';
         } else {
             this.modalTitle.textContent = '➕ Thêm Banner';
@@ -122,6 +135,9 @@ const bannerManager = {
 
     closeModal() {
         this.modal.classList.remove('show');
+        this.form.reset();
+        this.imageInput.value = '';
+        this.currentImageContainer.style.display = 'none';
     },
 
     async editBanner(id) {
@@ -140,35 +156,83 @@ const bannerManager = {
     },
 
     async saveBanner() {
-        if (!this.form.checkValidity()) {
-            this.form.reportValidity();
+        if (!this.titleInput.value.trim()) {
+            this.showMessage('Tiêu đề banner không được để trống', 'error');
             return;
         }
 
-        const formData = new FormData(this.form);
+        // Check image requirement
         const isUpdate = this.idInput.value !== '';
+        if (!isUpdate && !this.imageInput.files.length) {
+            this.showMessage('Vui lòng chọn hình ảnh', 'error');
+            return;
+        }
 
-        // Disable nút lưu để tránh bấm 2 lần
+        // Disable button
         this.saveBtn.disabled = true;
         this.saveBtn.textContent = 'Đang lưu...';
 
         try {
+            let imageFilename = '';
+
+            // Upload image if file selected
+            if (this.imageInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('image', this.imageInput.files[0]);
+
+                const uploadRes = await fetch(`${this.apiBaseUrl}/upload-image.php`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadRes.json();
+
+                if (!uploadData.success) {
+                    throw new Error(uploadData.message);
+                }
+
+                imageFilename = uploadData.filename;
+            } else {
+                // For update without new image, keep old filename
+                // Extract filename from image URL stored in data
+                const urlParts = this.currentImage.src.split('/');
+                imageFilename = urlParts[urlParts.length - 1];
+                
+                // If URL is relative path, make sure we get the filename
+                if (imageFilename.includes('?')) {
+                    imageFilename = imageFilename.split('?')[0];
+                }
+            }
+
+            // Save banner data
             const endpoint = isUpdate ? '/update.php' : '/create.php';
+            const saveData = {
+                title: this.titleInput.value.trim(),
+                image_url: imageFilename,
+                link_url: this.linkInput.value.trim(),
+                status: parseInt(this.statusSelect.value)
+            };
+
+            if (isUpdate) {
+                saveData.id = parseInt(this.idInput.value);
+            }
+
             const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(saveData)
             });
             const data = await response.json();
 
             if (data.success) {
                 this.showMessage(data.message, 'success');
                 this.closeModal();
-                this.loadBanners(); // Tải lại bảng
+                this.loadBanners(); // Reload table
             } else {
                 this.showMessage(data.message, 'error');
             }
         } catch (error) {
-            this.showMessage('Lỗi khi lưu banner', 'error');
+            console.error('Error:', error);
+            this.showMessage('Lỗi: ' + error.message, 'error');
         } finally {
             this.saveBtn.disabled = false;
             this.saveBtn.textContent = '💾 Lưu Banner';

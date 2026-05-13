@@ -1,40 +1,63 @@
 <?php
+/**
+ * API: Tạo banner mới
+ * POST /admin/backend/api/banners/create.php
+ * Body: JSON {title, image_url, link_url, status}
+ */
+
 header('Content-Type: application/json');
-if (session_status() === PHP_SESSION_NONE) session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     http_response_code(403);
-    exit(json_encode(['success' => false, 'message' => 'Không có quyền truy cập']));
+    echo json_encode(['success' => false, 'message' => 'Không có quyền truy cập']);
+    exit;
 }
 
-require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../../../backend/config/database.php';
 
 try {
     /** @var PDO $pdo */
-    $uploadDir = __DIR__ . '/../../../../uploads/banners/';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+    $data = json_decode(file_get_contents('php://input'), true);
 
-    $title = $_POST['title'] ?? '';
-    $link = $_POST['link'] ?? '';
-    $status = isset($_POST['status']) ? (int)$_POST['status'] : 1;
-
-    if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
-        exit(json_encode(['success' => false, 'message' => 'Vui lòng chọn hình ảnh hợp lệ']));
+    if (!$data) {
+        throw new Exception('Dữ liệu không hợp lệ');
     }
 
-    $fileExtension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-    $fileName = 'banner_' . time() . '_' . rand(1000, 9999) . '.' . $fileExtension;
-    $targetPath = $uploadDir . $fileName;
+    $title = trim($data['title'] ?? '');
+    $imageUrl = trim($data['image_url'] ?? '');
+    $linkUrl = trim($data['link_url'] ?? '');
+    $status = isset($data['status']) ? (int)$data['status'] : 1;
 
-    if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-        $stmt = $pdo->prepare("INSERT INTO banners (title, image_url, link_url, status) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$title, $fileName, $link, $status]);
-        echo json_encode(['success' => true, 'message' => 'Thêm banner thành công']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Lỗi khi upload hình ảnh lên server']);
+    // Validation
+    if (empty($title)) {
+        throw new Exception('Tiêu đề banner không được để trống');
     }
+
+    if (empty($imageUrl)) {
+        throw new Exception('Hình ảnh không được để trống');
+    }
+
+    // Insert to database
+    $stmt = $pdo->prepare("
+        INSERT INTO banners (title, image_url, link_url, status)
+        VALUES (?, ?, ?, ?)
+    ");
+    
+    $stmt->execute([$title, $imageUrl, $linkUrl, $status]);
+    $bannerId = $pdo->lastInsertId();
+
+    echo json_encode([
+        'success' => true,
+        'message' => 'Thêm banner thành công',
+        'banner_id' => (int)$bannerId
+    ]);
+
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Lỗi hệ thống: ' . $e->getMessage()]);
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>

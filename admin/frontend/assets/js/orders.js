@@ -404,9 +404,32 @@ class OrdersManager {
     exportOrder(format) {
         if (!this.currentOrder) return;
 
+        // Show loading state
+        const formatText = format.toUpperCase();
+        const originalText = format === 'pdf' ? '📄 Xuất PDF' : '📊 Xuất Excel';
+        const button = event.target;
+        const originalContent = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<span style="opacity: 0.7;">⏳ Đang xuất ' + formatText + '...</span>';
+
         const link = document.createElement('a');
         link.href = `${this.apiBase}/export.php?id=${this.currentOrder.order_id}&format=${format}`;
-        link.click();
+        
+        try {
+            link.click();
+            
+            // Restore button state after a short delay
+            setTimeout(() => {
+                button.disabled = false;
+                button.innerHTML = originalContent;
+                this.showMessage(`✅ Xuất ${formatText} thành công!`, 'success');
+            }, 1000);
+        } catch (error) {
+            button.disabled = false;
+            button.innerHTML = originalContent;
+            this.showMessage(`❌ Lỗi khi xuất ${formatText}. Vui lòng thử lại!`, 'error');
+        }
     }
 
     cancelOrder(id) {

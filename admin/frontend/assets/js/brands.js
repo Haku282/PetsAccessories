@@ -99,7 +99,7 @@ class BrandsManager {
                 <td>${brand.brand_id}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        ${brand.brand_logo ? `<img src="/PetsAccessories/uploads/brands/${brand.brand_logo}" alt="${brand.brand_name}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">` : '<div style="width: 40px; height: 40px; background: #e5e7eb; border-radius: 4px;"></div>'}
+                        ${brand.brand_logo ? `<img src="/PetsAccessories/admin/backend/uploads/brands/${brand.brand_logo}" alt="${brand.brand_name}" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;">` : '<div style="width: 40px; height: 40px; background: #e5e7eb; border-radius: 4px;"></div>'}
                         <strong>${brand.brand_name}</strong>
                     </div>
                 </td>
@@ -181,7 +181,7 @@ class BrandsManager {
         if (brand.brand_logo) {
             const logoPreview = document.getElementById('logoPreview');
             logoPreview.innerHTML = `
-                <img src="/PetsAccessories/uploads/brands/${brand.brand_logo}" alt="${brand.brand_name}" style="max-width: 100px; height: 100px; border-radius: 6px; object-fit: cover; border: 2px solid #e5e7eb;">
+                <img src="/PetsAccessories/admin/backend/uploads/brands/${brand.brand_logo}" alt="${brand.brand_name}" style="max-width: 100px; height: 100px; border-radius: 6px; object-fit: cover; border: 2px solid #e5e7eb;">
             `;
         }
     }
@@ -190,16 +190,40 @@ class BrandsManager {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Simple preview - in production, you'd upload to server
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const logoPreview = document.getElementById('logoPreview');
-            logoPreview.innerHTML = `
-                <img src="${event.target.result}" style="max-width: 100px; height: 100px; border-radius: 6px; object-fit: cover; border: 2px solid #e5e7eb;">
-            `;
-            document.getElementById('brandLogoInput').value = file.name;
-        };
-        reader.readAsDataURL(file);
+        // Validate file size
+        const maxFileSize = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxFileSize) {
+            this.showMessage('File quá lớn, tối đa 2MB', 'error');
+            return;
+        }
+
+        // Upload to server
+        const formData = new FormData();
+        formData.append('logo', file);
+
+        fetch('/PetsAccessories/admin/backend/api/brands/upload-logo.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Show preview
+                    const logoPreview = document.getElementById('logoPreview');
+                    logoPreview.innerHTML = `
+                        <img src="${data.image_url}" alt="Logo preview" style="max-width: 100px; height: 100px; border-radius: 6px; object-fit: cover; border: 2px solid #e5e7eb;">
+                    `;
+                    // Store filename
+                    document.getElementById('brandLogoInput').value = data.filename;
+                    this.showMessage('Upload logo thành công', 'success');
+                } else {
+                    this.showMessage('Lỗi: ' + data.message, 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                this.showMessage('Lỗi upload: ' + err.message, 'error');
+            });
     }
 
     saveBrand() {

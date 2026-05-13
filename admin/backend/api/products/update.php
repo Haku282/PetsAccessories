@@ -83,11 +83,20 @@ try {
     $stock_quantity = (int)$data['stock_quantity'];
     $status = $data['status'];
     $description = !empty($data['description']) ? $data['description'] : null;
+    $thumbnail = !empty($data['thumbnail']) ? $data['thumbnail'] : $existingProduct['thumbnail'];
+
+    // If thumbnail changed, delete old image
+    if ($thumbnail !== $existingProduct['thumbnail'] && !empty($existingProduct['thumbnail'])) {
+        $oldImagePath = __DIR__ . '/../../uploads/products/' . $existingProduct['thumbnail'];
+        if (file_exists($oldImagePath)) {
+            unlink($oldImagePath);
+        }
+    }
 
     // Cập nhật sản phẩm
     $stmt = $db->prepare("
         UPDATE products 
-        SET category_id = ?, brand_id = ?, product_name = ?, sku = ?, price = ?, discount_price = ?, stock_quantity = ?, status = ?, description = ?, updated_at = NOW()
+        SET category_id = ?, brand_id = ?, product_name = ?, sku = ?, price = ?, discount_price = ?, stock_quantity = ?, status = ?, description = ?, thumbnail = ?, updated_at = NOW()
         WHERE product_id = ?
     ");
 
@@ -101,6 +110,7 @@ try {
         $stock_quantity,
         $status,
         $description,
+        $thumbnail,
         $productId
     ]);
 
