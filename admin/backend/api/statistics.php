@@ -18,11 +18,67 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit;
 }
 
-require_once __DIR__ . '/../../backend/config/database.php';
+require_once __DIR__ . '/../../../backend/config/database.php';
 
 try {
     /** @var PDO $pdo */
     $db = $pdo;
+
+    $mode = isset($_GET['mode']) ? trim((string)$_GET['mode']) : '';
+    $groupBy = isset($_GET['group_by']) ? trim((string)$_GET['group_by']) : 'month';
+
+    if ($mode === 'revenue_breakdown') {
+        $allowedGroups = ['day', 'month', 'year'];
+        if (!in_array($groupBy, $allowedGroups, true)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'group_by không hợp lệ']);
+            exit;
+        }
+
+        if ($groupBy === 'day') {
+            $periodExpr = "DATE(created_at)";
+            $labelExpr = "DATE_FORMAT(created_at, '%d/%m/%Y')";
+        } elseif ($groupBy === 'year') {
+            $periodExpr = "DATE_FORMAT(created_at, '%Y')";
+            $labelExpr = "DATE_FORMAT(created_at, '%Y')";
+        } else {
+            $periodExpr = "DATE_FORMAT(created_at, '%Y-%m')";
+            $labelExpr = "DATE_FORMAT(created_at, '%m/%Y')";
+        }
+
+        $stmt = $db->query("
+            SELECT 
+                {$periodExpr} AS period_key,
+                {$labelExpr} AS period_label,
+                COUNT(*) AS order_count,
+                COALESCE(SUM(total_price), 0) AS revenue
+            FROM orders
+            WHERE order_status = 'completed'
+            GROUP BY period_key, period_label
+            ORDER BY period_key DESC
+        ");
+        $periodRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalRevenueStmt = $db->query("SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE order_status = 'completed'");
+        $totalRevenue = (float)$totalRevenueStmt->fetchColumn();
+
+        echo json_encode([
+            'success' => true,
+            'stats' => [
+                'group_by' => $groupBy,
+                'total_revenue' => $totalRevenue,
+                'periods' => array_map(function ($row) {
+                    return [
+                        'period_key' => $row['period_key'],
+                        'period_label' => $row['period_label'],
+                        'order_count' => (int)$row['order_count'],
+                        'revenue' => (float)$row['revenue']
+                    ];
+                }, $periodRows)
+            ]
+        ]);
+        exit;
+    }
     
     $stats = [];
 

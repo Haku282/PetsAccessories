@@ -629,3 +629,132 @@ body {
 .stat-card:nth-child(6) {
     animation-delay: 0.6s;
 }
+
+.clickable-stat {
+    cursor: pointer;
+    position: relative;
+}
+
+.clickable-stat:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+#revenueStatsModal .modal-content.revenue-modal-content {
+    width: min(94vw, 980px) !important;
+    max-width: 980px !important;
+    border-radius: 14px !important;
+}
+
+.revenue-modal-body {
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+}
+
+.revenue-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.revenue-controls label {
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.revenue-controls select {
+    min-width: 200px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    font-weight: 600;
+}
+
+.revenue-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.revenue-kpi {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    padding: 12px 14px;
+}
+
+.revenue-kpi .kpi-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--dark-light);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.revenue-kpi .kpi-value {
+    font-size: 20px;
+    color: var(--dark);
+}
+
+.revenue-table-wrapper {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.revenue-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.revenue-table th,
+.revenue-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.revenue-table th {
+    background: #f1f5f9;
+    font-size: 12px;
+    color: var(--dark-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.revenue-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#revenueStatsModal .btn-secondary {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+    .revenue-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .revenue-controls select {
+        width: 100%;
+    }
+
+    .revenue-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .revenue-table th,
+    .revenue-table td {
+        font-size: 12px;
+        padding: 10px;
+    }
+}
