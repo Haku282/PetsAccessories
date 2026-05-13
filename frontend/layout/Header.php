@@ -99,7 +99,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     </div> <nav class="primary-nav">
         <ul class="primary-menu">
             <li class="has-mega">
-                <a href="#">Boss</a>
+                <a href="/PetsAccessories/frontend/public/index.php">Boss</a>
 
                 <div class="mega-dropdown">
                     <div class="mega-inner">
@@ -131,9 +131,9 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                         <?php endif; ?>
                     </div>
                 </div> </li>
-            <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng mới về</a></li>
-            <li><a href="/PetsAccessories/frontend/components/brands.php">Thương hiệu</a></li>
-            <li><a href="/PetsAccessories/frontend/components/news_section.php">News và Khuyến Mãi</a></li>
+            <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng Mới Về</a></li>
+            <li><a href="/PetsAccessories/frontend/components/brands.php">Thương Hiệu</a></li>
+            <li><a href="/PetsAccessories/frontend/components/news_section.php">Tin Tức và Khuyến Mãi</a></li>
         </ul>
     </nav>
 </header>

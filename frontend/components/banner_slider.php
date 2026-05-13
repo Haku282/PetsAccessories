@@ -15,31 +15,67 @@ if (isset($pdo)) {
     }
 }
 ?>
-<section class="banner-slider">
-    <div class="banners">
+<section class="banner-slider-container" style="position: relative; max-width: 100%; overflow: hidden; margin: 20px auto; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <div class="banners-wrapper" id="banners-wrapper" style="display: flex; transition: transform 0.5s ease-in-out;">
         <?php if (!empty($banners)): ?>
             <?php foreach ($banners as $banner): ?>
-                <div class="banner-item">
-                    <?php if (!empty($banner['link'])): ?>
-                        <a href="<?php echo htmlspecialchars($banner['link']); ?>">
-                        <?php endif; ?>
+                <div class="banner-slide" style="min-width: 100%; box-sizing: border-box; position: relative;">
+                    <?php if (!empty($banner['link_url'])): ?>
+                        <a href="<?php echo htmlspecialchars($banner['link_url']); ?>" style="display: block;">
+                    <?php endif; ?>
 
-                        <img src="/PetsAccessories/admin/backend/uploads/banners/<?php echo htmlspecialchars($banner['image_url']); ?>" alt="<?php echo htmlspecialchars($banner['title'] ?? ''); ?>" loading="lazy">
+                        <img src="/PetsAccessories/admin/backend/uploads/banners/<?php echo htmlspecialchars($banner['image_url']); ?>" alt="<?php echo htmlspecialchars($banner['title'] ?? ''); ?>" loading="lazy" style="width: 100%; max-height: 400px; object-fit: cover; display: block; border-radius: 12px;">
 
                         <?php if (!empty($banner['title'])): ?>
-                            <div class="banner-text"><?php echo htmlspecialchars($banner['title']); ?></div>
+                            <div class="banner-text" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;"><?php echo htmlspecialchars($banner['title']); ?></div>
                         <?php endif; ?>
 
-                        <?php if (!empty($banner['link'])): ?>
+                    <?php if (!empty($banner['link_url'])): ?>
                         </a>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="banner-item">
-                <img src="/PetsAccessories/frontend/public/images/banner1.jpg" alt="Siêu sale đồ ăn thú cưng">
-                <div class="banner-text">Mùa hè sôi động, giảm 50% thức ăn hạt</div>
+            <div class="banner-slide" style="min-width: 100%; box-sizing: border-box; position: relative;">
+                <img src="/PetsAccessories/frontend/public/images/banner1.jpg" alt="Siêu sale đồ ăn thú cưng" style="width: 100%; max-height: 400px; object-fit: cover; display: block; border-radius: 12px;">
+                <div class="banner-text" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">Mùa hè sôi động, giảm 50% thức ăn hạt</div>
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Nút điều hướng -->
+    <button onclick="prevSlide()" style="position: absolute; top: 50%; left: 15px; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; font-size: 20px; cursor: pointer; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">❮</button>
+    <button onclick="nextSlide()" style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; font-size: 20px; cursor: pointer; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">❯</button>
 </section>
+
+<script>
+    let currentSlide = 0;
+    const wrapper = document.getElementById('banners-wrapper');
+    const slides = document.querySelectorAll('.banner-slide');
+    const totalSlides = slides.length;
+
+    function updateSlider() {
+        if (wrapper) {
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+    }
+
+    function nextSlide() {
+        if (totalSlides > 0) {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlider();
+        }
+    }
+
+    function prevSlide() {
+        if (totalSlides > 0) {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlider();
+        }
+    }
+
+    // Tự động trượt mỗi 4 giây
+    if (totalSlides > 1) {
+        setInterval(nextSlide, 4000);
+    }
+</script>
