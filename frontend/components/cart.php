@@ -34,7 +34,24 @@ require_once __DIR__ . '/../../backend/src/cart.php';
                             <div class="cart-item">
                                 <div class="cart-item__thumb">
                                     <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int) $item['product_id']; ?>">
-                                        <img src="<?php echo htmlspecialchars($item['thumbnail']); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                                        <?php
+                                        // Xử lý đường dẫn ảnh cho giỏ hàng
+                                        $rawThumb = $item['thumbnail'] ?? '';
+                                        if (!empty($rawThumb)) {
+                                            if (strpos($rawThumb, '/') !== false) {
+                                                $thumbnailUrl = $rawThumb;
+                                            } else {
+                                                // Nối thêm thư mục chứa ảnh
+                                                $thumbnailUrl = '/PetsAccessories/admin/backend/uploads/products/' . $rawThumb;
+                                            }
+                                        } else {
+                                            $thumbnailUrl = '/PetsAccessories/frontend/public/images/default-product.png';
+                                        }
+                                        ?>
+                                        <img src="<?php echo htmlspecialchars($thumbnailUrl); ?>"
+                                            alt="<?php echo htmlspecialchars($item['product_name']); ?>"
+                                            style="width: 100%; height: 80px; object-fit: contain;"
+                                            onerror="this.onerror=null; this.src='/PetsAccessories/frontend/public/images/default.jpg'">
                                     </a>
                                 </div>
 

@@ -50,7 +50,7 @@ require_once __DIR__ . '/../../backend/src/search.php';
                         <div class="product-image">
                             <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int)($product['product_id'] ?? 0); ?>">
                                 <?php 
-                                $image = !empty($product['thumbnail']) ? '/PetsAccessories/upload/imgProduct/' . $product['thumbnail'] : (!empty($product['image']) ? $product['image'] : '/PetsAccessories/frontend/public/images/default.jpg'); 
+                                $image = !empty($product['thumbnail']) ? '/PetsAccessories/admin/backend/uploads/products/' . $product['thumbnail'] : (!empty($product['image']) ? $product['image'] : '/PetsAccessories/admin/backend/uploads/products/default-product.png'); 
                                 ?>
                                 <img src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? $product['name'] ?? 'Tên sản phẩm'); ?>">
                             </a>
