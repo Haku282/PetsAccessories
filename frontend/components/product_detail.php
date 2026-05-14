@@ -223,7 +223,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                             Thêm vào giỏ hàng
                         </button>
-                        <button type="button" class="pd-wishlist">♥</button>
+                        <button type="button" class="pd-wishlist" id="wishlistBtn" data-id="<?php echo isset($productId) && $productId ? (int)$productId : (isset($product['product_id']) ? (int)$product['product_id'] : 0); ?>" data-wishlist="<?php echo $isInWishlist ? '1' : '0'; ?>" onclick="toggleProductDetailWishlist(this)">♥</button>
                     </div>
 
                     <div class="pd-benefits">
@@ -421,6 +421,98 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
             alert('Có lỗi xảy ra.');
         });
     }
+
+    function toggleProductDetailWishlist(btn) {
+        // Get product ID from button's data attribute
+        const productId = btn.getAttribute('data-id');
+        console.log('toggleWishlist called with btn:', btn);
+        console.log('Product ID attribute value:', productId);
+        console.log('Product ID type:', typeof productId);
+        
+        if (!productId || productId === '' || productId === '0' || productId === 'null' || productId === '[object HTMLButtonElement]') {
+            alert('Không thể xác định sản phẩm. Vui lòng tải lại trang.');
+            console.error('Invalid product ID:', productId);
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('action', 'toggle');
+        formData.append('product_id', String(productId).trim());
+        
+        console.log('Sending wishlist request with product_id:', String(productId).trim());
+        
+        fetch('/PetsAccessories/backend/src/wishlist_api.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(text => {
+            console.log('Raw response:', text);
+            try {
+                const data = JSON.parse(text);
+                if (data.status === 'success') {
+                    if (data.action === 'added') {
+                        btn.style.color = '#f44336';
+                        btn.style.borderColor = '#f44336';
+                        btn.setAttribute('data-wishlist', '1');
+                        if (typeof showToast === 'function') {
+                            showToast('Đã thêm vào danh sách yêu thích!');
+                        } else {
+                            alert('Đã thêm vào danh sách yêu thích!');
+                        }
+                    } else {
+                        btn.style.color = '#666';
+                        btn.style.borderColor = '#ddd';
+                        btn.setAttribute('data-wishlist', '0');
+                        if (typeof showToast === 'function') {
+                            showToast('Đã xóa khỏi danh sách yêu thích!');
+                        } else {
+                            alert('Đã xóa khỏi danh sách yêu thích!');
+                        }
+                    }
+                } else {
+                    if (typeof showToast === 'function') {
+                        showToast(data.message || 'Có lỗi xảy ra', true);
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                }
+            } catch(e) {
+                console.error('JSON parse error:', e);
+                alert('Lỗi: ' + text);
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            if (typeof showToast === 'function') {
+                showToast('Có lỗi xảy ra kết nối Server.', true);
+            } else {
+                alert('Có lỗi xảy ra kết nối Server.');
+            }
+        });
+    }
+
+    // Initialize wishlist button state on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        console.log('Initializing wishlist button:', wishlistBtn);
+        if (wishlistBtn) {
+            const dataId = wishlistBtn.getAttribute('data-id');
+            const isInWishlist = wishlistBtn.getAttribute('data-wishlist') === '1';
+            console.log('Button data-id:', dataId, 'Is in wishlist:', isInWishlist);
+            
+            if (isInWishlist) {
+                wishlistBtn.style.color = '#f44336';
+                wishlistBtn.style.borderColor = '#f44336';
+            } else {
+                wishlistBtn.style.color = '#666';
+                wishlistBtn.style.borderColor = '#ddd';
+            }
+            
+        } else {
+            console.warn('Wishlist button not found!');
+        }
+    });
     </script>
 </main>
 

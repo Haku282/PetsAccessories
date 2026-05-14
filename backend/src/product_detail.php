@@ -5,6 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/../../backend/config/database.php';
 
 $productId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+error_log('=== PRODUCT_DETAIL DEBUG ===');
+error_log('GET id: ' . ($_GET['id'] ?? 'NOT SET'));
+error_log('Filtered productId: ' . ($productId ?? 'NULL'));
+
 $product = null;
 $reviews = [];
 $relatedProducts = [];
@@ -26,6 +30,7 @@ if (!$productId) {
         );
         $stmt->execute([$productId]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
+        error_log('Product fetched: ' . json_encode($product));
     } catch (PDOException $e) {
         $product = null;
     }
@@ -115,6 +120,18 @@ if (!$productId) {
                 }
             } catch (PDOException $e) {
                 $canReview = false;
+            }
+        }
+
+        // Check if product is in wishlist
+        $isInWishlist = false;
+        if (isset($_SESSION['user_id'])) {
+            try {
+                $wishlistStmt = $db->prepare("SELECT wishlist_id FROM wishlists WHERE user_id = ? AND product_id = ? LIMIT 1");
+                $wishlistStmt->execute([$_SESSION['user_id'], $productId]);
+                $isInWishlist = (bool) $wishlistStmt->fetch();
+            } catch (PDOException $e) {
+                $isInWishlist = false;
             }
         }
 
