@@ -35,7 +35,6 @@ if (empty($_SESSION['cart'])) {
 
 $shippingLabels = [
     'standard' => 'Giao hàng tiêu chuẩn',
-    'express' => 'Giao hàng nhanh',
     'pickup' => 'Lấy tại cửa hàng',
 ];
 $paymentLabels = [

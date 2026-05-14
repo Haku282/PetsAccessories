@@ -6,6 +6,7 @@
 class OrdersManager {
     constructor() {
         this.apiBase = '/PetsAccessories/admin/backend/api/orders';
+        this.statsApi = '/PetsAccessories/admin/backend/api/orders/stats.php';
         this.currentPage = 1;
         this.currentFilters = {
             status: '',
@@ -17,6 +18,7 @@ class OrdersManager {
 
     init() {
         this.attachEventListeners();
+        this.loadStatusStats();
         this.loadOrders();
     }
 
@@ -78,6 +80,7 @@ class OrdersManager {
                     this.renderTable(data.data);
                     this.renderPagination(data.pagination);
                     this.currentPage = page;
+                    this.loadStatusStats();
                 } else {
                     this.showMessage('Lỗi: ' + data.message, 'error');
                 }
@@ -87,6 +90,39 @@ class OrdersManager {
                 this.showMessage('Lỗi tải dữ liệu', 'error');
             })
             .finally(() => this.hideLoading());
+    }
+
+    loadStatusStats() {
+        fetch(this.statsApi)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'Không thể tải thống kê đơn hàng');
+                }
+
+                const stats = data.stats || {};
+                const map = {
+                    ordersTotalStat: stats.total || 0,
+                    ordersPendingStat: stats.pending || 0,
+                    ordersConfirmedStat: stats.confirmed || 0,
+                    ordersShippingStat: stats.shipping || 0,
+                    ordersCompletedStat: stats.completed || 0,
+                    ordersCancelledStat: stats.cancelled || 0
+                };
+
+                Object.keys(map).forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = Number(map[id]).toLocaleString('vi-VN');
+                    }
+                });
+            })
+            .catch(() => {
+                const totalEl = document.getElementById('ordersTotalStat');
+                if (totalEl) {
+                    totalEl.textContent = 'N/A';
+                }
+            });
     }
 
     renderTable(orders) {

@@ -20,6 +20,59 @@ require_once __DIR__ . '/../../layout/header.php';
                 </div>
             </div>
 
+            <div class="product-stats-grid" id="productStatsGrid">
+                <div class="product-stat-card product-stat-primary">
+                    <div class="product-stat-top">
+                        <div class="product-stat-title-wrap">
+                            <span class="product-stat-icon">🔥</span>
+                            <div>
+                                <h3>Sản phẩm bán chạy</h3>
+                                <p class="product-stat-hint">Hiệu suất bán hàng hiện tại</p>
+                            </div>
+                        </div>
+                        <span class="stat-pill">Top seller</span>
+                    </div>
+                    <div class="stat-panel product-name-panel">
+                        <p class="stat-value product-name-value" id="topSellingProductName">Đang tải...</p>
+                    </div>
+                    <div class="stat-meta-row stat-panel">
+                        <span>Đã bán</span>
+                        <strong><span id="topSellingQuantity">0</span> sản phẩm</strong>
+                    </div>
+                </div>
+                <div class="product-stat-card product-stat-secondary">
+                    <div class="product-stat-top">
+                        <div class="product-stat-title-wrap">
+                            <span class="product-stat-icon">📦</span>
+                            <div>
+                                <h3>Tổng quan tồn kho</h3>
+                                <p class="product-stat-hint">Theo dõi nhanh tình trạng kho</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-panel inventory-total-panel">
+                        <p class="stat-value"><span id="inventoryTotalUnits">0</span> đơn vị tồn</p>
+                    </div>
+                    <div class="inventory-mini-grid">
+                        <div class="mini-stat">
+                            <i class="mini-stat-icon">🧾</i>
+                            <span>Tổng SP</span>
+                            <strong id="inventoryTotalProducts">0</strong>
+                        </div>
+                        <div class="mini-stat">
+                            <i class="mini-stat-icon">⚠️</i>
+                            <span>Hết hàng</span>
+                            <strong id="inventoryOutOfStock">0</strong>
+                        </div>
+                        <div class="mini-stat">
+                            <i class="mini-stat-icon">⏳</i>
+                            <span>Sắp hết</span>
+                            <strong id="inventoryLowStock">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search & Filter Section -->
             <div class="search-filter-section">
                 <div class="search-filter-grid">

@@ -22,6 +22,10 @@ require_once __DIR__ . '/../../layout/header.php';
                     <h3>Khách Thường Xuyên (>2 đơn)</h3>
                     <p id="frequentClients">0</p>
                 </div>
+                <div class="stat-card" style="border-left-color: #9C27B0;">
+                    <h3>Khách Tiềm Năng (1-2 đơn)</h3>
+                    <p id="potentialClients">0</p>
+                </div>
             </div>
 
             <div class="orders-filters">

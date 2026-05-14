@@ -12,6 +12,33 @@ require_once __DIR__ . '/../../layout/header.php';
                 <h2>🛒 Danh Sách Đơn Hàng</h2>
             </div>
 
+            <div class="orders-stats-grid" id="orderStatusStats">
+                <div class="order-stat-card total">
+                    <h3>Tổng đơn</h3>
+                    <p id="ordersTotalStat">0</p>
+                </div>
+                <div class="order-stat-card pending">
+                    <h3>⏳ Chờ xác nhận</h3>
+                    <p id="ordersPendingStat">0</p>
+                </div>
+                <div class="order-stat-card confirmed">
+                    <h3>✅ Đã xác nhận</h3>
+                    <p id="ordersConfirmedStat">0</p>
+                </div>
+                <div class="order-stat-card shipping">
+                    <h3>🚚 Đang giao</h3>
+                    <p id="ordersShippingStat">0</p>
+                </div>
+                <div class="order-stat-card completed">
+                    <h3>🎉 Hoàn thành</h3>
+                    <p id="ordersCompletedStat">0</p>
+                </div>
+                <div class="order-stat-card cancelled">
+                    <h3>❌ Đã hủy</h3>
+                    <p id="ordersCancelledStat">0</p>
+                </div>
+            </div>
+
             <div class="search-filter-section">
                 <div class="search-filter-grid">
                     <div class="form-group">
@@ -116,6 +143,7 @@ require_once __DIR__ . '/../../layout/header.php';
             </div>
         </div>
 
+        <!-- Payment Modal -->
         <div id="paymentModal" class="modal">
             <div class="modal-content" style="max-width: 500px;">
                 <div class="modal-header">

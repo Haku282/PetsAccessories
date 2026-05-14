@@ -42,6 +42,41 @@
     font-weight: bold;
 }
 
+.orders-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.order-stat-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: var(--shadow);
+}
+
+.order-stat-card h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #666;
+}
+
+.order-stat-card p {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.order-stat-card.total { border-left-color: #607D8B; }
+.order-stat-card.pending { border-left-color: #ff9800; }
+.order-stat-card.confirmed { border-left-color: #2196F3; }
+.order-stat-card.shipping { border-left-color: #4CAF50; }
+.order-stat-card.completed { border-left-color: #009688; }
+.order-stat-card.cancelled { border-left-color: #f44336; }
+
 .orders-header-actions {
     display: flex;
     gap: 10px;

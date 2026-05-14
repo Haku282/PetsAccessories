@@ -91,7 +91,11 @@ require_once __DIR__ . '/../../backend/src/cart.php';
                         <p class="cart-summary__hint">Các giá trị trên là tạm tính và có thể thay đổi khi thanh toán.</p>
 
                         <div class="cart-summary__actions">
-                            <a href="/PetsAccessories/frontend/components/checkout.php" class="cart-btn">Thanh toán</a>
+                            <?php if (isset($_SESSION['user_id']) || isset($_SESSION['user_name'])): ?>
+                                <a href="/PetsAccessories/frontend/components/checkout.php" class="cart-btn">Thanh toán</a>
+                            <?php else: ?>
+                                <a href="/PetsAccessories/frontend/components/login.php" class="cart-btn" onclick="alert('Vui lòng đăng nhập để tiến hành thanh toán!');">Thanh toán</a>
+                            <?php endif; ?>
                         </div>
                     </aside>
                 </div>

@@ -6,6 +6,7 @@
 class ProductsManager {
     constructor() {
         this.apiBase = '/PetsAccessories/admin/backend/api/products';
+        this.statsApi = '/PetsAccessories/admin/backend/api/products/stats.php';
         this.currentPage = 1;
         this.currentFilters = {
             category_id: '',
@@ -23,6 +24,7 @@ class ProductsManager {
     init() {
         this.loadOptions();
         this.attachEventListeners();
+        this.loadProductStats();
         this.loadProducts();
     }
 
@@ -211,11 +213,61 @@ class ProductsManager {
                 this.renderProducts(data.data);
                 this.renderPagination(data.pagination);
                 this.currentPage = page;
+                this.loadProductStats();
             } else {
                 this.showMessage('error', data.message);
             }
         } catch (error) {
             this.showMessage('error', 'Lỗi khi tải sản phẩm: ' + error.message);
+        }
+    }
+
+    async loadProductStats() {
+        try {
+            const response = await fetch(this.statsApi);
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || 'Không thể tải thống kê sản phẩm');
+            }
+
+            const stats = data.stats || {};
+            const topProduct = stats.top_selling_product || {};
+            const inventory = stats.inventory || {};
+
+            const topNameEl = document.getElementById('topSellingProductName');
+            const topQtyEl = document.getElementById('topSellingQuantity');
+            const totalProductsEl = document.getElementById('inventoryTotalProducts');
+            const outOfStockEl = document.getElementById('inventoryOutOfStock');
+            const lowStockEl = document.getElementById('inventoryLowStock');
+            const totalUnitsEl = document.getElementById('inventoryTotalUnits');
+
+            if (topNameEl) {
+                topNameEl.textContent = topProduct.product_name || 'Chưa có dữ liệu';
+            }
+            if (topQtyEl) {
+                topQtyEl.textContent = Number(topProduct.sold_quantity || 0).toLocaleString('vi-VN');
+            }
+            if (totalProductsEl) {
+                totalProductsEl.textContent = Number(inventory.total_products || 0).toLocaleString('vi-VN');
+            }
+            if (outOfStockEl) {
+                outOfStockEl.textContent = Number(inventory.out_of_stock_products || 0).toLocaleString('vi-VN');
+            }
+            if (lowStockEl) {
+                lowStockEl.textContent = Number(inventory.low_stock_products || 0).toLocaleString('vi-VN');
+            }
+            if (totalUnitsEl) {
+                totalUnitsEl.textContent = Number(inventory.total_units_in_stock || 0).toLocaleString('vi-VN');
+            }
+        } catch (error) {
+            const topNameEl = document.getElementById('topSellingProductName');
+            const topQtyEl = document.getElementById('topSellingQuantity');
+            if (topNameEl) {
+                topNameEl.textContent = 'Không tải được thống kê';
+            }
+            if (topQtyEl) {
+                topQtyEl.textContent = '0';
+            }
         }
     }
 

@@ -7,7 +7,18 @@ $isEmbedded = $isEmbedded ?? false;
 if (!isset($products)) {
     try {
         if (isset($pdo)) {
-            $stmt = $pdo->query("SELECT * FROM products WHERE status = 'active' ORDER BY created_at DESC LIMIT 20");
+            $query = "SELECT * FROM products WHERE status = 'active'";
+            $params = [];
+
+            if (isset($_GET['brand_id']) && is_numeric($_GET['brand_id'])) {
+                $query .= " AND brand_id = :brand_id";
+                $params[':brand_id'] = (int)$_GET['brand_id'];
+            }
+
+            $query .= " ORDER BY created_at DESC LIMIT 20";
+
+            $stmt = $pdo->prepare($query);
+            $stmt->execute($params);
             $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } else {
             $products = [];

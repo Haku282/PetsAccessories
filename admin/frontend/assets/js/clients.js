@@ -59,6 +59,7 @@ const clientManager = {
                 document.getElementById('totalClients').textContent = data.stats.total;
                 document.getElementById('newClients').textContent = data.stats.new_clients;
                 document.getElementById('frequentClients').textContent = data.stats.frequent_clients;
+                document.getElementById('potentialClients').textContent = data.stats.potential_clients || 0;
             }
         } catch (error) {
             console.error('Lỗi tải thống kê:', error);
