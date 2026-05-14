@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/database.php';
-
+/** @var PDO $pdo */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!isset($_SESSION['user_id'])) {
         echo json_encode(["status" => "error", "message" => "Vui lòng đăng nhập để đánh giá."]);
@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo json_encode(["status" => "error", "message" => "Dữ liệu không hợp lệ."]);
         exit;
     }
-
     // Check if user has bought product
     $checkStmt = $pdo->prepare("
         SELECT o.order_id

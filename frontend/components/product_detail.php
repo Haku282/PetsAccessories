@@ -480,7 +480,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                 <!-- Tabs -->
                 <div class="pd-nav-tabs">
                     <div class="pd-nav-tab active" onclick="switchTab(0)">Mô tả sản phẩm</div>
-                    <div class="pd-nav-tab" onclick="switchTab(2)">Đánh giá & Nhận xét</div>
+                    <div class="pd-nav-tab" onclick="switchTab(1)">Đánh giá & Nhận xét</div>
                 </div>
 
                 <div class="pd-tab-panel active" id="tab-0">
@@ -489,7 +489,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                 </div>
 
 
-                <div class="pd-tab-panel" id="tab-2">
+                <div class="pd-tab-panel" id="tab-1">
                     <h3>Đánh giá từ người mua</h3>
                     <div style="display: flex; gap: 30px; margin-bottom: 30px; align-items: center; background: #fafafa; padding: 20px; border-radius: 8px;">
                         <div style="text-align: center;">

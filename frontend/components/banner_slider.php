@@ -27,10 +27,10 @@ if (isset($pdo)) {
                         <img src="/PetsAccessories/admin/backend/uploads/banners/<?php echo htmlspecialchars($banner['image_url']); ?>"
                             alt="<?php echo htmlspecialchars($banner['title'] ?? ''); ?>"
                             loading="lazy"
-                            style="width: 100%; height: 500px; object-fit: contain; background: #fff; display: block; border-radius: 12px;"
+                            style="width: 100%; height: 500px; object-fit: contain; background: transparent; display: block; border-radius: 12px;"
                             onerror="this.onerror=null; this.src='/PetsAccessories/admin/backend/uploads/banners/default-banner.png'">
                         <?php if (!empty($banner['title'])): ?>
-                            <div class="banner-text" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;"><?php echo htmlspecialchars($banner['title']); ?></div>
+                            <div class="banner-text" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 25px; border-radius: 30px; font-weight: bold; font-size: 16px; text-align: center; white-space: nowrap; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"><?php echo htmlspecialchars($banner['title']); ?></div>
                         <?php endif; ?>
 
                         <?php if (!empty($banner['link_url'])): ?>
@@ -41,7 +41,7 @@ if (isset($pdo)) {
         <?php else: ?>
             <div class="banner-slide" style="flex: 0 0 100%; width: 100%; box-sizing: border-box; position: relative;">
                 <img src="/PetsAccessories/admin/backend/uploads/banners/default-banner.png" alt="Siêu sale đồ ăn thú cưng" style="width: 100%; height: 500px; object-fit: cover; display: block; border-radius: 12px;">
-                <div class="banner-text" style="position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold;">Mùa hè sôi động, giảm 50% thức ăn hạt</div>
+                <div class="banner-text" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 10px 25px; border-radius: 30px; font-weight: bold; font-size: 16px; text-align: center; white-space: nowrap; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">Mùa hè sôi động, giảm 50% thức ăn hạt</div>
             </div>
         <?php endif; ?>
     </div>

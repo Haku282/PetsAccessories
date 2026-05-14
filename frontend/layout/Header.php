@@ -30,7 +30,6 @@ if (!($db instanceof PDO)) {
         }
     } catch (PDOException $e) {
         $category_tree = [];
-        // In lỗi ra thẳng trang web để dễ nhìn
         echo "<div style='background: red; color: white; text-align: center; padding: 10px; z-index: 9999; position: relative;'>Lỗi Header SQL: " . $e->getMessage() . "</div>";
     }
 }
@@ -42,106 +41,108 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     $cartCount = count($_SESSION['cart']);
 }
 ?>
+<!DOCTYPE html>
+<html lang="vi">
 
-<header>
-    <div class="header-top">
-        <div class="logo">
-            <a href="/PetsAccessories/frontend/public/index.php" style="text-decoration: none; color: inherit;">
-                <h1>PetsAccessories</h1>
-            </a>
-        </div>
-        <div class="search-bar">
-            <form action="/PetsAccessories/frontend/components/search.php" method="GET" style="display: flex; align-items: center; gap: 8px;">
+<head>
+    <meta charset="UTF-8">
+    <title>Pet Accessories</title>
+    <link rel="stylesheet" type="text/css" href="/PetsAccessories/frontend/layout/style.css">
+</head>
 
-                <input type="text" name="q" placeholder="Tìm kiếm nhanh sản phẩm..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+<body>
+    <div class="background-blur-overlay"></div>
 
-                <button type="submit">Tìm kiếm</button>
-                <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">💵</button>
-
-                <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo !empty($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
-                    <option value="">-- Mặc định --</option>
-                    <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
-                    <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
-                </select>
-            </form>
-        </div>
-        <div class="auth-buttons">
-            <div class="cart-icon-container" style="margin-right: 15px; position: relative;">
-                <a href="/PetsAccessories/frontend/components/cart.php" style="text-decoration: none; color: #333; font-weight: bold; font-size: 16px;">
-                    🛒 Giỏ hàng
-                    <span id="cart-count-badge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; position: absolute; top: -10px; right: -15px;"><?php echo $cartCount; ?></span>
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <a href="/PetsAccessories/frontend/public/index.php" style="text-decoration: none; color: inherit;">
+                    <h1>PetsAccessories</h1>
                 </a>
             </div>
-            <?php if (isset($_SESSION['user_name'])): ?>
-                <div class="user-menu">
-                    <button class="btn-profile">Chào, <?php echo htmlspecialchars($_SESSION['user_name']); ?> &#9662;</button>
-                    <div class="dropdown-content">
-                        <a href="/PetsAccessories/frontend/components/profile.php">Hồ sơ cá nhân</a>
-                        <a href="/PetsAccessories/frontend/components/orders.php">Quản lý đơn hàng</a>
-                        <a href="/PetsAccessories/frontend/public/index.php?page=wishlist">Danh sách yêu thích</a>
-                        <a href="/PetsAccessories/frontend/components/change_password.php">Đổi mật khẩu</a>
-                        <a href="/PetsAccessories/frontend/components/logout.php" class="logout-link">Đăng xuất</a>
+            <div class="search-bar">
+                <form action="/PetsAccessories/frontend/components/search.php" method="GET" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="text" name="q" placeholder="Tìm kiếm nhanh sản phẩm..." value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>">
+                    <button type="submit">Tìm kiếm</button>
+                    <button type="button" class="btn-filter" title="Lọc nâng cao" onclick="toggleSortFilter()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 6px 10px; border-radius: 4px; cursor: pointer;">💵</button>
+                    <select id="price-sort" name="sort" onchange="this.form.submit()" style="display: <?php echo !empty($_GET['sort']) ? 'block' : 'none'; ?>; padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">-- Mặc định --</option>
+                        <option value="price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_asc') ? 'selected' : ''; ?>>Giá: Thấp đến cao</option>
+                        <option value="price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_desc') ? 'selected' : ''; ?>>Giá: Cao đến thấp</option>
+                    </select>
+                </form>
+            </div>
+            <div class="auth-buttons">
+                <div class="cart-icon-container" style="margin-right: 15px; position: relative;">
+                    <a href="/PetsAccessories/frontend/components/cart.php" style="text-decoration: none; color: #333; font-weight: bold; font-size: 16px;">
+                        🛒 Giỏ hàng
+                        <span id="cart-count-badge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; position: absolute; top: -10px; right: -15px;"><?php echo $cartCount; ?></span>
+                    </a>
+                </div>
+                <?php if (isset($_SESSION['user_name'])): ?>
+                    <div class="user-menu">
+                        <button class="btn-profile">Chào, <?php echo htmlspecialchars($_SESSION['user_name']); ?> &#9662;</button>
+                        <div class="dropdown-content">
+                            <a href="/PetsAccessories/frontend/components/profile.php">Hồ sơ cá nhân</a>
+                            <a href="/PetsAccessories/frontend/components/orders.php">Quản lý đơn hàng</a>
+                            <a href="/PetsAccessories/frontend/public/index.php?page=wishlist">Danh sách yêu thích</a>
+                            <a href="/PetsAccessories/frontend/components/change_password.php">Đổi mật khẩu</a>
+                            <a href="/PetsAccessories/frontend/components/logout.php" class="logout-link">Đăng xuất</a>
+                        </div>
                     </div>
-                </div>
-            <?php else: ?>
-                <div class="login">
-                    <form action="/PetsAccessories/frontend/components/login.php" method="GET">
-                        <button type="submit" class="btn-login">Đăng nhập</button>
-                    </form>
-                </div>
-                <div class="register">
-                    <form action="/PetsAccessories/frontend/components/register.php" method="GET">
-                        <button type="submit" class="btn-register">Đăng ký</button>
-                    </form>
-                </div>
-            <?php endif; ?>
+                <?php else: ?>
+                    <div class="login">
+                        <form action="/PetsAccessories/frontend/components/login.php" method="GET">
+                            <button type="submit" class="btn-login">Đăng nhập</button>
+                        </form>
+                    </div>
+                    <div class="register">
+                        <form action="/PetsAccessories/frontend/components/register.php" method="GET">
+                            <button type="submit" class="btn-register">Đăng ký</button>
+                        </form>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
-    </div> <nav class="primary-nav">
-        <ul class="primary-menu">
-            <li class="has-mega">
-                <a href="/PetsAccessories/frontend/public/index.php">Boss</a>
-
-                <div class="mega-dropdown">
-                    <div class="mega-inner">
-                        <?php foreach ($mega_menu_columns as $column): ?>
-                            <div class="mega-col">
-                                <?php foreach ($column as $parent_category): ?>
-                                    <div class="mega-group">
-                                        <h4><?php echo htmlspecialchars($parent_category['category_name']); ?></h4>
-                                        <?php if (!empty($parent_category['children'])): ?>
-                                            <ul>
-                                                <?php foreach ($parent_category['children'] as $child): ?>
-                                                    <li><a href="/PetsAccessories/frontend/components/category.php?id=<?php echo (int) $child['category_id']; ?>"><?php echo htmlspecialchars($child['category_name']); ?></a></li>
-                                                <?php endforeach; ?>
-                                            </ul>
-                                        <?php endif; ?>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endforeach; ?>
-                        <?php if (empty($mega_menu_columns)): ?>
-                            <div class="mega-col">
-                                <div class="mega-group">
-                                    <h4>Danh mục đang cập nhật</h4>
-                                    <ul>
-                                        <li><a href="/PetsAccessories/frontend/public/index.php">Quay về trang chủ</a></li>
-                                    </ul>
+        <nav class="primary-nav">
+            <ul class="primary-menu">
+                <li class="has-mega">
+                    <a href="/PetsAccessories/frontend/public/index.php">Boss</a>
+                    <div class="mega-dropdown">
+                        <div class="mega-inner">
+                            <?php foreach ($mega_menu_columns as $column): ?>
+                                <div class="mega-col">
+                                    <?php foreach ($column as $parent_category): ?>
+                                        <div class="mega-group">
+                                            <h4><?php echo htmlspecialchars($parent_category['category_name']); ?></h4>
+                                            <?php if (!empty($parent_category['children'])): ?>
+                                                <ul>
+                                                    <?php foreach ($parent_category['children'] as $child): ?>
+                                                        <li><a href="/PetsAccessories/frontend/components/category.php?id=<?php echo (int) $child['category_id']; ?>"><?php echo htmlspecialchars($child['category_name']); ?></a></li>
+                                                    <?php endforeach; ?>
+                                                </ul>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
-                            </div>
-                        <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
-                </div> </li>
-            <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng Mới Về</a></li>
-            <li><a href="/PetsAccessories/frontend/components/brands.php">Thương Hiệu</a></li>
-            <li><a href="/PetsAccessories/frontend/components/news_section.php">Tin Tức và Khuyến Mãi</a></li>
-        </ul>
-    </nav>
-</header>
-
-<script>
-    function toggleSortFilter() {
-        const sortSelect = document.getElementById('price-sort');
-        if (!sortSelect) return;
-        sortSelect.style.display = sortSelect.style.display === 'none' ? 'block' : 'none';
-    }
-</script>
+                </li>
+                <li><a href="/PetsAccessories/frontend/components/popular_products.php">Hàng Mới Về</a></li>
+                <li><a href="/PetsAccessories/frontend/components/brands.php">Thương Hiệu</a></li>
+                <li><a href="/PetsAccessories/frontend/components/news_section.php">Tin Tức và Khuyến Mãi</a></li>
+            </ul>
+        </nav>
+    </header>
+    <script>
+        // Hàm xử lý Ẩn/Hiện nút Lọc giá nâng cao
+        function toggleSortFilter() {
+            var sortSelect = document.getElementById('price-sort');
+            if (sortSelect.style.display === 'none' || sortSelect.style.display === '') {
+                sortSelect.style.display = 'block'; // Hiện ô chọn giá
+            } else {
+                sortSelect.style.display = 'none'; // Ẩn ô chọn giá
+            }
+        }
+    </script>

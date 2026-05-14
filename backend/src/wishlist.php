@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../../backend/config/database.php';
-
+/** @var PDO $pdo */
 if (!isset($_SESSION['user_id'])) {
     header("Location: /PetsAccessories/frontend/public/index.php?page=login");
     exit;
@@ -11,7 +11,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $userId = $_SESSION['user_id'];
 $wishlists = [];
-
 try {
     $stmt = $pdo->prepare("
         SELECT p.product_id, p.product_name, p.price, p.discount_price, p.thumbnail

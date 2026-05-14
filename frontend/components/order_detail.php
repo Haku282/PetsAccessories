@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,8 +16,9 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
             padding: 20px;
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
+
         .order-detail-header {
             display: flex;
             align-items: center;
@@ -26,10 +28,12 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
             padding-bottom: 10px;
             margin-bottom: 18px;
         }
+
         .order-detail-header h2 {
             margin: 0;
             color: #333;
         }
+
         .btn {
             display: inline-block;
             padding: 10px 14px;
@@ -41,28 +45,33 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
             color: #333;
             font-weight: 600;
         }
+
         .btn-primary {
             background: #007bff;
             border-color: #007bff;
             color: #fff;
         }
+
         .meta-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
             margin: 16px 0;
         }
+
         .meta-box {
             border: 1px solid #eee;
             border-radius: 8px;
             padding: 14px;
             background: #fafafa;
         }
+
         .meta-box h3 {
             margin: 0 0 10px 0;
             font-size: 16px;
             color: #333;
         }
+
         .meta-row {
             display: flex;
             justify-content: space-between;
@@ -70,24 +79,30 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
             margin: 6px 0;
             color: #555;
         }
+
         .meta-row strong {
             color: #222;
         }
+
         .orders-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
-        .orders-table th, .orders-table td {
+
+        .orders-table th,
+        .orders-table td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #f0f0f0;
         }
+
         .orders-table th {
             background-color: #f9f9f9;
             font-weight: 600;
             color: #555;
         }
+
         .status-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -96,53 +111,103 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
             font-weight: 500;
             text-align: center;
         }
-        .status-pending { background-color: #fff3cd; color: #856404; }
-        .status-shipping { background-color: #cce5ff; color: #004085; }
-        .status-completed { background-color: #d4edda; color: #155724; }
-        .status-cancelled { background-color: #f8d7da; color: #721c24; }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-shipping {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
 
         .alert {
             padding: 10px 12px;
             border-radius: 8px;
             margin: 12px 0;
         }
-        .alert-error { background: #f8d7da; color: #721c24; }
-        .alert-success { background: #d4edda; color: #155724; }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
 
         .return-box {
             margin-top: 22px;
             border-top: 2px solid #eee;
             padding-top: 16px;
         }
+
         .return-box h3 {
             margin: 0 0 10px 0;
         }
+
         .form-row {
             margin: 10px 0;
         }
+
         .form-row label {
             display: block;
             margin-bottom: 6px;
             color: #333;
             font-weight: 600;
         }
-        .form-row select, .form-row textarea {
+
+        .form-row select,
+        .form-row textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
         }
-        .form-row textarea { min-height: 90px; resize: vertical; }
+
+        .form-row textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
 
         @media print {
-            header, footer, .no-print { display: none !important; }
-            body { background: #fff !important; }
-            .order-detail-page { box-shadow: none !important; margin: 0 !important; padding: 0 !important; }
-            .meta-box { background: #fff !important; }
+
+            header,
+            footer,
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: #fff !important;
+            }
+
+            .order-detail-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .meta-box {
+                background: #fff !important;
+            }
         }
     </style>
 </head>
+
 <body>
     <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
@@ -199,9 +264,24 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                             <?php foreach ($orderItems as $item): ?>
                                 <tr>
                                     <td>
-                                        <?php if (!empty($item['thumbnail'])): ?>
-                                            <img src="<?php echo htmlspecialchars($item['thumbnail']); ?>" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;">
-                                        <?php endif; ?>
+                                        <?php
+                                        // Xử lý chuẩn đường dẫn ảnh
+                                        $rawThumb = $item['thumbnail'] ?? '';
+                                        if (!empty($rawThumb)) {
+                                            if (strpos($rawThumb, '/') !== false) {
+                                                $thumbnail = $rawThumb;
+                                            } else {
+                                                $thumbnail = '/PetsAccessories/admin/backend/uploads/products/' . $rawThumb;
+                                            }
+                                        } else {
+                                            $thumbnail = '/PetsAccessories/frontend/public/images/default-product.png';
+                                        }
+                                        ?>
+                                        <img src="<?php echo htmlspecialchars($thumbnail); ?>"
+                                            alt="<?php echo htmlspecialchars((string) ($item['product_name'] ?? '')); ?>"
+                                            style="width:40px;height:40px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;"
+                                            onerror="this.onerror=null; this.src='/PetsAccessories/frontend/public/images/default-product.png'">
+
                                         <?php echo htmlspecialchars((string) ($item['product_name'] ?? ('#' . (int) $item['product_id']))); ?>
                                     </td>
                                     <td><?php echo (int) ($item['quantity'] ?? 0); ?></td>
@@ -283,4 +363,5 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
 
     <?php require_once __DIR__ . '/../layout/footer.php'; ?>
 </body>
+
 </html>

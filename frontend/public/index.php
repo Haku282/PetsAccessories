@@ -110,7 +110,7 @@
 
     $sectionTitle = "Sản phẩm Mới";
     $products = $newProducts;
-    require __DIR__ . '/../components/products.php';
+    require __DIR__ . '/../components/popular_products.php';
 
     $sectionTitle = "Sản phẩm Khuyến Mãi";
     $products = $saleProducts;
