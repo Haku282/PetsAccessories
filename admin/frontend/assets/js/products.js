@@ -116,55 +116,60 @@ class ProductsManager {
     }
 
     populateFilterOptions() {
-        // Populate category filter
-        const categorySelect = document.getElementById('categoryFilter');
-        if (categorySelect) {
-            categorySelect.innerHTML = '<option value="">-- Tất cả danh mục --</option>';
-            this.categories.forEach(cat => {
-                if (!cat.parent_id) {
-                    const option = document.createElement('option');
-                    option.value = cat.category_id;
-                    option.textContent = cat.category_name;
-                    categorySelect.appendChild(option);
-                }
-            });
-        }
+        // 1. Lấy các phần tử HTML (Chỉ khai báo 1 lần duy nhất)
+        const categoryFilter = document.getElementById('categoryFilter');
+        const categoryInput = document.getElementById('categoryInput');
+        const brandFilter = document.getElementById('brandFilter');
+        const brandInput = document.getElementById('brandInput');
 
-        // Populate brand filter
-        const brandSelect = document.getElementById('brandFilter');
-        if (brandSelect) {
-            brandSelect.innerHTML = '<option value="">-- Tất cả thương hiệu --</option>';
-            this.brands.forEach(brand => {
-                const option = document.createElement('option');
-                option.value = brand.brand_id;
-                option.textContent = brand.brand_name;
-                brandSelect.appendChild(option);
-            });
-        }
+        // Hàm phụ để render danh mục theo dạng cây (Cha - Con)
+        const renderTree = (selectEl, defaultText) => {
+            if (!selectEl) return;
+            selectEl.innerHTML = `<option value="">-- ${defaultText} --</option>`;
+            
+            // Lấy danh mục cha
+            const parents = this.categories.filter(cat => !cat.parent_id || cat.parent_id == 0);
+            
+            parents.forEach(parent => {
+                // Thêm cha
+                const pOpt = document.createElement('option');
+                pOpt.value = parent.category_id;
+                pOpt.textContent = parent.category_name;
+                pOpt.style.fontWeight = "bold";
+                selectEl.appendChild(pOpt);
 
-        // Populate category in modal
-        const modalCategorySelect = document.getElementById('categoryInput');
-        if (modalCategorySelect) {
-            modalCategorySelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
-            this.categories.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat.category_id;
-                option.textContent = cat.category_name;
-                modalCategorySelect.appendChild(option);
+                // Thêm con
+                const children = this.categories.filter(cat => cat.parent_id == parent.category_id);
+                children.forEach(child => {
+                    const cOpt = document.createElement('option');
+                    cOpt.value = child.category_id;
+                    cOpt.innerHTML = `&nbsp;&nbsp;&nbsp;— ${child.category_name}`;
+                    selectEl.appendChild(cOpt);
+                });
             });
-        }
+        };
 
-        // Populate brand in modal
-        const modalBrandSelect = document.getElementById('brandInput');
-        if (modalBrandSelect) {
-            modalBrandSelect.innerHTML = '<option value="">-- Không chọn --</option>';
-            this.brands.forEach(brand => {
-                const option = document.createElement('option');
-                option.value = brand.brand_id;
-                option.textContent = brand.brand_name;
-                modalBrandSelect.appendChild(option);
-            });
-        }
+        // 2. Thực thi render cho Category
+        renderTree(categoryFilter, 'Tất cả danh mục');
+        renderTree(categoryInput, 'Chọn danh mục');
+
+        // 3. Thực thi render cho Brand (Thương hiệu)
+        const brandList = [
+            { el: brandFilter, text: 'Tất cả thương hiệu' },
+            { el: brandInput, text: 'Không chọn' }
+        ];
+
+        brandList.forEach(item => {
+            if (item.el) {
+                item.el.innerHTML = `<option value="">-- ${item.text} --</option>`;
+                this.brands.forEach(brand => {
+                    const opt = document.createElement('option');
+                    opt.value = brand.brand_id;
+                    opt.textContent = brand.brand_name;
+                    item.el.appendChild(opt);
+                });
+            }
+        });
     }
 
     applyFilters() {

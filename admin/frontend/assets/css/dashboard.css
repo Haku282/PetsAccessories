@@ -707,6 +707,21 @@ body {
     padding-top: 50px;
 }
 
+/* Import Modal - luôn ở trên cùng */
+#importModal {
+    z-index: 1100;
+}
+
+/* Revenue Modal - cấp 2 */
+#revenueStatsModal {
+    z-index: 1050;
+}
+
+/* Low Stock Modal - cấp 3 */
+#lowStockModal {
+    z-index: 1001;
+}
+
 .modal.show {
     display: flex;
     justify-content: center;

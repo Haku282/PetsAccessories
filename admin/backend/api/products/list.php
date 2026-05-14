@@ -54,7 +54,8 @@ try {
     }
 
     if (!empty($category_id)) {
-        $sql .= " AND p.category_id = ?";
+        $sql .= " AND (p.category_id = ? OR p.category_id IN (SELECT category_id FROM categories WHERE parent_id = ?))";
+        $params[] = (int)$category_id;
         $params[] = (int)$category_id;
     }
 
