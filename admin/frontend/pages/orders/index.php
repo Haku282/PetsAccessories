@@ -78,6 +78,7 @@ require_once __DIR__ . '/../../layout/header.php';
                     <button class="btn btn-info" id="exportPdfBtn">📄 Xuất PDF</button>
                     <button class="btn btn-info" id="exportExcelBtn">📊 Xuất Excel</button>
                     <button class="btn btn-warning" id="updateStatusBtn">📝 Cập Nhật Trạng Thái</button>
+                    <button class="btn btn-success" id="updatePaymentBtn">💳 Cập Nhật Thanh Toán</button>
                     <button class="btn btn-secondary" id="cancelModalBtn">Đóng</button>
                 </div>
             </div>
@@ -111,6 +112,36 @@ require_once __DIR__ . '/../../layout/header.php';
                 <div class="modal-footer">
                     <button class="btn btn-secondary" id="cancelStatusBtn">Hủy</button>
                     <button class="btn btn-primary" id="confirmStatusBtn">💾 Cập Nhật</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="paymentModal" class="modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>💳 Cập Nhật Trạng Thái Thanh Toán</h3>
+                    <button class="close-btn" id="closePaymentModalBtn" onclick="document.getElementById('paymentModal').classList.remove('show')">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group-vertical">
+                        <label for="paymentStatusSelect">Trạng Thái Thanh Toán *</label>
+                        <select id="paymentStatusSelect" required>
+                            <option value="">-- Chọn trạng thái --</option>
+                            <option value="unpaid">❌ Chưa Thanh Toán</option>
+                            <option value="paid">✅ Đã Thanh Toán</option>
+                            <option value="refunded">🔄 Hoàn Tiền</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group-vertical" style="margin-top: 15px;">
+                        <label for="paymentNoteInput">Ghi Chú (tùy chọn)</label>
+                        <textarea id="paymentNoteInput" placeholder="Nhập ghi chú về thanh toán..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd; min-height: 80px;"></textarea>
+                        <div class="help-text" style="font-size: 12px; color: #666; margin-top: 5px;">Ghi chú này sẽ được lưu vào lịch sử đơn hàng</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancelPaymentBtn">Hủy</button>
+                    <button class="btn btn-primary" id="confirmPaymentBtn">💾 Cập Nhật Thanh Toán</button>
                 </div>
             </div>
         </div>

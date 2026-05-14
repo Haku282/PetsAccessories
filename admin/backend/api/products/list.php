@@ -30,6 +30,7 @@ try {
     $status = isset($_GET['status']) ? $_GET['status'] : '';
     $brand_id = isset($_GET['brand_id']) ? $_GET['brand_id'] : '';
     $discount = isset($_GET['discount']) ? trim((string)$_GET['discount']) : '';
+    $filter = isset($_GET['filter']) ? trim($_GET['filter']) : '';
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
@@ -44,6 +45,13 @@ try {
         WHERE 1=1
     ";
     $params = [];
+
+    // Áp dụng filter nếu có
+    if ($filter === 'low_stock') {
+        $sql .= " AND p.stock_quantity < 10 AND p.stock_quantity > 0";
+    } elseif ($filter === 'out_of_stock') {
+        $sql .= " AND p.stock_quantity = 0";
+    }
 
     if (!empty($category_id)) {
         $sql .= " AND p.category_id = ?";

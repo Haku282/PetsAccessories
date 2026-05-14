@@ -42,6 +42,12 @@ class OrdersManager {
         document.getElementById('confirmStatusBtn')?.addEventListener('click', () => this.updateStatus());
         document.getElementById('cancelStatusBtn')?.addEventListener('click', () => this.closeStatusModal());
 
+        // Payment update buttons
+        document.getElementById('updatePaymentBtn')?.addEventListener('click', () => this.showPaymentModal());
+        document.getElementById('confirmPaymentBtn')?.addEventListener('click', () => this.updatePayment());
+        document.getElementById('cancelPaymentBtn')?.addEventListener('click', () => this.closePaymentModal());
+        document.getElementById('closePaymentModalBtn')?.addEventListener('click', () => this.closePaymentModal());
+
         // Export buttons
         document.getElementById('exportPdfBtn')?.addEventListener('click', () => this.exportOrder('pdf'));
         document.getElementById('exportExcelBtn')?.addEventListener('click', () => this.exportOrder('excel'));
@@ -49,6 +55,11 @@ class OrdersManager {
         // Status modal backdrop
         document.getElementById('statusModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'statusModal') this.closeStatusModal();
+        });
+
+        // Payment modal backdrop
+        document.getElementById('paymentModal')?.addEventListener('click', (e) => {
+            if (e.target.id === 'paymentModal') this.closePaymentModal();
         });
     }
 
@@ -397,6 +408,64 @@ class OrdersManager {
             .catch(err => {
                 console.error('Error:', err);
                 this.showMessage('Lỗi cập nhật trạng thái', 'error');
+            })
+            .finally(() => this.hideLoading());
+    }
+
+    showPaymentModal() {
+        if (!this.currentOrder) return;
+        const modal = document.getElementById('paymentModal');
+        if (modal) {
+            document.getElementById('paymentStatusSelect').value = this.currentOrder.payment_status || '';
+            document.getElementById('paymentNoteInput').value = '';
+            modal.classList.add('show');
+        }
+    }
+
+    closePaymentModal() {
+        const modal = document.getElementById('paymentModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    updatePayment() {
+        if (!this.currentOrder) return;
+
+        const paymentStatus = document.getElementById('paymentStatusSelect').value;
+        const note = document.getElementById('paymentNoteInput').value;
+
+        if (!paymentStatus) {
+            this.showMessage('Vui lòng chọn trạng thái thanh toán', 'warning');
+            return;
+        }
+
+        this.showLoading();
+        fetch(`${this.apiBase}/update-payment-status.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                order_id: this.currentOrder.order_id,
+                payment_status: paymentStatus,
+                note: note
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.showMessage('Cập nhật trạng thái thanh toán thành công', 'success');
+                    this.closePaymentModal();
+                    this.viewOrder(this.currentOrder.order_id);
+                    this.loadOrders(this.currentPage);
+                } else {
+                    this.showMessage('Lỗi: ' + data.message, 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                this.showMessage('Lỗi cập nhật thanh toán', 'error');
             })
             .finally(() => this.hideLoading());
     }
