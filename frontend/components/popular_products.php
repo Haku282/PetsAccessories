@@ -66,7 +66,7 @@ $isEmbedded = $isEmbedded ?? false; ?>
                     $price = (float)($product['price'] ?? 0);
                     $discount = (float)($product['discount_price'] ?? 0);
                     $hasDiscount = ($discount > 0 && $discount < $price);
-                    $thumbnail = !empty($product['thumbnail']) ? htmlspecialchars($product['thumbnail']) : '/PetsAccessories/frontend/public/images/default-product.png';
+                    $thumbnail = !empty($product['thumbnail']) ? htmlspecialchars($product['thumbnail']) : '/PetsAccessories/admin/backend/uploads/products/default-product.png';
                     ?>
 
                     <div class="product-card">

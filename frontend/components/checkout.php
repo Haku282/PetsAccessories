@@ -107,9 +107,27 @@ if (isset($db) && ($db instanceof PDO)) {
                     <div class="cart-items">
                         <?php foreach ($cartItems as $item): ?>
                             <div class="cart-item">
-                                <div class="cart-item__thumb">
+<div class="cart-item__thumb">
                                     <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int) $item['product_id']; ?>">
-                                        <img src="<?php echo htmlspecialchars($item['thumbnail']); ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>">
+                                        <?php 
+                                        // Xử lý đường dẫn ảnh cho giỏ hàng
+                                        $rawThumb = $item['thumbnail'] ?? '';
+                                        if (!empty($rawThumb)) {
+                                            if (strpos($rawThumb, '/') !== false) {
+                                                $thumbnailUrl = $rawThumb;
+                                            } else {
+                                                // Nối thêm thư mục chứa ảnh. 
+                                                // Lưu ý: Đổi thành '/PetsAccessories/upload/imgProduct/' nếu ảnh của bạn lưu ở đó
+                                                $thumbnailUrl = '/PetsAccessories/admin/backend/uploads/products/' . $rawThumb;
+                                            }
+                                        } else {
+                                            $thumbnailUrl = '/PetsAccessories/frontend/public/images/default-product.png';
+                                        }
+                                        ?>
+                                        <img src="<?php echo htmlspecialchars($thumbnailUrl); ?>" 
+                                             alt="<?php echo htmlspecialchars($item['product_name']); ?>"
+                                             style="width: 100%; height: 80px; object-fit: contain;"
+                                             onerror="this.onerror=null; this.src='/PetsAccessories/frontend/public/images/default.jpg'">
                                     </a>
                                 </div>
 
@@ -351,7 +369,7 @@ if (isset($db) && ($db instanceof PDO)) {
                 }
 
                 currentShippingFee = 30000; // Default fee if no zone matches
-                let zoneNameMatch = 'Nội thành'; // Default zone name
+                let zoneNameMatch = 'Ngoại thành'; // Default zone name
 
                 if (shippingZonesData && shippingZonesData.length > 0) {
                     const matchedZone = shippingZonesData.find(zone => provinceName.includes(zone.zone_name));

@@ -124,7 +124,7 @@
                     ?>
 
                     <a href="/PetsAccessories/frontend/public/index.php?page=products&brand_id=<?php echo $brand['brand_id']; ?>" class="brand-card">
-                        <img src="<?php echo $logoPath; ?>" alt="Logo <?php echo htmlspecialchars($brand['brand_name']); ?>" loading="lazy" onerror="this.src='/PetsAccessories/frontend/public/images/default-brand.png'">
+                        <img src="<?php echo $logoPath; ?>" alt="Logo <?php echo htmlspecialchars($brand['brand_name']); ?>" loading="lazy" onerror="this.src='/PetsAccessories/admin/backend/uploads/brands/default-brand.png';">
                         <h4><?php echo htmlspecialchars($brand['brand_name']); ?></h4>
                     </a>
 
