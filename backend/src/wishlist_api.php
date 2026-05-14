@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/../config/database.php';
-
+/** @var PDO $pdo */
 // Debug logging
 error_log('=== WISHLIST API DEBUG ===');
 error_log('POST data: ' . json_encode($_POST));
@@ -53,5 +53,3 @@ if ($action === 'toggle') {
     error_log('INVALID ACTION: ' . $action);
     echo json_encode(['status' => 'error', 'message' => 'Hành động không hợp lệ.']);
 }
-
-

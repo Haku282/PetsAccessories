@@ -44,7 +44,7 @@
         }
 
         .brands-header h2 {
-            color: #4CAF50;
+            color: black;
             border-bottom: 2px solid #4CAF50;
             padding-bottom: 10px;
             display: inline-block;
