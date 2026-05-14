@@ -65,8 +65,8 @@ try {
 
     // Thêm khu vực giao hàng vào database
     $stmt = $db->prepare("
-        INSERT INTO shipping_zones (zone_name, shipping_fee, estimated_delivery, status, created_at)
-        VALUES (?, ?, ?, ?, NOW())
+        INSERT INTO shipping_zones (zone_name, shipping_fee, estimated_delivery, status)
+        VALUES (?, ?, ?, ?)
     ");
 
     $success = $stmt->execute([
