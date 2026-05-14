@@ -29,7 +29,7 @@ if ($db instanceof PDO) {
             (SELECT COALESCE(SUM(total_price),0) FROM orders WHERE order_status = 'completed') AS total_revenue,
             (SELECT COUNT(*) FROM orders WHERE order_status = 'pending') AS pending_orders,
             (SELECT COUNT(*) FROM products WHERE stock_quantity = 0) AS out_of_stock,
-            (SELECT COUNT(*) FROM products WHERE stock_quantity < 10 AND stock_quantity > 0) AS need_import_stock");
+            (SELECT COUNT(*) FROM products WHERE stock_quantity <= 5 AND stock_quantity > 0) AS need_import_stock");
         $row = $apiStats->fetch(PDO::FETCH_ASSOC);
         if ($row) {
             $stats = array_merge($stats, $row);
@@ -84,7 +84,7 @@ require_once __DIR__ . '/layout/header.php';
             <div class="stat-card need-import" onclick="openLowStockModal()">
                 <h3><span class="icon">📦</span> Cần Nhập Kho</h3>
                 <div class="number"><?php echo $stats['need_import_stock'] ?? 0; ?></div>
-                <div class="label">Sản phẩm < 10 (Click để xem)</div>
+                <div class="label">Sản phẩm (Click để xem)</div>
             </div>
         </div>
 
@@ -242,6 +242,77 @@ require_once __DIR__ . '/layout/header.php';
             </div>
         </div>
 
+        <!-- Stock Import History -->
+        <div class="recent-section">
+            <h2><span class="icon">📝</span> Lịch Sử Nhập Kho Gần Đây</h2>
+            <div class="recent-table-wrapper">
+                <table class="recent-table">
+                    <thead>
+                        <tr>
+                            <th>Sản Phẩm</th>
+                            <th>Loại</th>
+                            <th>Số Lượng</th>
+                            <th>Trước / Sau</th>
+                            <th>Ghi Chú</th>
+                            <th>Ngày</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        try {
+                            $stmt = $db->query("SELECT 
+                                psl.log_id,
+                                psl.product_id,
+                                psl.type,
+                                psl.quantity,
+                                psl.current_stock,
+                                psl.new_stock,
+                                psl.note,
+                                psl.created_at,
+                                p.product_name
+                            FROM product_stock_logs psl
+                            LEFT JOIN products p ON psl.product_id = p.product_id
+                            ORDER BY psl.created_at DESC
+                            LIMIT 10");
+                            $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                            
+                            if (count($logs) > 0) {
+                                foreach ($logs as $log):
+                                    $type_label = $log['type'] === 'import' ? '📦 Nhập' : '📤 Xuất';
+                                    $type_color = $log['type'] === 'import' ? '#06d6a0' : '#ff6b6b';
+                        ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($log['product_name'] ?? 'N/A'); ?></td>
+                            <td><span style="color: <?php echo $type_color; ?>; font-weight: 600;"><?php echo $type_label; ?></span></td>
+                            <td style="font-weight: 600; color: #4361ee;"><?php echo $log['quantity']; ?> SP</td>
+                            <td style="font-size: 12px;">
+                                <span style="color: #999;"><?php echo $log['current_stock']; ?></span>
+                                <span style="margin: 0 4px; color: #ccc;">→</span>
+                                <span style="color: #06d6a0; font-weight: 600;"><?php echo $log['new_stock']; ?></span>
+                            </td>
+                            <td style="font-size: 12px; color: #666; max-width: 200px; white-space: normal;"><?php echo htmlspecialchars($log['note'] ?? '-'); ?></td>
+                            <td style="font-size: 12px;"><?php echo date('d/m/Y H:i', strtotime($log['created_at'])); ?></td>
+                        </tr>
+                        <?php endforeach; 
+                            } else {
+                        ?>
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #999;">
+                                📭 Chưa có lịch sử nhập kho
+                            </td>
+                        </tr>
+                        <?php 
+                            }
+                        } catch (Exception $e) { ?>
+                        <tr>
+                            <td colspan="6" style="text-align: center;">❌ Không thể tải lịch sử</td>
+                        </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- System Info -->
         <div class="recent-section">
             <h2><span class="icon">ℹ️</span> Thông Tin Hệ Thống</h2>
@@ -386,6 +457,11 @@ require_once __DIR__ . '/layout/header.php';
                 document.getElementById('currentStock').textContent = currentStock;
                 document.getElementById('importQuantity').value = '';
                 document.getElementById('importNote').value = '';
+                
+                // Đóng low stock modal trước
+                closeLowStockModal();
+                
+                // Mở import modal
                 document.getElementById('importModal').classList.add('show');
             }
 
