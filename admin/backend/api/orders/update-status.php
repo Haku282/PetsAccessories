@@ -75,7 +75,7 @@ try {
     $allowedTransitions = [
         'pending'   => ['confirmed', 'cancelled'],
         'confirmed' => ['shipping', 'cancelled'],
-        'shipping  ' => ['completed', 'cancelled'],
+        'shipping'  => ['completed', 'cancelled'],
         'completed' => [], // Đã xong thì không đổi được nữa
         'cancelled' => []  // Đã hủy thì không đổi được nữa
     ];

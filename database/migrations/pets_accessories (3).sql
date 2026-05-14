@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th5 13, 2026 lúc 11:28 AM
+-- Thời gian đã tạo: Th5 14, 2026 lúc 06:11 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -42,7 +42,7 @@ CREATE TABLE `banners` (
 --
 
 INSERT INTO `banners` (`banner_id`, `title`, `image_url`, `link_url`, `position`, `order_priority`, `status`) VALUES
-(1, '123', 'banner_1778663018_68269.png', '', 'slider', 0, 1);
+(1, 'Chương trình Khuyến mãi mùa hè cực cháy dành cho các BOSS', 'banner_1778675644_59470.png', '', 'slider', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -62,10 +62,10 @@ CREATE TABLE `brands` (
 --
 
 INSERT INTO `brands` (`brand_id`, `brand_name`, `brand_logo`, `description`) VALUES
-(1, 'Royal Canin', 'royal_canin.png', NULL),
-(2, 'Pedigree', 'pedigree.png', NULL),
+(1, 'Royal Canin', 'brand_1778674277_9464.png', ''),
+(2, 'Pedigree', 'brand_1778674049_8407.png', ''),
 (3, 'Natural Core', 'brand_1778647652_7413.webp', ''),
-(4, 'Taste of the Wild', 'taste_of_the_wild.png', NULL);
+(4, 'Taste of the Wild', 'brand_1778674325_9906.jpg', '');
 
 -- --------------------------------------------------------
 
@@ -169,7 +169,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`order_id`, `user_id`, `coupon_id`, `total_price`, `shipping_fee`, `discount_amount`, `order_status`, `payment_method`, `payment_status`, `shipping_method`, `shipping_address`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 2, NULL, 465000.00, 30000.00, 0.00, 'pending', 'cod', 'unpaid', 'standard', 'Lý Tự Trọng\r\nNinh Kiều, Phường An Khánh, Quận Ninh Kiều, Thành phố Cần Thơ', NULL, '2026-05-13 03:26:31', '2026-05-13 03:26:31');
+(1, 2, NULL, 465000.00, 30000.00, 0.00, 'completed', 'cod', 'paid', 'standard', 'Lý Tự Trọng\r\nNinh Kiều, Phường An Khánh, Quận Ninh Kiều, Thành phố Cần Thơ', NULL, '2026-05-13 03:26:31', '2026-05-13 13:29:02');
 
 -- --------------------------------------------------------
 
@@ -209,6 +209,15 @@ CREATE TABLE `order_logs` (
   `changed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `order_logs`
+--
+
+INSERT INTO `order_logs` (`log_id`, `order_id`, `admin_id`, `old_status`, `new_status`, `reason`, `changed_at`) VALUES
+(1, 1, 1, 'pending', 'confirmed', '', '2026-05-13 13:18:26'),
+(2, 1, 1, 'confirmed', 'shipping', '', '2026-05-13 13:18:30'),
+(3, 1, 1, 'shipping', 'completed', '', '2026-05-13 13:29:02');
+
 -- --------------------------------------------------------
 
 --
@@ -221,6 +230,15 @@ CREATE TABLE `order_status_history` (
   `status` enum('pending','confirmed','shipping','completed','cancelled') NOT NULL,
   `changed_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `order_status_history`
+--
+
+INSERT INTO `order_status_history` (`history_id`, `order_id`, `status`, `changed_at`) VALUES
+(1, 1, 'confirmed', '2026-05-13 13:18:26'),
+(2, 1, 'shipping', '2026-05-13 13:18:30'),
+(3, 1, 'completed', '2026-05-13 13:29:02');
 
 -- --------------------------------------------------------
 
@@ -241,7 +259,7 @@ CREATE TABLE `pages` (
 --
 
 INSERT INTO `pages` (`page_id`, `page_title`, `page_slug`, `page_content`, `updated_at`) VALUES
-(1, '123', '123', '123', '2026-05-13 09:19:23');
+(1, 'Tin Tức Shop Thú Cưng - Cẩm Nang Chăm Sóc, Dinh Dưỡng Và Kinh Nghiệm Nuôi Thú Cưng Toàn Diện', 'tin-tuc-shop-thu-cung-cam-nang-cham-soc-dinh-duong-va-kinh-nghiem-nuoi-thu-cung-toan-dien', 'Chào mừng bạn đến với chuyên mục Tin Tức Shop Thú Cưng – nơi cập nhật những kiến thức hữu ích, kinh nghiệm thực tế và xu hướng mới nhất trong việc chăm sóc chó, mèo, hamster, thỏ, chim cảnh và nhiều loài thú cưng khác. Tại đây, chúng tôi tổng hợp những bài viết chuyên sâu về dinh dưỡng, sức khỏe, huấn luyện, vệ sinh, làm đẹp và lựa chọn phụ kiện phù hợp nhằm giúp thú cưng của bạn luôn khỏe mạnh, vui vẻ và phát triển toàn diện.\n1. Tại Sao Việc Chăm Sóc Thú Cưng Đúng Cách Lại Quan Trọng?\nThú cưng không chỉ là vật nuôi mà còn là những người bạn thân thiết trong gia đình. Việc chăm sóc đúng cách giúp kéo dài tuổi thọ, tăng cường sức khỏe và cải thiện chất lượng cuộc sống của các bé. Một chế độ dinh dưỡng khoa học, môi trường sống sạch sẽ và sự quan tâm thường xuyên sẽ giúp thú cưng hạn chế bệnh tật, giảm stress và phát triển ổn định cả về thể chất lẫn tinh thần.\nNgoài ra, việc hiểu rõ nhu cầu từng giống loài còn giúp chủ nuôi đưa ra lựa chọn phù hợp về thức ăn, đồ chơi, chuồng trại và các sản phẩm hỗ trợ chăm sóc hằng ngày.\n2. Cập Nhật Tin Tức Mới Nhất Về Thị Trường Thú Cưng\nNgành công nghiệp thú cưng đang phát triển mạnh mẽ với hàng loạt sản phẩm và dịch vụ mới. Các thương hiệu nổi tiếng liên tục ra mắt thức ăn hữu cơ, hạt dinh dưỡng cao cấp, pate tươi, sữa bổ sung vitamin, thuốc hỗ trợ tiêu hóa, sản phẩm trị ve rận và nhiều phụ kiện thông minh.\nBên cạnh đó, xu hướng chăm sóc thú cưng hiện đại ngày càng chú trọng đến sức khỏe tinh thần, chế độ ăn cân bằng và các hoạt động vận động phù hợp. Chủ nuôi ngày nay không chỉ quan tâm đến việc cho ăn mà còn đầu tư vào dịch vụ spa, khách sạn thú cưng, huấn luyện hành vi và bảo hiểm sức khỏe cho thú cưng.\n3. Hướng Dẫn Chọn Thức Ăn Phù Hợp\nThức Ăn Cho Chó\nChó cần chế độ ăn giàu protein, chất béo tốt, vitamin và khoáng chất. Tùy theo độ tuổi và kích thước, bạn có thể lựa chọn hạt khô, pate, thức ăn tươi hoặc chế độ ăn tự nấu. Các giống chó nhỏ thường cần hạt kích thước nhỏ và dễ tiêu hóa, trong khi chó lớn cần bổ sung glucosamine để hỗ trợ xương khớp.\nThức Ăn Cho Mèo\nMèo là động vật ăn thịt bắt buộc, do đó cần lượng đạm động vật cao. Taurine là dưỡng chất quan trọng giúp bảo vệ tim mạch và thị lực. Ngoài thức ăn khô, bạn nên kết hợp pate hoặc súp thưởng để tăng lượng nước nạp vào cơ thể.\nThức Ăn Cho Hamster, Thỏ Và Chim Cảnh\nHamster cần hạt ngũ cốc, trái cây sấy và thức ăn chuyên dụng. Thỏ cần cỏ khô Timothy, rau xanh và viên nén giàu chất xơ. Chim cảnh cần hỗn hợp hạt, trái cây và vitamin để duy trì bộ lông đẹp và sức khỏe tốt.\n4. Những Bệnh Thường Gặp Ở Thú Cưng\nMột số vấn đề phổ biến bao gồm:\n\n\nRối loạn tiêu hóa do thay đổi thức ăn đột ngột.\n\n\nViêm da, nấm và ký sinh trùng ngoài da.\n\n\nBệnh đường hô hấp.\n\n\nBéo phì do ít vận động.\n\n\nCác bệnh về răng miệng.\n\n\nStress và rối loạn hành vi.\n\n\nViệc tiêm phòng đầy đủ, tẩy giun định kỳ và khám sức khỏe thường xuyên là yếu tố then chốt để phòng ngừa bệnh tật.\n5. Cách Chăm Sóc Lông Và Da\nBộ lông khỏe mạnh phản ánh tình trạng sức khỏe tổng thể của thú cưng. Chủ nuôi nên:\n\n\nChải lông hằng ngày.\n\n\nTắm bằng sữa tắm chuyên dụng.\n\n\nSử dụng dầu dưỡng và xịt khử mùi.\n\n\nBổ sung Omega 3 và Omega 6.\n\n\nKiểm tra ve rận thường xuyên.\n\n\nĐối với những giống chó mèo lông dài, việc cắt tỉa định kỳ giúp giảm rối lông và hạn chế các bệnh về da.\n6. Phụ Kiện Cần Thiết Cho Thú Cưng\nCác sản phẩm không thể thiếu gồm:\n\n\nBát ăn và bình nước tự động.\n\n\nNhà ngủ, ổ nằm mềm mại.\n\n\nChuồng vận chuyển.\n\n\nKhay vệ sinh và cát vệ sinh.\n\n\nVòng cổ, dây dắt.\n\n\nĐồ chơi tương tác.\n\n\nCây cào móng cho mèo.\n\n\nĐệm làm mát hoặc giữ ấm.\n\n\n7. Kinh Nghiệm Huấn Luyện Cơ Bản\nHuấn luyện thú cưng giúp hình thành thói quen tốt và tăng khả năng giao tiếp giữa chủ và vật nuôi. Các kỹ năng cơ bản gồm:\n\n\nĐi vệ sinh đúng chỗ.\n\n\nNgồi, nằm, đứng yên.\n\n\nKhông cắn phá đồ đạc.\n\n\nLàm quen với dây dắt.\n\n\nPhản hồi khi được gọi tên.\n\n\nPhương pháp thưởng bằng bánh snack và lời khen thường mang lại hiệu quả cao.\n8. Xu Hướng Nuôi Thú Cưng Hiện Đại\nNgày càng nhiều gia đình coi thú cưng như một thành viên chính thức. Điều này thúc đẩy nhu cầu về:\n\n\nThức ăn hữu cơ.\n\n\nDịch vụ spa và grooming.\n\n\nBảo hiểm thú cưng.\n\n\nThiết bị thông minh theo dõi sức khỏe.\n\n\nCamera quan sát thú cưng.\n\n\nĐồ chơi kích thích trí tuệ.\n\n\n9. Mẹo Giúp Thú Cưng Sống Khỏe Mạnh\n\n\nCung cấp nước sạch liên tục.\n\n\nDuy trì lịch tiêm phòng.\n\n\nCho vận động mỗi ngày.\n\n\nKiểm soát cân nặng.\n\n\nKhám sức khỏe định kỳ.\n\n\nGiữ môi trường sống sạch sẽ.\n\n\nDành thời gian chơi và tương tác.\n\n\n10. Những Sản Phẩm Được Yêu Thích Tại Shop Thú Cưng\nTại shop thú cưng, khách hàng có thể tìm thấy hàng nghìn sản phẩm chất lượng cao như:\n\n\nThức ăn hạt cho chó mèo mọi lứa tuổi.\n\n\nPate dinh dưỡng cao cấp.\n\n\nCát vệ sinh khử mùi.\n\n\nSữa tắm trị nấm và ve rận.\n\n\nVitamin tổng hợp.\n\n\nBánh thưởng huấn luyện.\n\n\nĐồ chơi gặm nhai.\n\n\nChuồng và balo vận chuyển.\n\n\n11. Tư Vấn Chọn Sản Phẩm Theo Độ Tuổi\nThú Cưng Sơ Sinh\nCần sữa thay thế, bình bú, đệm giữ nhiệt và sản phẩm hỗ trợ miễn dịch.\nThú Cưng Trưởng Thành\nCần chế độ ăn cân bằng, đồ chơi vận động và các sản phẩm chăm sóc lông.\nThú Cưng Cao Tuổi\nCần thực phẩm hỗ trợ khớp, tim mạch và tiêu hóa.\n12. Cộng Đồng Yêu Thú Cưng\nChuyên mục tin tức cũng là nơi kết nối cộng đồng những người yêu động vật. Bạn có thể tìm thấy các câu chuyện cảm động, kinh nghiệm nhận nuôi, chia sẻ về cứu hộ động vật và các hoạt động thiện nguyện dành cho chó mèo bị bỏ rơi.\n13. Cam Kết Từ Shop Thú Cưng\nChúng tôi luôn cập nhật những kiến thức mới nhất, lựa chọn sản phẩm chính hãng và mang đến dịch vụ tư vấn tận tâm. Mỗi bài viết trong chuyên mục tin tức đều được biên soạn nhằm giúp người nuôi hiểu rõ hơn về nhu cầu của thú cưng, từ đó chăm sóc các bé một cách khoa học và hiệu quả nhất.\n14. Kết Luận\nNuôi thú cưng là một hành trình đầy niềm vui và trách nhiệm. Với nguồn thông tin phong phú từ chuyên mục Tin Tức Shop Thú Cưng, bạn sẽ có thêm kiến thức để chăm sóc người bạn bốn chân của mình tốt hơn mỗi ngày. Hãy thường xuyên theo dõi chuyên mục để cập nhật những bài viết mới nhất về dinh dưỡng, sức khỏe, huấn luyện và các sản phẩm hữu ích dành cho thú cưng thân yêu của bạn.', '2026-05-13 12:46:57');
 
 -- --------------------------------------------------------
 
@@ -266,7 +284,7 @@ CREATE TABLE `posts` (
 --
 
 INSERT INTO `posts` (`post_id`, `title`, `slug`, `content`, `thumbnail`, `category`, `author_id`, `status`, `created_at`) VALUES
-(1, '1234', '1234', '1234', 'post_1778663933_6722.jpg', 'blog', 1, 1, '2026-05-13 09:18:53');
+(1, '1234', '1234', '123', 'post_1778663933_6722.jpg', 'blog', 1, 1, '2026-05-13 12:06:28');
 
 -- --------------------------------------------------------
 
@@ -297,15 +315,15 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`product_id`, `category_id`, `brand_id`, `promotion_id`, `product_name`, `sku`, `price`, `discount_price`, `thumbnail`, `description`, `stock_quantity`, `status`, `created_at`, `updated_at`) VALUES
 (1, 8, 2, NULL, 'Thức ăn hạt Pedigree vị bò', 'DOG-FOOD-001', 150000.00, 135000.00, 'product_1778647264_80451.jpg', 'Thức ăn hạt giàu dinh dưỡng cho chó trưởng thành.', 44, 'active', '2026-04-27 06:35:34', '2026-05-13 04:57:10'),
-(2, 9, 1, NULL, 'Pate lon Royal Canin Puppy', 'DOG-FOOD-002', 45000.00, 0.00, NULL, 'Pate thơm ngon giúp kích thích vị giác cho cún con.', 100, 'active', '2026-04-27 06:35:34', '2026-04-28 08:16:17'),
+(2, 9, 1, NULL, 'Pate lon Royal Canin Puppy', 'DOG-FOOD-002', 45000.00, 0.00, 'product_1778677749_31818.jpg', 'Pate thơm ngon giúp kích thích vị giác cho cún con.', 100, 'active', '2026-04-27 06:35:34', '2026-05-13 13:09:09'),
 (3, 10, NULL, NULL, 'Hạt hỗ trợ tiêu hóa cho chó nhạy cảm', 'DOG-FOOD-003', 320000.00, 300000.00, 'product_1778647490_76895.webp', 'Công thức đặc biệt dành cho chó có hệ tiêu hóa yếu.', 18, 'active', '2026-04-27 06:35:34', '2026-05-13 04:44:50'),
-(4, 11, NULL, NULL, 'Thức ăn hữu cơ Natural Core', 'DOG-FOOD-004', 450000.00, 0.00, NULL, 'Thành phần 100% tự nhiên, không chất bảo quản.', 15, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
-(5, 12, NULL, NULL, 'Hạt không ngũ cốc Taste of the Wild', 'DOG-FOOD-005', 550000.00, 520000.00, NULL, 'Phù hợp cho chó dị ứng với các loại ngũ cốc.', 9, 'active', '2026-04-27 06:35:34', '2026-05-06 02:18:54'),
-(6, 13, NULL, NULL, 'Bánh thưởng mềm vị gà Bowwow', 'TREAT-001', 35000.00, 0.00, NULL, 'Bánh thưởng mềm, thơm mùi gà, thích hợp để huấn luyện.', 200, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
-(7, 14, NULL, NULL, 'Xương gặm sạch răng Pedigree Dentastix', 'TREAT-002', 25000.00, 0.00, NULL, 'Giúp giảm mảng bám và vôi răng cho cún.', 150, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
-(8, 15, NULL, NULL, 'Súp thưởng Wanpy cho chó', 'TREAT-003', 12000.00, 0.00, NULL, 'Súp dạng lỏng, bổ sung nước và dưỡng chất.', 300, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
-(9, 16, NULL, NULL, 'Bánh quy hình xương Milk Biscuit', 'TREAT-004', 65000.00, 0.00, NULL, 'Bánh quy giòn tan, giàu canxi.', 79, 'active', '2026-04-27 06:35:34', '2026-04-30 13:44:54'),
-(10, 17, NULL, NULL, 'Thịt bò sấy khô nguyên miếng', 'TREAT-005', 120000.00, 0.00, NULL, 'Thịt bò thật sấy lạnh, giữ nguyên hương vị.', 40, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34'),
+(4, 11, 3, NULL, 'Thức ăn hữu cơ Natural Core', 'DOG-FOOD-004', 450000.00, 0.00, 'product_1778677250_99955.jpg', 'Thành phần 100% tự nhiên, không chất bảo quản.', 15, 'active', '2026-04-27 06:35:34', '2026-05-13 13:00:56'),
+(5, 12, 4, NULL, 'Hạt không ngũ cốc Taste of the Wild', 'DOG-FOOD-005', 550000.00, 520000.00, 'product_1778676915_37020.png', 'Phù hợp cho chó dị ứng với các loại ngũ cốc.', 9, 'active', '2026-04-27 06:35:34', '2026-05-13 12:55:27'),
+(6, 13, NULL, NULL, 'Bánh thưởng mềm vị gà Bowwow', 'TREAT-001', 35000.00, 0.00, 'product_1778677786_83592.webp', 'Bánh thưởng mềm, thơm mùi gà, thích hợp để huấn luyện.', 200, 'active', '2026-04-27 06:35:34', '2026-05-13 13:09:46'),
+(7, 14, NULL, NULL, 'Xương gặm sạch răng Pedigree Dentastix', 'TREAT-002', 25000.00, 0.00, 'product_1778677817_25262.png', 'Giúp giảm mảng bám và vôi răng cho cún.', 150, 'active', '2026-04-27 06:35:34', '2026-05-13 13:10:17'),
+(8, 15, NULL, NULL, 'Súp thưởng Wanpy cho chó', 'TREAT-003', 12000.00, 0.00, 'product_1778677843_97112.jpg', 'Súp dạng lỏng, bổ sung nước và dưỡng chất.', 300, 'active', '2026-04-27 06:35:34', '2026-05-13 13:10:43'),
+(9, 16, NULL, NULL, 'Bánh quy hình xương Milk Biscuit', 'TREAT-004', 65000.00, 0.00, 'product_1778677715_48899.webp', 'Bánh quy giòn tan, giàu canxi.', 79, 'active', '2026-04-27 06:35:34', '2026-05-13 13:08:35'),
+(10, 17, NULL, NULL, 'Thịt bò sấy khô nguyên miếng', 'TREAT-005', 120000.00, 0.00, 'product_1778677898_26587.png', 'Thịt bò thật sấy lạnh, giữ nguyên hương vị.', 40, 'active', '2026-04-27 06:35:34', '2026-05-13 13:11:38'),
 (11, 25, NULL, NULL, 'Vòng cổ vải dù phản quang', 'ACC-001', 50000.00, 0.00, NULL, 'Dây dù bền chắc, có phản quang an toàn khi đi đêm.', 60, 'active', '2026-04-27 06:35:34', '2026-04-27 06:35:34');
 
 -- --------------------------------------------------------
@@ -320,6 +338,24 @@ CREATE TABLE `product_images` (
   `image_url` varchar(255) NOT NULL,
   `is_main` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `product_stock_logs`
+--
+
+CREATE TABLE `product_stock_logs` (
+  `log_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `type` enum('import','export') NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `current_stock` int(11) NOT NULL,
+  `new_stock` int(11) NOT NULL,
+  `note` text DEFAULT NULL,
+  `admin_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -557,6 +593,13 @@ ALTER TABLE `product_images`
   ADD KEY `fk_images_product` (`product_id`);
 
 --
+-- Chỉ mục cho bảng `product_stock_logs`
+--
+ALTER TABLE `product_stock_logs`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- Chỉ mục cho bảng `promotions`
 --
 ALTER TABLE `promotions`
@@ -660,13 +703,13 @@ ALTER TABLE `order_items`
 -- AUTO_INCREMENT cho bảng `order_logs`
 --
 ALTER TABLE `order_logs`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `order_status_history`
 --
 ALTER TABLE `order_status_history`
-  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `pages`
@@ -691,6 +734,12 @@ ALTER TABLE `products`
 --
 ALTER TABLE `product_images`
   MODIFY `image_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `product_stock_logs`
+--
+ALTER TABLE `product_stock_logs`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `promotions`
@@ -795,6 +844,12 @@ ALTER TABLE `products`
 --
 ALTER TABLE `product_images`
   ADD CONSTRAINT `fk_images_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `product_stock_logs`
+--
+ALTER TABLE `product_stock_logs`
+  ADD CONSTRAINT `product_stock_logs_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`);
 
 --
 -- Các ràng buộc cho bảng `return_requests`
