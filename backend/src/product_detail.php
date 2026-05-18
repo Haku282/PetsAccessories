@@ -145,27 +145,82 @@ if (!$productId) {
             }
         }
 
-        // Fetch related products (prefer same category; fallback to latest products)
+        // Fetch related products from parent category (5 random products)
         $categoryId = (int) ($product['category_id'] ?? 0);
+        $parentCategoryId = null;
 
-        if ($categoryId > 0) {
+        // Nếu danh mục hiện tại có parent_id > 0, thì nó là subcategory, lấy products từ parent
+        // Nếu danh mục hiện tại không có parent_id, thì nó là category cha, lấy products từ nó
+        try {
+            if ($categoryId > 0) {
+                $catStmt = $db->prepare(
+                    'SELECT parent_id FROM categories WHERE category_id = ? LIMIT 1'
+                );
+                $catStmt->execute([$categoryId]);
+                $catRow = $catStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($catRow) {
+                    // Nếu category có parent_id, dùng parent_id; nếu không thì dùng chính nó
+                    $parentCategoryId = (int) ($catRow['parent_id'] ?? 0);
+                    if ($parentCategoryId === 0) {
+                        // Nó là category cha rồi, dùng chính nó
+                        $parentCategoryId = $categoryId;
+                    }
+                }
+            }
+        } catch (PDOException $e) {
+            $parentCategoryId = null;
+        }
+
+        // Lấy sản phẩm từ danh mục cha + subcategory
+        if ($parentCategoryId !== null && $parentCategoryId > 0) {
             try {
                 $relatedStmt = $db->prepare(
                     'SELECT p.product_id, p.product_name, p.price, p.discount_price, p.thumbnail
                      FROM products p
-                     WHERE p.category_id = ?
+                     JOIN categories c ON p.category_id = c.category_id
+                     WHERE (c.category_id = ? OR c.parent_id = ?)
                        AND p.status = 1
                        AND p.product_id != ?
-                     ORDER BY p.product_id DESC
-                     LIMIT 6'
+                     ORDER BY RAND()'
                 );
-                $relatedStmt->execute([$categoryId, $productId]);
-                $relatedProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
+                $relatedStmt->execute([$parentCategoryId, $parentCategoryId, $productId]);
+                $categoryProducts = $relatedStmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                // Nếu có ít hơn 5 sản phẩm từ danh mục cha, lấy thêm từ các sản phẩm khác
+                if (count($categoryProducts) < 5) {
+                    $productsToAdd = 5 - count($categoryProducts);
+                    try {
+                        $otherStmt = $db->prepare(
+                            'SELECT p.product_id, p.product_name, p.price, p.discount_price, p.thumbnail
+                             FROM products p
+                             WHERE p.status = 1
+                               AND p.product_id != ?
+                               AND p.product_id NOT IN (SELECT product_id FROM (
+                                   SELECT p2.product_id
+                                   FROM products p2
+                                   JOIN categories c ON p2.category_id = c.category_id
+                                   WHERE (c.category_id = ? OR c.parent_id = ?)
+                                     AND p2.product_id != ?
+                               ) as temp)
+                             ORDER BY RAND()
+                             LIMIT ' . (int)$productsToAdd
+                        );
+                        $otherStmt->execute([$productId, $parentCategoryId, $parentCategoryId, $productId]);
+                        $otherProducts = $otherStmt->fetchAll(PDO::FETCH_ASSOC);
+                        $relatedProducts = array_merge($categoryProducts, $otherProducts);
+                    } catch (PDOException $e) {
+                        $relatedProducts = $categoryProducts;
+                    }
+                } else {
+                    $relatedProducts = $categoryProducts;
+                }
             } catch (PDOException $e) {
                 $relatedProducts = [];
             }
         }
 
+        // Fallback: Nếu không tìm thấy sản phẩm liên quan, lấy 5 sản phẩm ngẫu nhiên từ tất cả
         if (empty($relatedProducts)) {
             try {
                 $fallbackStmt = $db->prepare(
@@ -173,8 +228,8 @@ if (!$productId) {
                      FROM products p
                      WHERE p.status = 1
                        AND p.product_id != ?
-                     ORDER BY p.product_id DESC
-                     LIMIT 6'
+                     ORDER BY RAND()
+                     LIMIT 5'
                 );
                 $fallbackStmt->execute([$productId]);
                 $relatedProducts = $fallbackStmt->fetchAll(PDO::FETCH_ASSOC);

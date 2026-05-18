@@ -95,19 +95,11 @@ if ($order && $_SERVER['REQUEST_METHOD'] === 'POST') {
                         throw new PDOException('Không thể kết nối cơ sở dữ liệu.');
                     }
 
-                    $db->exec("CREATE TABLE IF NOT EXISTS order_return_requests (
-                        request_id INT AUTO_INCREMENT PRIMARY KEY,
-                        order_id INT NOT NULL,
-                        user_id INT NOT NULL,
-                        request_type VARCHAR(20) NOT NULL,
-                        reason TEXT NOT NULL,
-                        status VARCHAR(20) NOT NULL DEFAULT 'pending',
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        INDEX idx_orr_order_id (order_id),
-                        INDEX idx_orr_user_id (user_id)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-                    $stmt = $db->prepare('INSERT INTO order_return_requests (order_id, user_id, request_type, reason, status) VALUES (?, ?, ?, ?, ?)');
+                    // Sử dụng bảng return_requests có sẵn
+                    $stmt = $db->prepare(
+                        'INSERT INTO return_requests (order_id, user_id, request_type, reason, status) 
+                         VALUES (?, ?, ?, ?, ?)'
+                    );
                     $stmt->execute([
                         (int) $orderId,
                         (int) $userId,
@@ -117,6 +109,10 @@ if ($order && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]);
 
                     $success = 'Đã gửi yêu cầu đổi/trả. Shop sẽ liên hệ xác nhận sớm.';
+                    
+                    // Redirect để tránh re-submit khi reload trang
+                    header('Location: /PetsAccessories/frontend/components/order_detail.php?id=' . $orderId);
+                    exit;
                 } catch (PDOException $e) {
                     $error = 'Không thể tạo yêu cầu đổi/trả: ' . $e->getMessage();
                 }
@@ -211,15 +207,15 @@ if ($order) {
         $orderItems = [];
     }
 
-    // Load return requests (if table exists)
+    // Load return requests từ bảng return_requests
     try {
         if (!($db instanceof PDO)) {
             throw new PDOException('Không thể kết nối cơ sở dữ liệu.');
         }
 
         $stmt = $db->prepare('
-            SELECT request_id, request_type, reason, status, created_at
-            FROM order_return_requests
+            SELECT return_id, request_type, reason, status, created_at
+            FROM return_requests
             WHERE order_id = ? AND user_id = ?
             ORDER BY created_at DESC
         ');
