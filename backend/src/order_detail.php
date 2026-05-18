@@ -24,6 +24,7 @@ $success = '';
 $order = null;
 $orderItems = [];
 $returnRequests = [];
+$productComplaints = [];
 
 function mapOrderStatusLabel(string $status): string
 {
@@ -48,6 +49,30 @@ function mapPaymentStatusText(string $status): string
 
     $key = strtolower(trim($status));
     return $map[$key] ?? htmlspecialchars($status);
+}
+
+function mapProductComplaintTypeLabel(string $type): string
+{
+    $map = [
+        'complaint' => 'Khiếu nại',
+        'report' => 'Báo cáo sản phẩm',
+    ];
+
+    $key = strtolower(trim($type));
+    return $map[$key] ?? htmlspecialchars($type);
+}
+
+function mapProductComplaintStatusLabel(string $status): string
+{
+    $map = [
+        'pending' => '<span class="status-badge status-pending">Chờ xử lý</span>',
+        'processing' => '<span class="status-badge status-shipping">Đang xử lý</span>',
+        'resolved' => '<span class="status-badge status-completed">Đã xử lý</span>',
+        'rejected' => '<span class="status-badge status-cancelled">Từ chối</span>',
+    ];
+
+    $key = strtolower(trim($status));
+    return $map[$key] ?? '<span class="status-badge">' . htmlspecialchars($status) . '</span>';
 }
 
 try {
@@ -107,6 +132,61 @@ if ($order && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     $success = 'Đã gửi yêu cầu đổi/trả. Shop sẽ liên hệ xác nhận sớm.';
                 } catch (PDOException $e) {
                     $error = 'Không thể tạo yêu cầu đổi/trả: ' . $e->getMessage();
+                }
+            }
+        }
+    } elseif ($action === 'create_product_complaint') {
+        $complaintType = trim($_POST['complaint_type'] ?? '');
+        $productId = filter_input(INPUT_POST, 'product_id', FILTER_VALIDATE_INT);
+        $reason = trim($_POST['complaint_reason'] ?? '');
+
+        $allowedTypes = ['complaint', 'report'];
+        if (!in_array($complaintType, $allowedTypes, true)) {
+            $error = 'Loại yêu cầu không hợp lệ.';
+        } elseif (!$productId) {
+            $error = 'Vui lòng chọn sản phẩm cần khiếu nại hoặc báo cáo.';
+        } elseif ($reason === '') {
+            $error = 'Vui lòng nhập nội dung khiếu nại hoặc báo cáo.';
+        } else {
+            $orderStatus = strtolower((string) ($order['order_status'] ?? ''));
+            if ($orderStatus !== 'completed') {
+                $error = 'Chỉ hỗ trợ khiếu nại hoặc báo cáo khi đơn hàng đã hoàn thành.';
+            } else {
+                try {
+                    if (!($db instanceof PDO)) {
+                        throw new PDOException('Không thể kết nối cơ sở dữ liệu.');
+                    }
+
+                    $checkStmt = $db->prepare('
+                        SELECT oi.product_id, p.product_name
+                        FROM order_items oi
+                        LEFT JOIN products p ON p.product_id = oi.product_id
+                        WHERE oi.order_id = ? AND oi.product_id = ?
+                        LIMIT 1
+                    ');
+                    $checkStmt->execute([(int) $orderId, (int) $productId]);
+                    $product = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$product) {
+                        $error = 'Sản phẩm được chọn không thuộc đơn hàng này.';
+                    } else {
+                        $stmt = $db->prepare('
+                            INSERT INTO product_complaints (order_id, user_id, product_id, complaint_type, reason, status)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        ');
+                        $stmt->execute([
+                            (int) $orderId,
+                            (int) $userId,
+                            (int) $productId,
+                            $complaintType,
+                            $reason,
+                            'pending',
+                        ]);
+
+                        $success = 'Đã gửi yêu cầu khiếu nại/báo cáo. Shop sẽ kiểm tra và phản hồi sớm.';
+                    }
+                } catch (PDOException $e) {
+                    $error = 'Không thể tạo yêu cầu khiếu nại/báo cáo: ' . $e->getMessage();
                 }
             }
         }
@@ -215,5 +295,25 @@ if ($order) {
         $returnRequests = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         $returnRequests = [];
+    }
+
+    // Load product complaints for this order
+    try {
+        if (!($db instanceof PDO)) {
+            throw new PDOException('Không thể kết nối cơ sở dữ liệu.');
+        }
+
+        $stmt = $db->prepare('
+            SELECT pc.complaint_id AS request_id, pc.product_id, pc.complaint_type, pc.reason, pc.status, pc.created_at,
+                   p.product_name
+            FROM product_complaints pc
+            LEFT JOIN products p ON p.product_id = pc.product_id
+            WHERE pc.order_id = ? AND pc.user_id = ?
+            ORDER BY pc.created_at DESC
+        ');
+        $stmt->execute([(int) $orderId, (int) $userId]);
+        $productComplaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $productComplaints = [];
     }
 }

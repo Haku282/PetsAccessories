@@ -353,12 +353,89 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                 border-radius: 8px;
                 padding: 20px;
                 margin-bottom: 20px;
+                position: relative;
             }
 
             .pd-review-header {
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 10px;
+                gap: 12px;
+                padding-right: 42px;
+            }
+
+            .pd-review-actions {
+                position: absolute;
+                top: 14px;
+                right: 14px;
+            }
+
+            .pd-review-report-btn {
+                width: 32px;
+                height: 32px;
+                border: 1px solid #ddd;
+                border-radius: 50%;
+                background: #fff;
+                color: #d35400;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 16px;
+                line-height: 1;
+            }
+
+            .pd-review-report-btn:hover {
+                border-color: #d35400;
+                background: #fff7f0;
+            }
+
+            .pd-review-report-form {
+                margin-top: 14px;
+                padding: 14px;
+                border-radius: 8px;
+                background: #fafafa;
+                border: 1px solid #eee;
+                display: none;
+            }
+
+            .pd-review-report-form.active {
+                display: block;
+            }
+
+            .pd-review-report-form textarea {
+                width: 100%;
+                min-height: 90px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                resize: vertical;
+                font-family: inherit;
+            }
+
+            .pd-review-report-actions {
+                display: flex;
+                gap: 10px;
+                margin-top: 10px;
+                flex-wrap: wrap;
+            }
+
+            .pd-review-report-actions button {
+                border: none;
+                border-radius: 6px;
+                padding: 9px 14px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .pd-review-report-submit {
+                background: #d35400;
+                color: #fff;
+            }
+
+            .pd-review-report-cancel {
+                background: #eaeaea;
+                color: #333;
             }
 
             .pd-review-author {
@@ -559,6 +636,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                     <?php if (!empty($reviews) && is_array($reviews)): ?>
                         <?php foreach ($reviews as $review): ?>
                             <div class="pd-review-box">
+                                <?php $canReportReview = isset($_SESSION['user_id']); ?>
                                 <div class="pd-review-header">
                                     <div class="pd-review-author"><?php echo htmlspecialchars($review['fullname'] ?? 'Khách hàng'); ?>
                                         <span style="color: #ff9800; margin-left: 10px;">
@@ -567,6 +645,27 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                                     </div>
                                     <div class="pd-review-date"><?php echo date('d/m/Y', strtotime($review['created_at'])); ?></div>
                                 </div>
+                                <?php if ($canReportReview): ?>
+                                    <div class="pd-review-actions">
+                                        <button type="button"
+                                            class="pd-review-report-btn"
+                                            title="Báo cáo review"
+                                            aria-label="Báo cáo review"
+                                            data-review-id="<?php echo (int) ($review['review_id'] ?? 0); ?>"
+                                            onclick="toggleReviewReportForm(this)">⚑</button>
+                                    </div>
+                                    <div class="pd-review-report-form" id="report-form-<?php echo (int) ($review['review_id'] ?? 0); ?>">
+                                        <strong style="display:block; margin-bottom: 8px; color:#333;">Báo cáo review này</strong>
+                                        <form onsubmit="submitReviewReport(event)">
+                                            <input type="hidden" name="review_id" value="<?php echo (int) ($review['review_id'] ?? 0); ?>">
+                                            <textarea name="reason" placeholder="Nêu rõ lý do báo cáo review này..." required></textarea>
+                                            <div class="pd-review-report-actions">
+                                                <button type="submit" class="pd-review-report-submit">Gửi báo cáo</button>
+                                                <button type="button" class="pd-review-report-cancel" onclick="toggleReviewReportForm(this, true)">Hủy</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
                                 <p style="margin: 0; color: #444;"><?php echo htmlspecialchars($review['comment'] ?? ''); ?></p>
                             </div>
                         <?php endforeach; ?>
@@ -728,6 +827,45 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                         alert(data.message);
                         if (data.status === 'success') {
                             location.reload();
+                        }
+                    })
+                    .catch(err => {
+                        alert('Có lỗi xảy ra.');
+                    });
+            }
+
+            function toggleReviewReportForm(trigger, forceClose = false) {
+                const reviewBox = trigger?.closest ? trigger.closest('.pd-review-box') : null;
+                const button = reviewBox ? reviewBox.querySelector('.pd-review-report-btn') : trigger;
+                const reviewId = button?.getAttribute ? button.getAttribute('data-review-id') : null;
+                if (!reviewId) return;
+
+                const form = document.getElementById(`report-form-${reviewId}`);
+                if (!form) return;
+
+                if (forceClose) {
+                    form.classList.remove('active');
+                    return;
+                }
+
+                form.classList.toggle('active');
+            }
+
+            function submitReviewReport(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+
+                fetch('/PetsAccessories/backend/src/report_review.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        if (data.status === 'success') {
+                            e.target.reset();
+                            const wrapper = e.target.closest('.pd-review-report-form');
+                            if (wrapper) wrapper.classList.remove('active');
                         }
                     })
                     .catch(err => {

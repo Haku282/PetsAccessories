@@ -154,7 +154,17 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
             padding-top: 16px;
         }
 
+        .complaint-box {
+            margin-top: 22px;
+            border-top: 2px solid #f1c40f;
+            padding-top: 16px;
+        }
+
         .return-box h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .complaint-box h3 {
             margin: 0 0 10px 0;
         }
 
@@ -351,6 +361,72 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                                         <td><?php echo htmlspecialchars((string) $req['status']); ?></td>
                                         <td><?php echo !empty($req['created_at']) ? date('d/m/Y H:i', strtotime($req['created_at'])) : ''; ?></td>
                                         <td><?php echo nl2br(htmlspecialchars((string) ($req['reason'] ?? ''))); ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="complaint-box no-print">
+                <h3>Khiếu nại / báo cáo sản phẩm</h3>
+                <div>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="create_product_complaint">
+                        <div class="form-row">
+                            <label for="complaint_type">Loại yêu cầu</label>
+                            <select id="complaint_type" name="complaint_type" required>
+                                <option value="complaint">Khiếu nại sản phẩm</option>
+                                <option value="report">Báo cáo sản phẩm</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="product_id">Sản phẩm cần xử lý</label>
+                            <select id="product_id" name="product_id" required>
+                                <?php if (!empty($orderItems)): ?>
+                                    <?php foreach ($orderItems as $item): ?>
+                                        <option value="<?php echo (int) ($item['product_id'] ?? 0); ?>">
+                                            <?php echo htmlspecialchars((string) ($item['product_name'] ?? ('#' . (int) ($item['product_id'] ?? 0)))); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <option value="">Không có sản phẩm</option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="complaint_reason">Nội dung khiếu nại / báo cáo</label>
+                            <textarea id="complaint_reason" name="complaint_reason" placeholder="Mô tả lỗi sản phẩm, tình trạng nhận hàng, bằng chứng hoặc lý do báo cáo..." required></textarea>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Gửi yêu cầu</button>
+                    </form>
+                    <p style="margin-top:10px;color:#777;">Lưu ý: hiện chỉ cho phép gửi khiếu nại hoặc báo cáo khi đơn hàng ở trạng thái Hoàn thành.</p>
+                </div>
+
+                <?php if (!empty($productComplaints)): ?>
+                    <h4 style="margin:16px 0 8px 0;">Lịch sử khiếu nại / báo cáo</h4>
+                    <div style="overflow-x:auto;">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã yêu cầu</th>
+                                    <th>Loại</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Nội dung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($productComplaints as $complaint): ?>
+                                    <tr>
+                                        <td>#<?php echo (int) ($complaint['request_id'] ?? 0); ?></td>
+                                        <td><?php echo mapProductComplaintTypeLabel((string) ($complaint['complaint_type'] ?? '')); ?></td>
+                                        <td><?php echo htmlspecialchars((string) ($complaint['product_name'] ?? ('#' . (int) ($complaint['product_id'] ?? 0)))); ?></td>
+                                        <td><?php echo mapProductComplaintStatusLabel((string) ($complaint['status'] ?? '')); ?></td>
+                                        <td><?php echo !empty($complaint['created_at']) ? date('d/m/Y H:i', strtotime($complaint['created_at'])) : ''; ?></td>
+                                        <td><?php echo nl2br(htmlspecialchars((string) ($complaint['reason'] ?? ''))); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
