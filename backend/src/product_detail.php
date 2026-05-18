@@ -99,6 +99,16 @@ if (!$productId) {
             $ratingStats = ['avg_rating' => 0, 'total_reviews' => 0];
         }
 
+        // Fetch product images
+        $productImages = [];
+        try {
+            $imgStmt = $db->prepare("SELECT image_url FROM product_images WHERE product_id = ? ORDER BY is_main DESC, image_id ASC");
+            $imgStmt->execute([$productId]);
+            $productImages = $imgStmt->fetchAll(PDO::FETCH_COLUMN);
+        } catch (PDOException $e) {
+            $productImages = [];
+        }
+
         // Check if user can review
         $canReview = false;
         if (isset($_SESSION['user_id'])) {
