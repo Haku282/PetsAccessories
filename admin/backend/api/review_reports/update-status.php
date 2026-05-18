@@ -39,6 +39,12 @@ try {
     $action = isset($data['action']) ? trim($data['action']) : '';
     $note = isset($data['admin_note']) ? trim($data['admin_note']) : null;
 
+    if (!in_array($status, [0, 1, 2], true)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Trạng thái không hợp lệ']);
+        exit;
+    }
+
     $check = $db->prepare('SELECT review_id FROM review_reports WHERE report_id = ?');
     $check->execute([$reportId]);
     $reviewId = $check->fetchColumn();
