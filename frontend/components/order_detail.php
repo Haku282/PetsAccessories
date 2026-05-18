@@ -209,7 +209,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="order-detail-page">
         <div class="order-detail-header">
@@ -308,7 +308,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                     </div>
                 </div>
             </div>
-            <p style="font-size: 20px; color: black;">Thắc mắc về đơn hàng cần hỗ trợ? Liên hệ ngay : 0988 xxx xxx</p>
+            <p style="font-size: 20px; color: black;">Thắc mắc về đơn hàng cần hỗ trợ? Liên hệ ngay : 1900 xxxx</p>
             <div class="return-box no-print">
                 <h3>Yêu cầu đổi/trả</h3>
                 <div>
@@ -361,7 +361,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
         <?php endif; ?>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 </body>
 
 </html>

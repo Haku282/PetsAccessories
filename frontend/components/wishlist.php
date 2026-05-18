@@ -102,7 +102,7 @@ require_once __DIR__ . '/../../backend/src/wishlist.php';
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="wishlist-container">
         <h2 style="border-bottom: 2px solid #ddd; padding-bottom: 15px; margin-bottom: 20px;">Danh sách yêu thích của bạn</h2>
@@ -222,7 +222,7 @@ require_once __DIR__ . '/../../backend/src/wishlist.php';
         }
     </script>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 </body>
 
 </html>

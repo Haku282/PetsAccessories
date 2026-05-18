@@ -1,5 +1,5 @@
 <?php
-// frontend/layout/header.php
+// frontend/layout/Header.php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
 
 <body>
 
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="product-detail">
         <style>

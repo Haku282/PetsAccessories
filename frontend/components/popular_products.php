@@ -13,7 +13,7 @@ $isEmbedded = $isEmbedded ?? false; ?>
     </head>
 
     <body>
-        <?php require_once __DIR__ . '/../layout/header.php'; ?>
+        <?php require_once __DIR__ . '/../layout/Header.php'; ?>
     <?php endif; ?>
 
     <?php
@@ -139,7 +139,7 @@ $isEmbedded = $isEmbedded ?? false; ?>
     </main>
 
     <?php if (!$isEmbedded): ?>
-        <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+        <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 
         <script>
             function addToCart(btn) {

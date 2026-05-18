@@ -51,7 +51,7 @@ $sectionTitle = $sectionTitle ?? 'Danh sách sản phẩm';
     </head>
 
     <body>
-        <?php require_once __DIR__ . '/../layout/header.php'; ?>
+        <?php require_once __DIR__ . '/../layout/Header.php'; ?>
     <?php endif; ?>
     <main class="products-page" style="padding: 40px 0;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
@@ -137,7 +137,7 @@ $sectionTitle = $sectionTitle ?? 'Danh sách sản phẩm';
         </div>
     </main>
     <?php if (!$isEmbedded): ?>
-        <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+        <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 
     </body>
 

@@ -65,7 +65,7 @@ if (!empty($slug) && isset($pdo)) {
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="detail-page-container">
         <?php if ($post): ?>
@@ -98,7 +98,7 @@ if (!empty($slug) && isset($pdo)) {
         <?php endif; ?>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 </body>
 
 </html>
