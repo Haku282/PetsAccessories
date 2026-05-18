@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../backend/src/search.php';
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="products-page" style="padding: 40px 0;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 15px;">
@@ -97,7 +97,7 @@ require_once __DIR__ . '/../../backend/src/search.php';
         </div>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 
     <script>
         function addToCart(btn) {

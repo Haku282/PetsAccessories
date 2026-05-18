@@ -97,7 +97,7 @@
     }
 
     // Tích hợp các components
-    require_once __DIR__ . '/../layout/header.php';
+    require_once __DIR__ . '/../layout/Header.php';
     require_once __DIR__ . '/../components/banner_slider.php';
     require_once __DIR__ . '/../components/news_section.php';
 
@@ -117,7 +117,7 @@
     require __DIR__ . '/../components/products.php';
 
     // Tin tức & Thông tin
-    require_once __DIR__ . '/../layout/footer.php';
+    require_once __DIR__ . '/../layout/Footer.php';
     ?>
 
 </body>

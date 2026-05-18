@@ -87,7 +87,7 @@ if (isset($db) && ($db instanceof PDO)) {
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="cart-page">
         <div class="cart-container">
@@ -300,7 +300,7 @@ if (isset($db) && ($db instanceof PDO)) {
         </div>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 
     <!-- Modal QR Code -->
     <div id="qr-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center;">

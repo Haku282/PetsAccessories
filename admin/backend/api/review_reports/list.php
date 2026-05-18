@@ -22,9 +22,33 @@ try {
     $db = $pdo;
     $search = isset($_GET['search']) ? trim($_GET['search']) : '';
     $status = isset($_GET['status']) ? trim((string)$_GET['status']) : '';
+    $action = isset($_GET['action']) ? trim((string)$_GET['action']) : '';
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = ($page - 1) * $limit;
+
+    if ($action === 'stats') {
+        $stmt = $db->query("
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 0 THEN 1 ELSE 0 END) AS pending,
+                SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS resolved,
+                SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS rejected
+            FROM review_reports
+        ");
+        $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'stats' => [
+                'total' => (int)($stats['total'] ?? 0),
+                'pending' => (int)($stats['pending'] ?? 0),
+                'resolved' => (int)($stats['resolved'] ?? 0),
+                'rejected' => (int)($stats['rejected'] ?? 0)
+            ]
+        ]);
+        exit;
+    }
 
     $sql = "
         SELECT rr.report_id, rr.review_id, rr.user_id, rr.reason, rr.status, rr.created_at,

@@ -94,7 +94,7 @@ if (!empty($user['address'])) {
 
 <body>
 
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <?php $showEditForm = ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($error)) ? true : false; ?>
 
@@ -321,7 +321,7 @@ if (!empty($user['address'])) {
         });
     </script>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 
 </body>
 

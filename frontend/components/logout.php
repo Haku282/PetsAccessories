@@ -20,7 +20,7 @@ session_destroy();
 
 <body>
 
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
 
     <main class="auth-container">
         <div class="auth-box" style="text-align: center;">
@@ -33,7 +33,7 @@ session_destroy();
         </div>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 
 </body>
 

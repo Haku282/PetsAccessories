@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../backend/src/process_checkout.php';
 </head>
 
 <body>
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Header.php'; ?>
     <main style="max-width: 600px; margin: 60px auto; text-align: center; padding: 40px; background: #fff; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
         <h2 style="color: #027a48; margin-bottom: 20px;">🎉 Đặt hàng thành công!</h2>
         <p style="margin-bottom: 10px; color: #555;">Cảm ơn <strong><?php echo htmlspecialchars($name); ?></strong> đã mua sắm tại PetsAccessories.</p>
@@ -71,7 +71,7 @@ require_once __DIR__ . '/../../backend/src/process_checkout.php';
 
                 <a href="/PetsAccessories/frontend/public/index.php" class="cart-btn" style="display: inline-block;">Tiếp tục mua sắm</a>
     </main>
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../layout/Footer.php'; ?>
 </body>
 
 </html>
