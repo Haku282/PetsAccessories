@@ -850,6 +850,120 @@ body {
         padding: 10px 12px;
     }
 }
+
+/* =========================================
+           IMAGE UPLOAD & GALLERY
+   ========================================= */
+
+/* Image Upload Section */
+.image-upload-section {
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    background-color: var(--light-gray);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.image-upload-section:hover,
+.image-upload-section.drag-over {
+    border-color: var(--primary-color);
+    background-color: #f0f8f0;
+}
+
+.image-upload-section p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.image-upload-label {
+    color: var(--primary-color);
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.image-upload-input {
+    display: none;
+}
+
+.image-upload-hint {
+    font-size: 12px;
+    color: #999;
+    margin-top: 10px;
+}
+
+/* Image Gallery */
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.image-item {
+    position: relative;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.image-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.image-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-main-badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: var(--success-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.image-item-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.image-item:hover .image-item-overlay {
+    transform: translateY(0);
+}
+
+.image-item-overlay .btn {
+    flex: 1;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
 /* =========================================
                 ANIMATIONS 
    ========================================= */
