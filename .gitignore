@@ -12,3 +12,9 @@ Thumbs.db
 # Loại bỏ file log và cache
 *.log
 /storage/*.php
+
+# Bỏ qua tất cả các file (hình ảnh) trong thư mục qr
+/backend/upload/qr/*
+
+# Nhưng KHÔNG bỏ qua file .gitkeep để Git giữ lại thư mục này
+!/backend/upload/qr/.gitkeep

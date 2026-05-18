@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../backend/config/database.php';
 
 $isEmbedded = $isEmbedded ?? false;
+$brandInfo = null;
 
 // Pagination and filtering could go here
 if (!isset($products)) {
@@ -13,6 +14,15 @@ if (!isset($products)) {
             if (isset($_GET['brand_id']) && is_numeric($_GET['brand_id'])) {
                 $query .= " AND brand_id = :brand_id";
                 $params[':brand_id'] = (int)$_GET['brand_id'];
+                
+                // Fetch brand details if brand_id is provided
+                $brandStmt = $pdo->prepare("SELECT brand_name, description, brand_logo FROM brands WHERE brand_id = :brand_id LIMIT 1");
+                $brandStmt->execute([':brand_id' => $params[':brand_id']]);
+                $brandInfo = $brandStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($brandInfo && !isset($sectionTitle)) {
+                    $sectionTitle = "Sản phẩm thương hiệu " . $brandInfo['brand_name'];
+                }
             }
 
             $query .= " ORDER BY created_at DESC LIMIT 20";
@@ -49,6 +59,13 @@ $sectionTitle = $sectionTitle ?? 'Danh sách sản phẩm';
                 <h2>
                     <?php echo htmlspecialchars($sectionTitle); ?>
                 </h2>
+
+                <?php if (isset($brandInfo) && !empty($brandInfo['description'])): ?>
+                    <div class="brand-description" style="margin-bottom: 30px; padding: 20px; background-color: #f9fbfd; border-radius: 8px; border: 1px solid #e1e8ee;">
+
+                        <p style="margin: 0; line-height: 1.6; color: #555;"><?php echo nl2br(htmlspecialchars($brandInfo['description'])); ?></p>
+                    </div>
+                <?php endif; ?>
 
                 <div class="product-grid">
                     <?php if (!empty($products) && is_array($products)): ?>

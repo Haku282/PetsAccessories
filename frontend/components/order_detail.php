@@ -308,10 +308,10 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                     </div>
                 </div>
             </div>
-
-            <div class="return-box">
+            <p style="font-size: 20px; color: black;">Thắc mắc về đơn hàng cần hỗ trợ? Liên hệ ngay : 0988 xxx xxx</p>
+            <div class="return-box no-print">
                 <h3>Yêu cầu đổi/trả</h3>
-                <div class="no-print">
+                <div>
                     <form method="POST">
                         <input type="hidden" name="action" value="create_return_request">
                         <div class="form-row">
@@ -346,7 +346,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                             <tbody>
                                 <?php foreach ($returnRequests as $req): ?>
                                     <tr>
-                                        <td>#<?php echo (int) $req['return_id']; ?></td>
+                                        <td>#<?php echo (int) ($req['request_id'] ?? $req['return_id'] ?? 0); ?></td>
                                         <td><?php echo htmlspecialchars((string) $req['request_type']); ?></td>
                                         <td><?php echo htmlspecialchars((string) $req['status']); ?></td>
                                         <td><?php echo !empty($req['created_at']) ? date('d/m/Y H:i', strtotime($req['created_at'])) : ''; ?></td>

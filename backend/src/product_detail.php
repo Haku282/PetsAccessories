@@ -23,9 +23,10 @@ if (!$productId) {
     try {
         // Try full fields first
         $stmt = $db->prepare(
-            'SELECT product_id, category_id, product_name, price, discount_price, thumbnail, description, specifications, stock_quantity
-             FROM products
-             WHERE status = 1 AND product_id = ?
+            'SELECT p.product_id, p.category_id, p.product_name, p.price, p.discount_price, p.thumbnail, p.description, p.specifications, p.stock_quantity, b.brand_name
+             FROM products p
+             LEFT JOIN brands b ON p.brand_id = b.brand_id
+             WHERE p.status = 1 AND p.product_id = ?
              LIMIT 1'
         );
         $stmt->execute([$productId]);
@@ -39,9 +40,10 @@ if (!$productId) {
         try {
             // Fallback if specifications column does not exist
             $stmt = $db->prepare(
-                'SELECT product_id, category_id, product_name, price, discount_price, thumbnail, description, stock_quantity
-                 FROM products
-                 WHERE status = 1 AND product_id = ?
+                'SELECT p.product_id, p.category_id, p.product_name, p.price, p.discount_price, p.thumbnail, p.description, p.stock_quantity, b.brand_name
+                 FROM products p
+                 LEFT JOIN brands b ON p.brand_id = b.brand_id
+                 WHERE p.status = 1 AND p.product_id = ?
                  LIMIT 1'
             );
             $stmt->execute([$productId]);
@@ -58,9 +60,10 @@ if (!$productId) {
         try {
             // Minimal fallback
             $stmt = $db->prepare(
-                'SELECT product_id, category_id, product_name, price, discount_price, thumbnail, stock_quantity
-                 FROM products
-                 WHERE status = 1 AND product_id = ?
+                'SELECT p.product_id, p.category_id, p.product_name, p.price, p.discount_price, p.thumbnail, p.stock_quantity, b.brand_name
+                 FROM products p
+                 LEFT JOIN brands b ON p.brand_id = b.brand_id
+                 WHERE p.status = 1 AND p.product_id = ?
                  LIMIT 1'
             );
             $stmt->execute([$productId]);

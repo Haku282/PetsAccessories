@@ -353,15 +353,26 @@ if (isset($pdo) && !empty($_SESSION['cart'])) {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
+        $orderStatus = 'pending';
+        $paymentStatus = 'unpaid';
+        
+        // Nếu người dùng chọn thanh toán bằng QR và đã click "Đã chuyển tiền", 
+        // thì form submit sẽ có $_POST['redirect_to_index'] == '1'.
+        // Ta có thể thêm cờ báo đó để xác định. Nhìn trong HTML, form được thêm <input type="hidden" name="qr_paid" value="1">
+        if (($paymentMethod === 'bank_transfer' || $paymentMethod === 'ewallet') && isset($_POST['redirect_to_index'])) {
+            $orderStatus = 'completed';
+            $paymentStatus = 'paid';
+        }
+
         $stmtOrder->execute([
             $userIdInsert,
             $totalValue + $shippingFee - $discountAmount,
             $shippingFee,
             $discountAmount,
             $couponIdInsert,
-            'pending',
+            $orderStatus,
             $paymentMethod,
-            'unpaid',
+            $paymentStatus,
             $shippingMethod,
             $address,
         ]);

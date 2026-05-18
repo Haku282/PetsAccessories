@@ -460,8 +460,7 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                         </div>
 
                         <div class="pd-meta">
-                            <div>Thương hiệu: <strong>Đang cập nhật</strong></div>
-                            <div>Xuất xứ: <strong>Việt Nam</strong></div>
+                            <div>Thương hiệu: <strong><?php echo !empty($product['brand_name']) ? htmlspecialchars($product['brand_name']) : 'Đang cập nhật'; ?></strong></div>
                         </div>
 
                         <div class="pd-short-desc">

@@ -107,9 +107,9 @@ if (isset($db) && ($db instanceof PDO)) {
                     <div class="cart-items">
                         <?php foreach ($cartItems as $item): ?>
                             <div class="cart-item">
-<div class="cart-item__thumb">
+                                <div class="cart-item__thumb">
                                     <a href="/PetsAccessories/frontend/components/product_detail.php?id=<?php echo (int) $item['product_id']; ?>">
-                                        <?php 
+                                        <?php
                                         // Xử lý đường dẫn ảnh cho giỏ hàng
                                         $rawThumb = $item['thumbnail'] ?? '';
                                         if (!empty($rawThumb)) {
@@ -124,10 +124,10 @@ if (isset($db) && ($db instanceof PDO)) {
                                             $thumbnailUrl = '/PetsAccessories/frontend/public/images/default-product.png';
                                         }
                                         ?>
-                                        <img src="<?php echo htmlspecialchars($thumbnailUrl); ?>" 
-                                             alt="<?php echo htmlspecialchars($item['product_name']); ?>"
-                                             style="width: 100%; height: 80px; object-fit: contain;"
-                                             onerror="this.onerror=null; this.src='/PetsAccessories/frontend/public/images/default.jpg'">
+                                        <img src="<?php echo htmlspecialchars($thumbnailUrl); ?>"
+                                            alt="<?php echo htmlspecialchars($item['product_name']); ?>"
+                                            style="width: 100%; height: 80px; object-fit: contain;"
+                                            onerror="this.onerror=null; this.src='/PetsAccessories/frontend/public/images/default.jpg'">
                                     </a>
                                 </div>
 
@@ -307,7 +307,7 @@ if (isset($db) && ($db instanceof PDO)) {
         <div style="background: #fff; padding: 40px; border-radius: 12px; text-align: center; max-width: 400px; width: 90%;">
             <h3 style="margin-bottom: 20px; color: #0f172a;">Quét mã QR để thanh toán</h3>
             <p style="color: #64748b; margin-bottom: 20px;">Đơn hàng của bạn sẽ được hoàn tất sau khi chuyển tiền.</p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=Thanh+Toan+PetsAccessories" alt="QR Code" style="width: 250px; height: 250px; margin-bottom: 30px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px;">
+            <img src="/PetsAccessories/backend/upload/qr/momo_qr.jpg" alt="QR Momo" style="width: 250px; height: auto; margin-bottom: 30px; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px;">
             <div style="display: flex; gap: 15px; justify-content: center;">
                 <button type="button" id="btn-cancel-qr" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #64748b; cursor: pointer;">Hủy</button>
                 <button type="button" id="btn-paid-qr" style="padding: 10px 20px; border-radius: 8px; border: none; background: #38bdf8; color: #fff; font-weight: bold; cursor: pointer;">Đã chuyển tiền</button>
