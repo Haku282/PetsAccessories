@@ -308,7 +308,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                     </div>
                 </div>
             </div>
-            <p style="font-size: 20px; color: black;">Thắc mắc về đơn hàng cần hỗ trợ? Liên hệ ngay : 1900 xxxx</p>
+            <p style="font-size: 20px; color: black;">Thắc mắc về đơn hàng cần hỗ trợ? Liên hệ ngay : 1900 xxxx hoặc email: support@petsaccessories.com</p>
             <div class="return-box no-print">
                 <h3>Yêu cầu đổi/trả</h3>
                 <div>
