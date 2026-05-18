@@ -431,9 +431,10 @@ class ProductsManager {
         images.forEach(image => {
             const item = document.createElement('div');
             item.className = 'image-item';
+            const imageUrl = `/PetsAccessories/admin/backend/uploads/products/${image.image_url}`;
             item.innerHTML = `
                 ${image.is_main ? '<div class="image-main-badge">Ảnh chính</div>' : ''}
-                <img src="${image.image_url}" alt="Product image">
+                <img src="${imageUrl}" alt="Product image" style="width: 100%; height: 150px; object-fit: cover;">
                 <div class="image-item-overlay">
                     ${!image.is_main ? `<button class="btn btn-sm btn-success" onclick="productsManager.setMainImage(${image.image_id})">★</button>` : ''}
                     <button class="btn btn-sm btn-danger" onclick="productsManager.deleteImage(${image.image_id})">🗑️</button>
@@ -566,7 +567,8 @@ class ProductsManager {
                 const formData = new FormData();
                 formData.append('image', thumbnailInput.files[0]);
 
-                const uploadRes = await fetch(`${this.apiBase}/upload-image.php`, {
+                // ✅ Gọi API riêng cho thumbnail (không cần product_id)
+                const uploadRes = await fetch(`${this.apiBase}/upload-thumbnail.php`, {
                     method: 'POST',
                     body: formData
                 });
@@ -614,8 +616,26 @@ class ProductsManager {
 
             if (data.success) {
                 this.showMessage('success', data.message);
-                this.closeModal();
-                this.loadProducts(this.currentPage);
+                
+                // Nếu thêm mới sản phẩm, lấy product_id và load ảnh
+                if (!isUpdate && data.product_id) {
+                    // Fetch product detail để lấy dữ liệu hoàn chỉnh
+                    const detailRes = await fetch(`${this.apiBase}/get.php?id=${data.product_id}`);
+                    const detailData = await detailRes.json();
+                    
+                    if (detailData.success) {
+                        this.currentProduct = detailData.data;
+                        this.renderProductImages(detailData.data.images);
+                        // Hiển thị section ảnh bổ sung
+                        document.getElementById('imagesSection').style.display = 'block';
+                        // Cập nhật title modal
+                        document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Sản Phẩm';
+                    }
+                } else {
+                    // Nếu update, đóng modal và reload
+                    this.closeModal();
+                    this.loadProducts(this.currentPage);
+                }
             } else {
                 if (data.errors && Array.isArray(data.errors)) {
                     this.showMessage('error', data.errors.join(', '));

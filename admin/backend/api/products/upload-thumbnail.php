@@ -1,12 +1,10 @@
 <?php
 /**
- * API: Upload ảnh sản phẩm bổ sung vào gallery
- * POST /admin/backend/api/products/upload-image.php
+ * API: Upload thumbnail sản phẩm
+ * POST /admin/backend/api/products/upload-thumbnail.php
  * 
  * Parameters:
- *  - product_id: (required) ID của sản phẩm
- *  - image: (required) File ảnh upload
- *  - is_main: (optional) 1 để đặt làm ảnh chính, 0 để thêm vào gallery
+ *  - image: (required) File ảnh thumbnail
  */
 
 header('Content-Type: application/json');
@@ -25,20 +23,11 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit;
 }
 
-require_once __DIR__ . '/../../../../backend/config/database.php';
-require_once __DIR__ . '/../../utils/products_helper.php';
-
 try {
     if (!isset($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
         throw new Exception('Vui lòng chọn hình ảnh hợp lệ');
     }
 
-    // Kiểm tra product_id
-    if (!isset($_POST['product_id']) || empty($_POST['product_id'])) {
-        throw new Exception('Product ID không hợp lệ');
-    }
-
-    $productId = (int)$_POST['product_id'];
     $file = $_FILES['image'];
     $maxFileSize = 5 * 1024 * 1024; // 5MB
 
@@ -100,25 +89,14 @@ try {
         }
     }
 
-    // Lưu thông tin ảnh vào database
-    /** @var PDO $pdo */
-    $db = $pdo;
-    
-    $imageUrl = $fileName; // Lưu filename, không phải path đầy đủ
-    $isMain = isset($_POST['is_main']) ? (bool)(int)$_POST['is_main'] : false;
-    
-    // Thêm ảnh vào bảng product_images
-    if (addProductImage($db, $productId, $imageUrl, $isMain)) {
-        ob_end_clean();
-        echo json_encode([
-            'success' => true,
-            'filename' => $fileName,
-            'image_url' => '/PetsAccessories/admin/backend/uploads/products/' . $fileName,
-            'message' => 'Upload ảnh thành công'
-        ]);
-    } else {
-        throw new Exception('Lỗi khi lưu thông tin ảnh vào database');
-    }
+    // Return success response
+    ob_end_clean();
+    echo json_encode([
+        'success' => true,
+        'filename' => $fileName,
+        'image_url' => '/PetsAccessories/admin/backend/uploads/products/' . $fileName,
+        'message' => 'Upload ảnh thành công'
+    ]);
 
 } catch (Exception $e) {
     ob_end_clean();
