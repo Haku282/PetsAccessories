@@ -442,6 +442,24 @@ CREATE TABLE `return_requests` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `product_complaints`
+--
+
+CREATE TABLE `product_complaints` (
+  `complaint_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `complaint_type` enum('complaint','report') NOT NULL,
+  `reason` text NOT NULL,
+  `status` enum('pending','processing','resolved','rejected') DEFAULT 'pending',
+  `admin_note` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `reviews`
 --
 
@@ -664,6 +682,15 @@ ALTER TABLE `return_requests`
   ADD KEY `fk_return_user` (`user_id`);
 
 --
+-- Chỉ mục cho bảng `product_complaints`
+--
+ALTER TABLE `product_complaints`
+  ADD PRIMARY KEY (`complaint_id`),
+  ADD KEY `fk_complaint_order` (`order_id`),
+  ADD KEY `fk_complaint_user` (`user_id`),
+  ADD KEY `fk_complaint_product` (`product_id`);
+
+--
 -- Chỉ mục cho bảng `reviews`
 --
 ALTER TABLE `reviews`
@@ -804,6 +831,12 @@ ALTER TABLE `return_requests`
   MODIFY `return_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `product_complaints`
+--
+ALTER TABLE `product_complaints`
+  MODIFY `complaint_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `reviews`
 --
 ALTER TABLE `reviews`
@@ -907,6 +940,14 @@ ALTER TABLE `product_stock_logs`
 ALTER TABLE `return_requests`
   ADD CONSTRAINT `fk_return_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`),
   ADD CONSTRAINT `fk_return_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
+-- Các ràng buộc cho bảng `product_complaints`
+--
+ALTER TABLE `product_complaints`
+  ADD CONSTRAINT `fk_complaint_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_complaint_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_complaint_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `reviews`
