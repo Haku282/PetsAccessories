@@ -55,13 +55,37 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                 border: 1px solid #ebebeb;
                 object-fit: contain;
                 padding: 10px;
+                transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            }
+
+            .pd-main-img.sliding {
+                opacity: 0.5;
+                transform: scale(0.98);
+            }
+
+            .pd-thumbnails-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                margin-top: 15px;
+            }
+
+            .pd-thumbnails::-webkit-scrollbar {
+                height: 6px;
+            }
+
+            .pd-thumbnails::-webkit-scrollbar-thumb {
+                background-color: #ddd;
+                border-radius: 4px;
             }
 
             .pd-thumbnails {
                 display: flex;
                 gap: 10px;
-                margin-top: 15px;
                 overflow-x: auto;
+                scroll-behavior: smooth;
+                flex: 1;
+                padding-bottom: 5px;
             }
 
             .pd-thumb {
@@ -389,8 +413,23 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                     <div class="pd-gallery">
                         <img src="<?php echo htmlspecialchars($thumbnail); ?>" alt="<?php echo htmlspecialchars($product['product_name'] ?? ''); ?>" class="pd-main-img" id="mainImage" onerror="this.src='/PetsAccessories/frontend/public/images/default-product.png'">
 
-                        <div class="pd-thumbnails">
-                            <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="pd-thumb active" onclick="document.getElementById('mainImage').src=this.src;" onerror="this.style.display='none'">
+                        <div class="pd-thumbnails-wrapper">
+                            <div class="pd-thumbnails" id="thumbnailList">
+                                <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="pd-thumb active" onclick="changeMainImage(this)" onerror="this.style.display='none'">
+                                <?php if (!empty($productImages)): ?>
+                                    <?php foreach ($productImages as $img): ?>
+                                        <?php
+                                        $imgUrl = $img;
+                                        if (strpos($imgUrl, '/') === false) {
+                                            $imgUrl = '/PetsAccessories/admin/backend/uploads/products/' . $imgUrl;
+                                        }
+                                        if ($imgUrl !== $thumbnail):
+                                        ?>
+                                            <img src="<?php echo htmlspecialchars($imgUrl); ?>" class="pd-thumb" onclick="changeMainImage(this)" onerror="this.style.display='none'">
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
 
@@ -582,6 +621,55 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
         <?php endif; ?>
 
         <script>
+            // KHAI BÁO BIẾN CHO AUTO-SLIDE
+            let autoSlideInterval;
+            let currentImgIndex = 0;
+
+            function changeMainImage(thumbElement, isAuto = false) {
+                const mainImg = document.getElementById('mainImage');
+                if (mainImg.src === thumbElement.src) return;
+
+                // Thêm class để tạo hiệu ứng mờ/thu nhỏ
+                mainImg.classList.add('sliding');
+
+                setTimeout(() => {
+                    mainImg.src = thumbElement.src;
+                    mainImg.classList.remove('sliding');
+                }, 150);
+
+                // Cập nhật trạng thái active cho ảnh nhỏ
+                const allThumbs = document.querySelectorAll('.pd-thumb');
+                allThumbs.forEach((t, index) => {
+                    t.classList.remove('active');
+                    if (t === thumbElement) {
+                        t.classList.add('active');
+                        currentImgIndex = index; // Cập nhật lại vị trí index hiện tại
+                    }
+                });
+
+                // Nếu người dùng tự click tay, reset lại bộ đếm thời gian để không bị giật ảnh nhanh
+                if (!isAuto) {
+                    resetAutoSlide();
+                }
+            }
+
+            // HÀM BẮT ĐẦU TỰ ĐỘNG TRƯỢT ẢNH
+            function startAutoSlide() {
+                const allThumbs = document.querySelectorAll('.pd-thumb');
+                if (allThumbs.length <= 1) return; // Không có hoặc chỉ có 1 ảnh thì không cần trượt
+
+                autoSlideInterval = setInterval(() => {
+                    currentImgIndex = (currentImgIndex + 1) % allThumbs.length; // Tăng index lên 1, nếu vượt quá số lượng ảnh thì quay về 0
+                    changeMainImage(allThumbs[currentImgIndex], true); // true = Báo cho hệ thống biết đây là tự động chuyển
+                }, 3000); // Đổi số 3000 thành thời gian bạn muốn (3000 = 3 giây / ảnh)
+            }
+
+            // HÀM RESET AUTO SLIDE KHI NGƯỜI DÙNG CLICK TAY
+            function resetAutoSlide() {
+                clearInterval(autoSlideInterval);
+                startAutoSlide();
+            }
+
             function switchTab(index) {
                 document.querySelectorAll('.pd-nav-tab').forEach((t, i) => t.classList.toggle('active', i === index));
                 document.querySelectorAll('.pd-tab-panel').forEach((p, i) => p.classList.toggle('active', i === index));
@@ -738,6 +826,8 @@ require_once __DIR__ . '/../../backend/src/product_detail.php';
                 } else {
                     console.warn('Wishlist button not found!');
                 }
+                // KHỞI ĐỘNG AUTO SLIDE NGAY KHI VÀO TRANG
+                startAutoSlide();
             });
         </script>
     </main>
