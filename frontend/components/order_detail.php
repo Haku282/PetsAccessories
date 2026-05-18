@@ -346,7 +346,7 @@ require_once __DIR__ . '/../../backend/src/order_detail.php';
                             <tbody>
                                 <?php foreach ($returnRequests as $req): ?>
                                     <tr>
-                                        <td>#<?php echo (int) $req['request_id']; ?></td>
+                                        <td>#<?php echo (int) $req['return_id']; ?></td>
                                         <td><?php echo htmlspecialchars((string) $req['request_type']); ?></td>
                                         <td><?php echo htmlspecialchars((string) $req['status']); ?></td>
                                         <td><?php echo !empty($req['created_at']) ? date('d/m/Y H:i', strtotime($req['created_at'])) : ''; ?></td>

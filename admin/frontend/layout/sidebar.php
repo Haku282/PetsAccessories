@@ -16,6 +16,7 @@
         <li class="menu-header">KHÁCH HÀNG & MARKETING</li>
         <li><a href="/PetsAccessories/admin/frontend/pages/users/index.php"><i class="icon">👥</i> Người Dùng</a></li>
         <li><a href="/PetsAccessories/admin/frontend/pages/clients/index.php"><i class="icon">👦</i> Khách Hàng</a></li>
+        <li><a href="/PetsAccessories/admin/frontend/pages/return_requests/index.php"><i class="icon">🔄</i> Yêu Cầu Đổi/Trả</a></li>
         <li><a href="/PetsAccessories/admin/frontend/pages/coupons/index.php"><i class="icon">🎟️</i> Mã Giảm Giá</a></li>
         <li><a href="/PetsAccessories/admin/frontend/pages/reviews/index.php"><i class="icon">⭐</i> Đánh Giá</a></li>
         <li><a href="/PetsAccessories/admin/frontend/pages/shipping/index.php"><i class="icon">🚚</i> Giao Hàng</a></li>
